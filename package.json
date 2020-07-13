@@ -1,0 +1,22 @@
+{
+  "name": "page_manager_service",
+  "version": "1.0.0",
+  "description": "Create service, which will generate new pages from data and templates, save this into a draft or complete page, and deliver these pages to other servers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlekseiMykhailov/page_manager_service.git"
+  },
+  "author": "Aleksei Mykhailov <oleksii.mihaylov@jobeasy.co>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlekseiMykhailov/page_manager_service/issues"
+  },
+  "homepage": "https://github.com/AlekseiMykhailov/page_manager_service#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
