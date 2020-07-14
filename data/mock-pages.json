@@ -1,6 +1,6 @@
 [
   {
-    "url": "learn-manual-qa-2020",
+    "slug": "learn-manual-qa-2020",
     "dependencies": "",
     "title": "Software Quality Assurance Course",
     "descr": "An intensive practical course to prepare you for a successful QA career in just 4 weeks",
@@ -26,7 +26,7 @@
     ]
   },
   {
-    "url": "learn-devops-2020",
+    "slug": "learn-devops-2020",
     "dependencies": "",
     "title": "Learn DevOps Course",
     "descr": "An intensive practical course to prepare you for a successful DevOps career in just 12 weeks.",

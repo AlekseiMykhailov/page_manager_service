@@ -4,7 +4,9 @@
   "description": "Create service, which will generate new pages from data and templates, save this into a draft or complete page, and deliver these pages to other servers.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "develop": "nodemon index.js",
+    "views": "node services/builder/views.js"
   },
   "repository": {
     "type": "git",
@@ -18,5 +20,13 @@
   "homepage": "https://github.com/AlekseiMykhailov/page_manager_service#readme",
   "devDependencies": {
     "nodemon": "^2.0.4"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-handlebars": "^5.0.0",
+    "handlebars": "^4.7.6",
+    "moleculer": "^0.14.8",
+    "moleculer-repl": "^0.6.4",
+    "moleculer-web": "^0.9.1"
   }
 }
