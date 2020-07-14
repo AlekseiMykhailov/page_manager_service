@@ -1,0 +1,54 @@
+[
+  {
+    "url": "learn-manual-qa-2020",
+    "dependencies": "",
+    "title": "Software Quality Assurance Course",
+    "descr": "An intensive practical course to prepare you for a successful QA career in just 4 weeks",
+    "rows": [
+      {
+        "type": "with-image",
+        "image": "https://uploads-ssl.webflow.com/5c8ff8ef21fa8e172cd8a465/5d2715893854966a256dae76_Group%202.jpg",
+        "title": "Software Quality Assurance",
+        "content": "An intensive practical course to prepare you for a successful QA career in just 4 weeks"
+      },
+      {
+        "type": "bricks",
+        "title": "How it Works",
+        "content": [
+          "4-week intensive online training will help you develop technical and communication skills for a successful career in QA.",
+          "Live classes are weekly Sunday to Thursday 9:30–11:30 PM Eastern. After each lesson students get handouts and recording.",
+          "1:1 support and mentoring. Students can ask questions during the lessons or after them. Even after the course is over.",
+          "We will make your resume and post it on job sites with proper keywords so you could get tons of calls from recruiters.",
+          "You will learn how to search for a job effectively, answer interview questions and significantly increase chances of getting hired.",
+          "Study first, pay us later. No student loans, no debt, and you won't pay a tuition until you land a job making at least $50k a year."
+        ]
+      }
+    ]
+  },
+  {
+    "url": "learn-devops-2020",
+    "dependencies": "",
+    "title": "Learn DevOps Course",
+    "descr": "An intensive practical course to prepare you for a successful DevOps career in just 12 weeks.",
+    "rows": [
+      {
+        "type": "bricks",
+        "title": "How it Works",
+        "content": [
+          "12-week intensive online training after which you can start looking for a mid-level job.",
+          "Live online classes with homework for daily practice. 1:1 support and mentoring, even after the course is over.",
+          "You will learn how to answer interview questions and how to pass job interview coding and other tests.",
+          "We will make your resume of experienced Engineer, so you can aim at $115K+ salary. We provide internships and references.",
+          "The first 2 lessons are FREE. You won't pay full tuition until you land a job. If you don't get a job in IT, you won't owe us anything.",
+          "Pay $99 registration fee and 17% of your salary over 24 months (if you don't get a job, the course is FREE) OR $999 fee and 10% of the salary over 18 mo."
+        ]
+      },
+      {
+        "type": "with-image",
+        "image": "https://uploads-ssl.webflow.com/5c8ff8ef21fa8e172cd8a465/5e538231eba259546b4261f4_Group%202.jpg",
+        "title": "Learn DevOps",
+        "content": "An intensive practical course to prepare you for a successful DevOps career in just 12 weeks."
+      }
+    ]
+  }
+]
