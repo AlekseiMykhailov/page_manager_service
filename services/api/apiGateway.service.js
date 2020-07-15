@@ -10,33 +10,91 @@ module.exports = {
   settings: {
     port: 3000,
     cors: {
-      origin: '*',
+      origin: ['http://localhost:3000', 'http://localhost:3005', 'https://localhost:4000'],
       methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Origin', 'User-Agent'],
-      exposedHeaders: ['*'],
-      credentials: false,
+      allowedHeaders: ['Content-Type', 'Origin', 'User-Agent', 'method'],
+      credentials: true,
       maxAge: 3600,
     },
-    routes: [{
-      path: '/',
-      aliases: {
-        'POST pages': 'apiHandler.createDraft',
-        'POST pages/:slug': 'apiHandler.updateDraft',
-        'GET pages': 'apiHandler.listDraft',
-        'GET pages/preview/:slug': 'apiHandler.getDraft',
-
-        'POST /pages/publish': 'apiHandler.publishPage',
-        // 'GET /pages/complete/:slug': 'apiHandler.getPage',
-
-        'GET custom'(req, res) {
-          res.end('<h1>hello from custom handler</h1>');
+    routes: [
+      {
+        path: '/',
+        aliases: {
+          'POST pages': 'apiHandler.createDraft',
+          'POST pages/:slug': 'apiHandler.updateDraft',
+          'POST pages/publish': 'apiHandler.publishPage',
         },
-        // 'GET add': 'apiHandler.createDraft',
+        authorization: false,
+        bodyParsers: {
+          json: true,
+          urlencoded: { extended: true }
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          res.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
+        use: [
+          function(err, req, res, next) {
+            this.logger.error('Error is occured in middlewares!');
+            this.sendError(req, res, err);
+          }
+        ],
       },
-      authorization: false,
-      bodyParsers: {
-        json: true,
+
+      // DRAFT JSON
+      {
+        path: '/drafts',
+        aliases: {
+          'GET /': 'apiHandler.listDraft',
+          'GET /:slug': 'apiHandler.getDraft',
+        },
+        bodyParsers: {
+          json: false,
+          urlencoded: { extended: true },
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          ctx.meta.userAgent = req.headers['user-agent'];
+        }
       },
-    }]
+
+      // DRAFT Preview
+      {
+        path: '/preview',
+        aliases: {
+          'GET /:slug': 'apiHandler.previewDraft',
+        },
+        bodyParsers: {
+          json: false,
+          urlencoded: { extended: true },
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+          ctx.meta.userAgent = req.headers['user-agent'];
+        }
+      },
+
+      // Complete pages
+      {
+        path: '/api',
+        cors: {
+          origin: ['http://localhost:3000', 'http://localhost:3005', 'https://localhost:4000'],
+          methods: ['GET'],
+          allowedHeaders: ['Content-Type', 'Origin', 'User-Agent'],
+          credentials: true,
+          maxAge: 3600,
+        },
+        aliases: {
+          'GET /pages/:slug': 'apiHandler.getPage',
+        },
+        bodyParsers: {
+          json: true,
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          ctx.meta.userAgent = req.headers['user-agent'];
+        }
+      }
+    ],
   },
 };

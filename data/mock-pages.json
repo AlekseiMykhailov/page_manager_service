@@ -1,5 +1,6 @@
 [
   {
+    "domain": "localhost:3000",
     "slug": "learn-manual-qa-2020",
     "dependencies": "",
     "title": "Software Quality Assurance Course",
@@ -14,7 +15,7 @@
       {
         "type": "bricks",
         "title": "How it Works",
-        "content": [
+        "blocks": [
           "4-week intensive online training will help you develop technical and communication skills for a successful career in QA.",
           "Live classes are weekly Sunday to Thursday 9:30–11:30 PM Eastern. After each lesson students get handouts and recording.",
           "1:1 support and mentoring. Students can ask questions during the lessons or after them. Even after the course is over.",
@@ -26,6 +27,7 @@
     ]
   },
   {
+    "domain": "localhost:3000",
     "slug": "learn-devops-2020",
     "dependencies": "",
     "title": "Learn DevOps Course",

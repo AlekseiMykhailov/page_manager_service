@@ -1,7 +1,7 @@
 const drafts = require('../data/mock-pages.json');
 
 const storage = {
-  drafts: [...drafts],
+  drafts: [...drafts, { domain: 'localhost:3000', slug: 'test', title: 'test'}],
 };
 
 const notFound = {
@@ -12,9 +12,17 @@ module.exports = ({
   name: 'draft',
   actions: {
     add(ctx) {
-      // storage.drafts = [...storage.drafts, ctx.params.draft];
-      storage.drafts = [...ctx.params.drafts];
-      return storage.drafts[storage.draft.length - 1];
+      const { title, slug, descr, domain } = ctx.params;
+      const newDraft = { domain, slug, title, descr };
+      const inStorage = storage.drafts.find(draft => draft.slug === slug && draft.domain === domain);
+
+      if (inStorage) {
+        throw 'This slug already in the storage';
+      }
+
+      storage.drafts = [... storage.drafts, newDraft];
+
+      return newDraft;
     },
     update(ctx) {
       storage.drafts = storage.drafts.map(draft => {
@@ -26,10 +34,23 @@ module.exports = ({
     },
     get(ctx) {
       const draft = storage.drafts.find(draft => draft.slug === ctx.params.slug) || notFound;
+
+      return draft;
+    },
+    preview(ctx) {
+      const draft = storage.drafts.find(draft => draft.slug === ctx.params.slug) || notFound;
+
       return this.broker.call('builder.create', draft);
     },
     list() {
-      return storage.drafts.map(draft => draft.title).join(', ');
+      console.log(storage.drafts);
+      const draftsList = storage.drafts.map(draft => ({
+        title: draft.title,
+        domain: draft.domain,
+        slug: draft.slug,
+      }));
+
+      return draftsList;
     },
   }
 });

@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "develop": "nodemon index.js",
-    "views": "node services/builder/views.js"
+    "dev": "nodemon index.js",
+    "temp": "nodemon temp/views.js",
+    "temp-m": "nodemon temp/m-views.js"
   },
   "repository": {
     "type": "git",

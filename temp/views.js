@@ -15,11 +15,7 @@ app.engine('.hbs', exphbs({
 app.set('view engine', '.hbs');
 
 app.get('/', (req, res) => {
-  res.render('template-index');
-});
-
-app.get('/add', (req, res) => {
-  res.render('add-draft');
+  res.render('index');
 });
 
 app.listen(PORT, () => console.log(`App listening on port http://localhost:${PORT}`));

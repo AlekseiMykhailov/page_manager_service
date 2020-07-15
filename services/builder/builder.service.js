@@ -1,29 +1,44 @@
-const Handlebars = require('handlebars');
-const headerTemplate = Handlebars.compile('<h1>PageName: {{title}}</h1>');
-const initial = Handlebars.compile(`
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Main Layout</title>
-    </head>
-    <body>
-      {{header}}
-    </body>
-  </html>
-`, {
-  noEscape: true,
-});
+const layout = require('./template/layout');
+const heading = require('./template/heading');
+const rowBricks = require('./template/rows/rowBricks');
+const rowWithImage = require('./template/rows/rowWithImage');
+
 
 module.exports = ({
   name: 'builder',
   actions: {
     create(ctx) {
-      const header = headerTemplate({ title: ctx.params.title });
-      // console.log(header);
-      return initial({ header });
+      const { title, descr, rows } = ctx.params;
+      const header = heading({ title });
+
+      let rowsHtml;
+
+      if (rows) {
+        rowsHtml = rows.map(row => {
+          const { title, content, blocks, image } = row;
+          switch (row.type) {
+          case 'bricks':
+            return rowBricks({ title, content, blocks });
+
+          case 'with-image':
+            return rowWithImage({ title, content, image });
+
+          default:
+            return;
+          }
+        }).join('');
+      }
+
+      const html = layout({
+        title,
+        descr,
+        header,
+        rows: rowsHtml,
+      });
+
+      // console.log(html);
+
+      return html;
     },
   }
 });
-

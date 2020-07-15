@@ -4,14 +4,17 @@ module.exports = {
   name: 'apiHandler',
   actions: {
     createDraft(ctx) {
-      console.log('create draft');
-      return this.broker.call('draft.add', { drafts });
+      this.logger.info("Creating Draft: ", ctx.params);
+      return this.broker.call('draft.add', ctx.params);
     },
     updateDraft(ctx) {
       console.log('update draft');
     },
     getDraft(ctx) {
       return this.broker.call('draft.get', ctx.params);
+    },
+    previewDraft(ctx) {
+      return this.broker.call('draft.preview', ctx.params);
     },
     listDraft() {
       return this.broker.call('draft.list');
