@@ -1,12 +1,57 @@
 const drafts = require('../data/mock-pages.json');
 
-const storage = {
-  drafts: [...drafts, { domain: 'localhost:3000', slug: 'test', title: 'test'}],
-};
+class DraftStore {
+  constructor(drafts) {
+    this.drafts = drafts;
+  }
 
-const notFound = {
-  title: 'Draft Not Found',
-};
+  create(newDraft) {
+    const { domain, slug } = newDraft;
+    const inStorage = this.drafts.find(draft => (
+      draft.domain === domain && draft.slug === slug
+    ));
+
+    if (inStorage) {
+      throw 'This domain already has the slug';
+    }
+
+    this.drafts = [...this.drafts, newDraft];
+
+    return this.get(domain, slug);
+  }
+
+  update(updatedDraft) {
+    const { domain, slug } = updatedDraft;
+
+    this.drafts = [this.drafts].map(draft => {
+      if (draft.domain === domain && draft.slug === slug) {
+        return updatedDraft;
+      }
+
+      return draft;
+    });
+
+    return this.get(domain, slug);
+  }
+
+  get(domain, slug) {
+    return this.drafts.find(draft => (
+      draft.domain === domain && draft.slug === slug
+    ));
+  }
+
+  getAll() {
+    return this.drafts;
+  }
+
+  delete(domain, slug) {
+    this.drafts = this.drafts.filter(draft => (
+      draft.slug === slug && draft.domain === domain
+    ));
+  }
+}
+
+const appDraftStore = new DraftStore([...drafts, { domain: 'localhost:3000', slug: 'test', title: 'test'}]);
 
 module.exports = ({
   name: 'draft',
@@ -14,37 +59,25 @@ module.exports = ({
     add(ctx) {
       const { title, slug, descr, domain } = ctx.params;
       const newDraft = { domain, slug, title, descr };
-      const inStorage = storage.drafts.find(draft => draft.slug === slug && draft.domain === domain);
 
-      if (inStorage) {
-        throw 'This slug already in the storage';
-      }
-
-      storage.drafts = [... storage.drafts, newDraft];
-
-      return newDraft;
+      return appDraftStore.create(newDraft);
     },
     update(ctx) {
-      storage.drafts = storage.drafts.map(draft => {
-        if (draft.slug !== ctx.params.draft.slug) {
-          return draft;
-        }
-        return { ...ctx.params.draft };
-      });
+      return appDraftStore.update(ctx.params.draft);
     },
     get(ctx) {
-      const draft = storage.drafts.find(draft => draft.slug === ctx.params.slug) || notFound;
+      const { domain, slug } = ctx.params;
 
-      return draft;
+      return appDraftStore.get(domain, slug);
     },
     preview(ctx) {
-      const draft = storage.drafts.find(draft => draft.slug === ctx.params.slug) || notFound;
+      const { domain, slug } = ctx.params;
+      const draft = appDraftStore.get(domain, slug);
 
       return this.broker.call('builder.create', draft);
     },
     list() {
-      console.log(storage.drafts);
-      const draftsList = storage.drafts.map(draft => ({
+      const draftsList = appDraftStore.getAll().map(draft => ({
         title: draft.title,
         domain: draft.domain,
         slug: draft.slug,

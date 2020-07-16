@@ -33,12 +33,13 @@ module.exports = {
           res.setHeader('Content-Type', 'application/x-www-form-urlencoded');
           ctx.meta.userAgent = req.headers['user-agent'];
         },
-        use: [
-          function(err, req, res, next) {
-            this.logger.error('Error is occured in middlewares!');
-            this.sendError(req, res, err);
-          }
-        ],
+        onError(req, res, err) {
+          this.logger.info("Error message: ", err);
+
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.writeHead(500);
+          res.end(JSON.stringify(err));
+        }
       },
 
       // DRAFT JSON
