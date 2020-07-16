@@ -1,0 +1,60 @@
+<h1>Add Drat</h1>
+<form id="add-draft">
+  <div>
+    <label for="domain">
+      Domain:
+      <select name="domain" id="domain">
+        <option value="localhost:4000">localhost:4000</option>
+        <option value="localhost:5000">localhost:5000</option>
+      </select>
+    </label>
+  </div>
+
+  <div>
+    <label for="titel">
+      Title:
+      <input type="text" name="title" id="title" required>
+    </label>
+  </div>
+  <div>
+    <label for="titel">
+      Slug:
+      <input type="text" name="slug" id="slug" required>
+    </label>
+  </div>
+  <div>
+    <label for="descr">
+      Description:
+      <input type="text" name="descr" id="descr" required>
+    </label>
+  </div>
+  <div>
+    <button type="submit">Submit</button>
+  </div>
+</form>
+
+<script>
+  const addDraftForm = document.querySelector('#add-draft');
+
+  const submitDraft = (e) => {
+    e.preventDefault();
+
+    const { domain, slug, title, descr } = e.target;
+    const data = {
+      domain: domain.value,
+      slug: slug.value,
+      title: title.value,
+      descr: descr.value,
+    }
+
+    fetch('http://localhost:3000/pages', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+    }).then(res => console.log(res));
+  }
+
+  addDraftForm.addEventListener('submit', submitDraft);
+</script>

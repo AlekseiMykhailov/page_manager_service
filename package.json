@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "temp": "nodemon temp/views.js",
-    "temp-m": "nodemon temp/m-views.js"
+    "dashboard": "nodemon dashboard/index.js"
   },
   "repository": {
     "type": "git",
