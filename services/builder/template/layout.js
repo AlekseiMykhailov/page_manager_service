@@ -11,6 +11,7 @@ const layout = Handlebars.compile(`
     <body>
       {{ header }}
       {{ rows }}
+      {{ body }}
     </body>
   </html>
 `, {

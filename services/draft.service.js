@@ -60,7 +60,8 @@ module.exports = ({
       const { title, slug, descr, domain } = ctx.params;
       const newDraft = { domain, slug, title, descr };
 
-      return appDraftStore.create(newDraft);
+      appDraftStore.create(newDraft);
+      return this.broker.call('builder.create', newDraft);
     },
     update(ctx) {
       return appDraftStore.update(ctx.params.draft);
@@ -70,7 +71,10 @@ module.exports = ({
 
       return appDraftStore.get(domain, slug);
     },
-    preview(ctx) {
+    previewList() {
+      return this.broker.call('builder.createList', { list: appDraftStore.getAll()});
+    },
+    previewDraft(ctx) {
       const { domain, slug } = ctx.params;
       const draft = appDraftStore.get(domain, slug);
 

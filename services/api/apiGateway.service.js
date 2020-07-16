@@ -17,12 +17,13 @@ module.exports = {
       maxAge: 3600,
     },
     routes: [
+      // DRAFT CREATE
       {
-        path: '/',
+        path: '/pages',
         aliases: {
-          'POST pages': 'draft.add',
-          'POST pages/:slug': 'draft.update',
-          'POST pages/publish': 'draft.publish',
+          'POST /': 'draft.add',
+          'POST /:slug': 'draft.update',
+          'POST /publish': 'draft.publish',
         },
         authorization: false,
         bodyParsers: {
@@ -30,7 +31,7 @@ module.exports = {
           urlencoded: { extended: true }
         },
         onBeforeCall: (ctx, route, req, res) => {
-          res.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
           ctx.meta.userAgent = req.headers['user-agent'];
         },
         onError(req, res, err) {
@@ -47,14 +48,31 @@ module.exports = {
       {
         path: '/drafts',
         aliases: {
-          'GET /': 'draft.list',
           'GET /:slug': 'draft.get',
         },
         bodyParsers: {
           json: true,
         },
         onBeforeCall: (ctx, route, req, res) => {
-          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
+          ctx.meta.userAgent = req.headers['user-agent'];
+        }
+      },
+
+      // DASHBOARD
+      {
+        path: '/',
+        aliases: {
+          'GET /': 'dashboard.dashboard',
+          'GET /add': 'dashboard.addDraft',
+          'GET /drafts': 'dashboard.draftList',
+        },
+        bodyParsers: {
+          json: false,
+          urlencoded: { extended: true },
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = 'text/html; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         }
       },
@@ -63,16 +81,15 @@ module.exports = {
       {
         path: '/preview',
         aliases: {
-          'GET /:domain/:slug': 'draft.preview',
+          'GET /': 'draft.previewList',
+          'GET /:domain/:slug': 'draft.previewDraft',
         },
         bodyParsers: {
           json: false,
           urlencoded: { extended: true },
         },
         onBeforeCall: (ctx, route, req, res) => {
-          console.log('GATEWAY - PREVIEW: SET header and userAgent');
-
-          res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+          ctx.meta.$responseType = 'text/html; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         }
       },
@@ -99,7 +116,7 @@ module.exports = {
           json: true,
         },
         onBeforeCall: (ctx, route, req, res) => {
-          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         }
       }
