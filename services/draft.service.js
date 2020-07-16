@@ -74,6 +74,8 @@ module.exports = ({
       const { domain, slug } = ctx.params;
       const draft = appDraftStore.get(domain, slug);
 
+      this.logger.info("Draft.Preview: ", domain, slug);
+
       return this.broker.call('builder.create', draft);
     },
     list() {

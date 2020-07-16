@@ -1,6 +1,6 @@
 [
   {
-    "domain": "localhost:3000",
+    "domain": "localhost:4000",
     "slug": "learn-manual-qa-2020",
     "dependencies": "",
     "title": "Software Quality Assurance Course",
@@ -27,7 +27,7 @@
     ]
   },
   {
-    "domain": "localhost:3000",
+    "domain": "localhost:4000",
     "slug": "learn-devops-2020",
     "dependencies": "",
     "title": "Learn DevOps Course",

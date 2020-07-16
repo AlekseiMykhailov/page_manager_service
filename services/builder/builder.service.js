@@ -36,8 +36,6 @@ module.exports = ({
         rows: rowsHtml,
       });
 
-      // console.log(html);
-
       return html;
     },
   }

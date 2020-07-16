@@ -20,9 +20,9 @@ module.exports = {
       {
         path: '/',
         aliases: {
-          'POST pages': 'apiHandler.createDraft',
-          'POST pages/:slug': 'apiHandler.updateDraft',
-          'POST pages/publish': 'apiHandler.publishPage',
+          'POST pages': 'draft.add',
+          'POST pages/:slug': 'draft.update',
+          'POST pages/publish': 'draft.publish',
         },
         authorization: false,
         bodyParsers: {
@@ -34,11 +34,12 @@ module.exports = {
           ctx.meta.userAgent = req.headers['user-agent'];
         },
         onError(req, res, err) {
-          this.logger.info("Error message: ", err);
+          this.logger.info('Error message: ', err.message);
 
-          res.setHeader('Content-Type', 'application/json; charset=utf-8');
-          res.writeHead(500);
-          res.end(JSON.stringify(err));
+          res.statusCode = 409;
+          res.statusMessage = err.message;
+          res.setHeader('Content-Type', 'text/plain');
+          res.end(err.message);
         }
       },
 
@@ -46,12 +47,11 @@ module.exports = {
       {
         path: '/drafts',
         aliases: {
-          'GET /': 'apiHandler.listDraft',
-          'GET /:slug': 'apiHandler.getDraft',
+          'GET /': 'draft.list',
+          'GET /:slug': 'draft.get',
         },
         bodyParsers: {
-          json: false,
-          urlencoded: { extended: true },
+          json: true,
         },
         onBeforeCall: (ctx, route, req, res) => {
           res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -59,34 +59,41 @@ module.exports = {
         }
       },
 
-      // DRAFT Preview
+      // DRAFT Preview HTML
       {
         path: '/preview',
         aliases: {
-          'GET /:slug': 'apiHandler.previewDraft',
+          'GET /:domain/:slug': 'draft.preview',
         },
         bodyParsers: {
           json: false,
           urlencoded: { extended: true },
         },
         onBeforeCall: (ctx, route, req, res) => {
+          console.log('GATEWAY - PREVIEW: SET header and userAgent');
+
           res.setHeader('Content-Type', 'text/html; charset=UTF-8');
           ctx.meta.userAgent = req.headers['user-agent'];
         }
       },
 
-      // Complete pages
+      // Complete pages API
       {
         path: '/api',
         cors: {
-          origin: ['http://localhost:3000', 'http://localhost:3005', 'https://localhost:4000'],
+          origin: [
+            'http://localhost:3000',
+            'http://localhost:3005',
+            'https://localhost:4000',
+            'https://localhost:5000',
+          ],
           methods: ['GET'],
           allowedHeaders: ['Content-Type', 'Origin', 'User-Agent'],
           credentials: true,
           maxAge: 3600,
         },
         aliases: {
-          'GET /pages/:slug': 'apiHandler.getPage',
+          'GET /pages/:domain/:slug': 'page.get',
         },
         bodyParsers: {
           json: true,

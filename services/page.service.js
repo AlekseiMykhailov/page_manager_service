@@ -1,33 +1,30 @@
-const storage = {
-  pages: [
-    { title: 'page one', slug: 'page-one', html: `<html>
-    <head>
-      <title>page one</title>
-    </head>
-    <body>
-      <h1>page one</h1>
-    </body>
-  </html>`},
-    { title: 'page two', slug: 'page-two', html: `<html>
-    <head>
-      <title>page one</title>
-    </head>
-    <body>
-      <h1>page one</h1>
-    </body>
-  </html>`},
-  ],
-};
+const drafts = require('../data/mock-pages.json');
 
-const notFound = {
-  title: 'Page Not Found',
-};
+class PageStore {
+  constructor(pages) {
+    this.pages = pages;
+  }
+
+  add(page) {}
+
+  update(page) {}
+
+  get(domain, slug) {
+    return this.pages.find(page => (
+      page.domain === domain && page.slug === slug
+    ));
+  }
+}
+
+const appPageStore = new PageStore([...drafts, { domain: 'localhost:3000', slug: 'test', title: 'test'}]);
 
 module.exports = ({
   name: 'page',
   actions: {
     get(ctx) {
-      return storage.pages.find(page => page.slug === ctx.params.slug) || notFound;
+      const { domain, slug } = ctx.params;
+
+      return appPageStore.get(domain, slug);
     },
   }
 });
