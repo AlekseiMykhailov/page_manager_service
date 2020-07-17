@@ -19,7 +19,7 @@ module.exports = {
     routes: [
       // DRAFT CREATE
       {
-        path: '/pages',
+        path: '/drafts',
         aliases: {
           'POST /': 'draft.add',
           'POST /:slug': 'draft.update',
@@ -66,6 +66,7 @@ module.exports = {
           'GET /': 'dashboard.dashboard',
           'GET /add': 'dashboard.addDraft',
           'GET /drafts': 'dashboard.draftList',
+          'GET /drafts/:domain/:slug': 'dashboard.draftEdit',
         },
         bodyParsers: {
           json: false,

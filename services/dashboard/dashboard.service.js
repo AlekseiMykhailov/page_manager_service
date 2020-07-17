@@ -4,39 +4,23 @@ module.exports = ({
     dashboard() {
       const title = 'Dashboard';
       const list = [
-        { slug: 'add', title: 'Add Draft'},
+        { slug: 'drafts', title: 'Drafts'},
         { slug: 'preview', title: 'Preview Drafts'},
+        { slug: 'add', title: 'Add Draft'},
       ];
 
       return this.broker.call('builder.createList', {
         title,
-        header: title,
+        h1: title,
         list,
       });
     },
     addDraft() {
       const title = 'Add Draft';
-      const fields = [
-        {
-          name: 'domain',
-          type: 'select',
-          child: [ 'http://localhost:4000/', 'http://localhost:5000/' ],
-        },
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'descr',
-          type: 'text',
-        },
-      ];
 
       return this.broker.call('builder.createForm', {
         title,
-        header: title,
-        fields,
+        h1: title,
       });
     },
     draftList() {
@@ -44,7 +28,25 @@ module.exports = ({
         .then(res => this.broker.call('builder.createList', {
           title: 'Draft List',
           h1: 'Draft List',
-          list: res,
+          list: res.map(draft => ({
+            title: draft.title,
+            domain: draft.domain,
+            slug: draft.slug,
+            section: 'drafts',
+          })),
+        }));
+    },
+    draftEdit(ctx) {
+      const { domain, slug } = ctx.params;
+
+      return this.broker.call('draft.get', { domain, slug })
+        .then(res => this.broker.call('builder.createEditForm', {
+          h1: 'Edit Draft',
+          title: res.title,
+          domain: res.domain,
+          slug: res.slug,
+          descr: res.descr,
+          fields: res.rows,
         }));
     },
   },

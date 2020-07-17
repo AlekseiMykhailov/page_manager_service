@@ -61,7 +61,15 @@ module.exports = ({
       const newDraft = { domain, slug, title, descr };
 
       appDraftStore.create(newDraft);
-      return this.broker.call('builder.create', newDraft);
+
+      const previews = appDraftStore.getAll().map(draft => ({
+        title: draft.title,
+        domain: draft.domain,
+        slug: draft.slug,
+        section: 'preview',
+      }));
+
+      return this.broker.call('builder.createList',  { list: previews });
     },
     update(ctx) {
       return appDraftStore.update(ctx.params.draft);
@@ -72,7 +80,13 @@ module.exports = ({
       return appDraftStore.get(domain, slug);
     },
     previewList() {
-      return this.broker.call('builder.createList', { list: appDraftStore.getAll()});
+      const previews = appDraftStore.getAll().map(draft => ({
+        title: draft.title,
+        domain: draft.domain,
+        slug: draft.slug,
+        section: 'preview',
+      }));
+      return this.broker.call('builder.createList', { list: previews, title: 'Preview Drafts' });
     },
     previewDraft(ctx) {
       const { domain, slug } = ctx.params;

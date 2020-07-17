@@ -3,7 +3,7 @@ const layout = Handlebars.compile(`
 <style>
   .form-section {}
   .form-section__wrapper {
-    max-width: 30rem;
+    max-width: 60rem;
     width: 100%;
     margin: 0 auto;
     padding: 0 2rem;
@@ -61,28 +61,29 @@ const layout = Handlebars.compile(`
 </style>
 <section class="form-section container">
   <div class="form-section__wrapper">
-    <form action="http://localhost:3000/drafts" method="POST" id="add-draft" class="form">
+    <h1>{{ h1 }}</h1>
+    <form action="http://localhost:3000/pages" method="POST" id="add-draft" class="form">
       <div class="form__field field">
         <label for="domain" class="field__label">
           <select name="domain" id="domain" class="field__element">
-            <option value="localhost:4000" selected="selected">localhost:4000</option>
+            <option value="localhost:4000">localhost:4000</option>
             <option value="localhost:5000">localhost:5000</option>
           </select>
         </label>
       </div>
       <div class="form__field field">
         <label for="title" class="field__label">
-          <input type="text" name="title" id="title" required class="field__element" placeholder="Title">
+          <input type="text" name="title" id="title" required class="field__element" placeholder="Title" value="{{ title }}">
         </label>
       </div>
       <div class="form__field field">
         <label for="slug" class="field__label">
-          <input type="text" name="slug" id="slug" required class="field__element" placeholder="Slug">
+          <input type="text" name="slug" id="slug" required class="field__element" placeholder="Slug" value="{{ slug }}">
         </label>
       </div>
       <div class="form__field field">
         <label for="descr" class="field__label">
-          <input type="text" name="descr" id="descr" class="field__element" placeholder="Description">
+          <input type="text" name="descr" id="descr" class="field__element" placeholder="Description" value="{{ descr }}">
         </label>
       </div>
       <button type="submit" class="form__button button">Submit</button>
