@@ -3,7 +3,7 @@ const layout = Handlebars.compile(`
 <style>
   .form-section {}
   .form-section__wrapper {
-    max-width: 30rem;
+    max-width: 60rem;
     width: 100%;
     margin: 0 auto;
     padding: 0 2rem;

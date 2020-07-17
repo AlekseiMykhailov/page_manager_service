@@ -22,6 +22,8 @@ const rowWithImage = Handlebars.compile(`
     }
     .with-image__content {
       max-width: 400px;
+      background-color: #fff;
+      border-radius: 2rem;
     }
     .with-image__title {
       font-size: 40px;

@@ -71,6 +71,9 @@ const layout = Handlebars.compile(`
           color: green;
         }
 
+        .temp {
+          margin-top: 120px;
+        }
         .temp h1,
         .temp h2 {
           text-align: center;

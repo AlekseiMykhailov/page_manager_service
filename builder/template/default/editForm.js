@@ -13,6 +13,11 @@ const layout = Handlebars.compile(`
     width: 100%;
   }
   .form__field-wrapper {}
+  .form__buttons {
+    display: grid;
+    grid-auto-flow: column;
+    gap: 1rem;
+  }
   .form__button {}
 
   .field {}
@@ -44,19 +49,35 @@ const layout = Handlebars.compile(`
     margin-top: 8px;
     padding: 0 22px;
     border-radius: 24px;
-    border: 0;
+    border: 1px solid transparent;
     background-color: #737ad8;
-    transition: background-color .2s ease;
     color: #fff;
     font-size: 20px;
     line-height: 48px;
     font-weight: 500;
     text-transform: none;
+    transition: background-color 0.3s, color 0.3s, opacity 0.3s;
   }
+
   .button:hover,
   .button:focus {
+    color: #fff;
     background-color: #4049bc;
+    opacity: 1;
     cursor: pointer;
+  }
+  .button--success {
+    background-color: green;
+    opacity: 0.7;
+  }
+  .button--success:hover,
+  .button--success:focus {
+    background-color: green;
+  }
+  .button--empty {
+    color: #737ad8;
+    background-color: transparent;
+    border: 1px solid #737ad8;
   }
 </style>
 <section class="form-section container">
@@ -86,7 +107,11 @@ const layout = Handlebars.compile(`
           <input type="text" name="descr" id="descr" class="field__element" placeholder="Description" value="{{ descr }}">
         </label>
       </div>
-      <button type="submit" class="form__button button">Submit</button>
+      <div class="form__buttons">
+        <button type="submit" class="form__button button button--empty">Cancel</button>
+        <button type="submit" class="form__button button">Save Draft</button>
+        <button type="submit" class="form__button button button--success">Publish Page</button>
+      </div>
     </form>
   </div>
 <section>

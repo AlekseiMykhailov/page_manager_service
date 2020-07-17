@@ -1,10 +1,10 @@
-const layout = require('./template/layout');
-const heading = require('./template/heading');
-const list = require('./template/list');
-const form = require('./template/form');
-const editForm = require('./template/editForm');
-const rowBricks = require('./template/rows/rowBricks');
-const rowWithImage = require('./template/rows/rowWithImage');
+const layout = require('../../template/default/layout');
+const heading = require('../../template/default/heading');
+const list = require('../../template/default/list');
+const form = require('../../template/default/form');
+const editForm = require('../../template/default/editForm');
+const rowBricks = require('../../template/default/rows/rowBricks');
+const rowWithImage = require('../../template/default/rows/rowWithImage');
 
 
 module.exports = ({
@@ -83,8 +83,6 @@ module.exports = ({
         canBePublished: true,
         body: formHtml,
       });
-
-      this.logger.info('Create Edit Form: ', ctx.params);
 
       return html;
     },
