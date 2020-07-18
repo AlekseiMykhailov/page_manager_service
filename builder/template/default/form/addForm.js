@@ -13,35 +13,16 @@ const layout = Handlebars.compile(`
     width: 100%;
   }
   .form__field-wrapper {}
-  .form__button {}
-
-  .field {}
-  .field__label {}
-  .field__element {
-    height: 48px;
-    max-height: 120px;
-    min-height: 0;
-    margin-bottom: 12px;
-    border: 1px solid #d0d2eb;
-    border-radius: 4px;
-    font-size: 16px;
-
-    width: 100%;
-    padding: 8px 12px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    color: #333;
-  }
-  .field__element:focus {
-    border-color: #3898EC;
-    outline: none;
+  .form__button {
+    margin-top: 8px;
   }
 
   .button {
-    display: inline-block;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     height: 48px;
-    margin-top: 8px;
     padding: 0 22px;
     border-radius: 24px;
     border: 0;
@@ -52,11 +33,17 @@ const layout = Handlebars.compile(`
     line-height: 48px;
     font-weight: 500;
     text-transform: none;
+    outline: none;
   }
   .button:hover,
   .button:focus {
     background-color: #4049bc;
     cursor: pointer;
+  }
+  .button--round {
+    border-radius: 50%;
+    width: 48px;
+    padding: 0;
   }
 </style>
 <section class="form-section container">
@@ -70,25 +57,14 @@ const layout = Handlebars.compile(`
           </select>
         </label>
       </div>
-      <div class="form__field field">
-        <label for="title" class="field__label">
-          <input type="text" name="title" id="title" required class="field__element" placeholder="Title">
-        </label>
-      </div>
-      <div class="form__field field">
-        <label for="slug" class="field__label">
-          <input type="text" name="slug" id="slug" required class="field__element" placeholder="Slug">
-        </label>
-      </div>
-      <div class="form__field field">
-        <label for="descr" class="field__label">
-          <input type="text" name="descr" id="descr" class="field__element" placeholder="Description">
-        </label>
-      </div>
-      <button type="submit" class="form__button button">Submit</button>
+
+---------------------------------------------------------
+      {{{ fields }}}
+      {{{ fieldSet }}}
+      {{{ button }}}
     </form>
   </div>
-<section>
+</section>
 `);
 
 module.exports = layout;

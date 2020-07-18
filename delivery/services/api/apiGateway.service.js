@@ -8,7 +8,7 @@ module.exports = {
   name: 'apiGateway',
   mixins: [ApiService],
   settings: {
-    port: 3001,
+    port: process.env.DELIVERY_PORT || 3001,
     cors: {
       origin: ['*'],
       methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'DELETE'],

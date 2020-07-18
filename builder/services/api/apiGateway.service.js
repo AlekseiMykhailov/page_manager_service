@@ -8,7 +8,7 @@ module.exports = {
   name: 'apiGateway',
   mixins: [ApiService],
   settings: {
-    port: 3002,
+    port: process.env.BUILDER_PORT || 3002,
     cors: {
       origin: [
         'http://localhost:3000',

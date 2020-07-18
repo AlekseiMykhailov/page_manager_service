@@ -8,7 +8,7 @@ module.exports = {
   name: 'apiGateway',
   mixins: [ApiService],
   settings: {
-    port: 3000,
+    port: process.env.PORT || 3000,
     cors: {
       origin: [
         'http://localhost:3000',
@@ -20,7 +20,31 @@ module.exports = {
       credentials: true,
       maxAge: 3600,
     },
+    assets: {
+      // TODO: this don't work and need to fix it
+      folder: 'public',
+      options: {}
+    },
     routes: [
+      // DASHBOARD
+      {
+        path: '/',
+        aliases: {
+          'GET /': 'dashboard.dashboard',
+          'GET /add': 'dashboard.addDraft',
+          'GET /drafts': 'dashboard.draftList',
+          'GET /drafts/:domain/:slug': 'dashboard.draftEdit',
+        },
+        bodyParsers: {
+          json: false,
+          urlencoded: { extended: true },
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = 'text/html; charset=utf-8';
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
+      },
+
       // DRAFT CREATE
       {
         path: '/drafts',
@@ -39,31 +63,12 @@ module.exports = {
           ctx.meta.userAgent = req.headers['user-agent'];
         },
         onError(req, res, err) {
-          this.logger.info('Error message: ', err.message);
+          this.logger.error('Error message: ', err.message);
 
           res.statusCode = 409;
           res.statusMessage = err.message;
           res.setHeader('Content-Type', 'text/plain');
           res.end(err.message);
-        }
-      },
-
-      // DASHBOARD
-      {
-        path: '/',
-        aliases: {
-          'GET /': 'dashboard.dashboard',
-          'GET /add': 'dashboard.addDraft',
-          'GET /drafts': 'dashboard.draftList',
-          'GET /drafts/:domain/:slug': 'dashboard.draftEdit',
-        },
-        bodyParsers: {
-          json: false,
-          urlencoded: { extended: true },
-        },
-        onBeforeCall: (ctx, route, req, res) => {
-          ctx.meta.$responseType = 'text/html; charset=utf-8';
-          ctx.meta.userAgent = req.headers['user-agent'];
         }
       },
 
