@@ -1,12 +1,11 @@
 const Handlebars = require('handlebars');
-const { BRICKS_TYPE } = require('./config');
 
-Handlebars.registerHelper('isSimple', function (bricks) {
-  return bricks.type === BRICKS_TYPE.simple;
+Handlebars.registerHelper('isSimple', function (type) {
+  return type === 'simple';
 });
 
-Handlebars.registerHelper('isPerson', function (bricks) {
-  return bricks.type === BRICKS_TYPE.person;
+Handlebars.registerHelper('isPerson', function (type) {
+  return type === 'person';
 });
 
 const rowBricks = Handlebars.compile(`
@@ -70,18 +69,19 @@ const rowBricks = Handlebars.compile(`
     {{/if}}
 
     <ul class="bricks__list">
+
       {{#each bricks}}
 
-        {{#if (isSimple bricks)}}
+        {{#if (isSimple this.type)}}
           <li class="bricks__item brick-simple">
             {{#if this.title}}
               <h2 class="brick-simple__title">{{this.title}}</h2>
             {{/if}}
-            <p class="brick-simple__content">{{this}}
+            <p class="brick-simple__content">{{this.content}}
           </li>
         {{/if}}
 
-        {{#if (isPerson bricks)}}
+        {{#if (isPerson this.type)}}
           <li class="bricks__item brick-person">
             <img src="{{this.photo}}" alt="{{this.personName}}" class="brick-person__photo" />
             <p class="brick-person__content">{{this.content}}</p>
@@ -99,4 +99,4 @@ const rowBricks = Handlebars.compile(`
 </section>
 `);
 
-module.exports = rowBricks;
+module.exports = { rowBricks };

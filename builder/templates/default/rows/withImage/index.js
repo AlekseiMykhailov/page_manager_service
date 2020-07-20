@@ -55,4 +55,4 @@ const rowWithImage = Handlebars.compile(`
   </section>
 `);
 
-module.exports = rowWithImage;
+module.exports = { rowWithImage };

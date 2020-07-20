@@ -1,5 +1,5 @@
 const Handlebars = require('handlebars');
-const layout = Handlebars.compile(`
+const editForm = Handlebars.compile(`
 <style>
   .form-section {}
   .form-section__wrapper {
@@ -82,16 +82,7 @@ const layout = Handlebars.compile(`
 </style>
 <section class="form-section container">
   <div class="form-section__wrapper">
-    <h1>{{ h1 }}</h1>
-    <form action="http://localhost:3000/pages" method="POST" id="add-draft" class="form">
-      <div class="form__field field">
-        <label for="domain" class="field__label">
-          <select name="domain" id="domain" class="field__element">
-            <option value="localhost:4000">localhost:4000</option>
-            <option value="localhost:5000">localhost:5000</option>
-          </select>
-        </label>
-      </div>
+    <form action="/pages/" method="POST" id="edit-form" class="form">
       <div class="form__field field">
         <label for="title" class="field__label">
           <input type="text" name="title" id="title" required class="field__element" placeholder="Title" value="{{ title }}">
@@ -99,12 +90,12 @@ const layout = Handlebars.compile(`
       </div>
       <div class="form__field field">
         <label for="slug" class="field__label">
-          <input type="text" name="slug" id="slug" required class="field__element" placeholder="Slug" value="{{ slug }}">
+          <input type="text" name="slug" id="slug" required class="field__element" placeholder="Slug" value="{{ slug }}" disabled>
         </label>
       </div>
       <div class="form__field field">
-        <label for="descr" class="field__label">
-          <input type="text" name="descr" id="descr" class="field__element" placeholder="Description" value="{{ descr }}">
+        <label for="description" class="field__label">
+          <input type="text" name="description" id="description" class="field__element" placeholder="Description" value="{{ description }}">
         </label>
       </div>
       <div class="form__buttons">
@@ -115,6 +106,19 @@ const layout = Handlebars.compile(`
     </form>
   </div>
 <section>
+<script>
+  const form = document.getElementById('edit-form');
+  const slug = document.getElementById('slug');
+  const defaultActionURL = form.action;
+  form.action = defaultActionURL + slug.value;
+
+  console.log(defaultActionURL, slug.value);
+
+  slug.addEventListener('input', (e) => {
+    const { value } = e.target;
+    form.action = defaultActionURL.value + value;
+  });
+</script>
 `);
 
-module.exports = layout;
+module.exports = { editForm };

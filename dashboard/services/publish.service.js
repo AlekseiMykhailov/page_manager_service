@@ -36,15 +36,15 @@ class PageStore {
   }
 }
 
-const appPageStore = new PageStore([...drafts, { domain: 'localhost:3000', slug: 'test', title: 'test'}]);
+const appPageStore = new PageStore([...drafts, { slug: 'test', title: 'test'}]);
 
 module.exports = ({
-  name: 'page',
+  name: 'publish',
   actions: {
-    get(ctx) {
-      const { domain, slug } = ctx.params;
+    getWebPage(ctx) {
+      const { slug } = ctx.params;
 
-      return appPageStore.get(domain, slug);
+      return appPageStore.get(slug);
     },
   }
 });

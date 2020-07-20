@@ -92,19 +92,16 @@ const layout = Handlebars.compile(`
           <a class="dashboard-nav__link" href="/">Dashboard</a>
         </li>
         <li class="dashboard-nav__item">
-          <a class="dashboard-nav__link" href="/drafts">Drafts</a>
+          <a class="dashboard-nav__link" href="/pages">Web Pages</a>
         </li>
         <li class="dashboard-nav__item">
-          <a class="dashboard-nav__link" href="/preview">Previews</a>
-        </li>
-        <li class="dashboard-nav__item">
-          <a class="dashboard-nav__link" href="/add">Add Draft</a>
+          <a class="dashboard-nav__link" href="/pages/create">Create Web Page</a>
         </li>
         {{#if canBeEdited}}
         <li class="dashboard-nav__item">
           <a
             class="dashboard-nav__link dashboard-nav__link--caution"
-            href="/drafts/{{ domain }}/{{ slug }}"
+            href="/pages/{{ slug }}"
           >Edit</a>
         </li>
         {{/if}}
@@ -116,10 +113,10 @@ const layout = Handlebars.compile(`
       </ul>
     </div>
     {{#if (noRows rows)}}
-    <div class="temp">
-      {{#if title}}<h1>{{ title }}</h1>{{/if}}
-      {{#if descr}}<h2>{{ descr }}</h2>{{/if}}
-    </temp>
+      <div class="temp">
+        {{#if title}}<h1>{{ title }}</h1>{{/if}}
+        {{#if descr}}<h2>{{ descr }}</h2>{{/if}}
+      </temp>
     {{/if}}
     {{ rows }}
     {{ body }}

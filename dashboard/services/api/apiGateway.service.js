@@ -31,9 +31,9 @@ module.exports = {
         path: '/',
         aliases: {
           'GET /': 'dashboard.dashboard',
-          'GET /add': 'dashboard.addDraft',
-          'GET /drafts': 'dashboard.draftList',
-          'GET /drafts/:domain/:slug': 'dashboard.draftEdit',
+          'GET /pages': 'dashboard.listWebPages',
+          'GET /pages/create': 'dashboard.createWebPage',
+          'GET /pages/:slug': 'dashboard.editWebPage',
         },
         bodyParsers: {
           json: false,
@@ -45,13 +45,13 @@ module.exports = {
         },
       },
 
-      // DRAFT CREATE
+      // PAGE CREATE
       {
-        path: '/drafts',
+        path: '/pages',
         aliases: {
-          'POST /': 'draft.add',
-          'POST /:slug': 'draft.update',
-          'POST /publish': 'draft.publish',
+          'POST /create': 'pages.createWebPage',
+          'POST /:slug': 'pages.updateWebPage',
+          'POST /publish': 'pages.publish',
         },
         authorization: false,
         bodyParsers: {
@@ -72,12 +72,12 @@ module.exports = {
         }
       },
 
-      // DRAFT Preview HTML
+      // PAGE PREVIEW
       {
-        path: '/preview',
+        path: '/pages',
         aliases: {
-          'GET /': 'draft.previewList',
-          'GET /:domain/:slug': 'draft.previewDraft',
+          'GET /preview': 'pages.previewWebPageList',
+          'GET /preview/:slug': 'pages.previewWebPage',
         },
         bodyParsers: {
           json: false,

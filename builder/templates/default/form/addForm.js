@@ -1,5 +1,5 @@
 const Handlebars = require('handlebars');
-const layout = Handlebars.compile(`
+const addForm = Handlebars.compile(`
 <style>
   .form-section {}
   .form-section__wrapper {
@@ -48,23 +48,23 @@ const layout = Handlebars.compile(`
 </style>
 <section class="form-section container">
   <div class="form-section__wrapper">
-    <form action="http://localhost:3000/drafts" method="POST" id="add-draft" class="form">
-      <div class="form__field field">
-        <label for="domain" class="field__label">
-          <select name="domain" id="domain" class="field__element">
-            <option value="localhost:4000" selected="selected">localhost:4000</option>
-            <option value="localhost:5000">localhost:5000</option>
-          </select>
-        </label>
-      </div>
-
----------------------------------------------------------
+    <form action="{{ actionURL }}" method="POST" id="add-draft" class="form">
       {{{ fields }}}
       {{{ fieldSet }}}
       {{{ button }}}
     </form>
   </div>
 </section>
+<script>
+  // const form = document.getElementById('add-draft');
+  // const slug = document.getElementById('slug');
+  // const defaultActionURL = form.action;
+
+  // slug.addEventListener('input', (e) => {
+  //   const { value } = e.target;
+  //   form.action = defaultActionURL + value;
+  // });
+</script>
 `);
 
-module.exports = layout;
+module.exports = { addForm };

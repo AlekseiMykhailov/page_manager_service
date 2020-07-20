@@ -33,9 +33,8 @@ module.exports = {
           maxAge: 3600,
         },
         aliases: {
-          'GET /pages': 'page.get',
-          'GET /pages/:domain': 'page.get',
-          'GET /pages/:domain/:slug': 'page.get',
+          'GET /pages': 'publish.getWebPage',
+          'GET /pages/:slug': 'publish.getWebPage',
         },
         bodyParsers: {
           json: true,

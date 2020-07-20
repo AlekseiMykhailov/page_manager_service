@@ -5,7 +5,7 @@ const fieldSet = Handlebars.compile(`
     margin-bottom: 10px;
   }
 </style>
-<fieldset class="fieldset">
+<fieldset class="fieldset" name="{{ fieldSetName }}">
   <legend>
     {{ title }}
   </legend>
