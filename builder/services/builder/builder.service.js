@@ -56,7 +56,7 @@ module.exports = ({
       return html;
     },
 
-    createPageForm(ctx) {
+    createAddPageForm(ctx) {
       const { actionURL, fields, fieldTypes } = ctx.params;
       const createField = (field) => {
         if (field.type === fieldTypes.text) {
@@ -143,7 +143,7 @@ module.exports = ({
       return html;
     },
 
-    createEditForm(ctx) {
+    createEditPageForm(ctx) {
       const { fields } = ctx.params;
 
       const formHtml = editForm({

@@ -85,7 +85,6 @@ const layout = Handlebars.compile(`
   </head>
 
   <body>
-    <img src="../images/a.png" alt="Favicon" />
     <div class="dashboard-nav">
       <ul class="dashboard-nav__list">
         <li class="dashboard-nav__item">

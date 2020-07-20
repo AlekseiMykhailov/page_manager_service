@@ -36,7 +36,7 @@ class PageStore {
   }
 }
 
-const appPageStore = new PageStore([...drafts, { slug: 'test', title: 'test'}]);
+const appPageStore = new PageStore([...drafts, { id: 3, slug: 'test', title: 'test'}]);
 
 module.exports = ({
   name: 'publish',

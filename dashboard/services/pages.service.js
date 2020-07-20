@@ -48,7 +48,7 @@ class PagesStore {
   }
 }
 
-const webPagesStore = new PagesStore([...mockPages, { slug: 'test', title: 'test'}]);
+const webPagesStore = new PagesStore([...mockPages, { id: 3, slug: 'test', title: 'test'}]);
 
 module.exports = ({
   name: 'pages',
@@ -68,7 +68,10 @@ module.exports = ({
           section: 'preview',
         }));
 
-      return this.broker.call('builder.createList',  { list: previews });
+
+      this.logger.info('LIST PREVIEWS: ', previews);
+
+      return this.broker.call('dashboard.editWebPage', webPage);
     },
 
     updateWebPage(ctx) {

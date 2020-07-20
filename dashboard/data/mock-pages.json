@@ -1,5 +1,6 @@
 [
   {
+    "id": 1,
     "slug": "learn-manual-qa-2020",
     "dependencies": "",
     "title": "Software Quality Assurance Course",
@@ -44,6 +45,7 @@
     ]
   },
   {
+    "id": 2,
     "slug": "learn-devops-2020",
     "dependencies": "",
     "title": "Learn DevOps Course",

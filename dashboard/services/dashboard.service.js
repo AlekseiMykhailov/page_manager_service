@@ -1,6 +1,5 @@
 const { FIELD_TYPES } = require('../../config/constants');
 
-
 module.exports = ({
   name: 'dashboard',
   actions: {
@@ -9,6 +8,8 @@ module.exports = ({
         { slug: 'pages', title: 'WebPages' },
         { slug: 'pages/create', title: 'Create Web Page' },
       ];
+
+      this.broker.call('rows.getRows').then(res => console.log('MOCK ROWS ', res));
 
       return this.broker.call('builder.createList', {
         title: 'Dashboard',
@@ -31,7 +32,7 @@ module.exports = ({
     },
 
     createWebPage() {
-      return this.broker.call('builder.createPageForm', {
+      return this.broker.call('builder.createAddPageForm', {
         actionURL: '/pages/create',
         fields: [
           {
@@ -64,7 +65,7 @@ module.exports = ({
       const { domain, slug } = ctx.params;
 
       return this.broker.call('pages.getWebPage', { domain, slug })
-        .then(res => this.broker.call('builder.createEditForm', {
+        .then(res => this.broker.call('builder.createEditPageForm', {
           title: 'Edit Web Page',
           slug,
           fields: res,
