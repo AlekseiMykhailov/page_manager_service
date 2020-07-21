@@ -48,11 +48,6 @@ const rowBricks = Handlebars.compile(`
   .brick-simple__title {}
   .brick-simple__content {}
 
-  .brick-person {}
-  .brick-person__photo {}
-  .brick-person__content {}
-  .brick-person__linked-in {}
-
   @media screen and (max-width: 1024px) {
     .bricks__list {
       grid-template-columns: 1fr;
@@ -64,37 +59,13 @@ const rowBricks = Handlebars.compile(`
 <section class="bricks container">
   <div class="bricks__wrapper">
     <h2 class="bricks__title">{{ title }}</h2>
-    {{#if subTitle}}
-      <h2 class="bricks__sub-title">{{ subTitle }}</h2>
-    {{/if}}
-
     <ul class="bricks__list">
-
       {{#each bricks}}
-
-        {{#if (isSimple this.type)}}
-          <li class="bricks__item brick-simple">
-            {{#if this.title}}
-              <h2 class="brick-simple__title">{{this.title}}</h2>
-            {{/if}}
-            <p class="brick-simple__content">{{this.content}}
-          </li>
-        {{/if}}
-
-        {{#if (isPerson this.type)}}
-          <li class="bricks__item brick-person">
-            <img src="{{this.photo}}" alt="{{this.personName}}" class="brick-person__photo" />
-            <p class="brick-person__content">{{this.content}}</p>
-            <a class="brick-person__linked-in" href="{{this.linkedIn}}"></a>
-          </li>
-        {{/if}}
-
+        <li class="bricks__item brick-simple">
+          <p class="brick-simple__content">{{this.value}}
+        </li>
       {{/each}}
     </ul>
-
-    {{#if subContent}}
-      <p class="bricks__sub-content">{{ subContent }}</p>
-    {{/if}}
   </div>
 </section>
 `);

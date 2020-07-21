@@ -45,7 +45,7 @@ module.exports = {
         },
       },
 
-      // PAGE CREATE
+      // PAGES CREATE, UPDATE AND PUBLISH
       {
         path: '/pages',
         aliases: {
@@ -70,6 +70,25 @@ module.exports = {
           res.setHeader('Content-Type', 'text/plain');
           res.end(err.message);
         }
+      },
+
+      // ROWS
+      {
+        path: '/rows',
+        aliases: {
+          'POST /create': 'rows.createRow',
+          'POST /:slug': 'rows.updateRow',
+          'POST /delete/:id': 'rows.deleteRow',
+        },
+        authorization: false,
+        bodyParsers: {
+          json: true,
+          urlencoded: { extended: true }
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
       },
 
       // PAGE PREVIEW

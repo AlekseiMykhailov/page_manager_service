@@ -1,42 +1,47 @@
-const layout = require('../../templates/default/layout');
-const heading = require('../../templates/default/heading');
-const list = require('../../templates/default/list');
-const { rowBricks, rowWithImage } = require('../../templates/default/rows');
+const layout = require('../../../templates/default/layout');
+const list = require('../../../templates/default/list');
+const { rowBricks, rowWithImage } = require('../../../templates/default/rows');
 const {
-  addForm, editForm, fieldSet, inputText, inputUrl, inputFile, select, buttonHtml,
-} = require('../../templates/default/form');
+  addForm, editForm, editRowForm, fieldSet, inputText, inputUrl, inputFile, select, buttonHtml,
+} = require('../../../templates/default/form');
 
 module.exports = ({
   name: 'builder',
   actions: {
     create(ctx) {
-      const { title, descr, rows, domain, slug } = ctx.params;
-      const header = heading({ title });
+      const { rows, webPage } = ctx.params;
+      const { title, descr, slug } = webPage;
 
       let rowsHtml;
 
       if (rows) {
-        rowsHtml = rows.map(row => {
-          const { title, bricks, content, image } = row;
-          switch (row.type) {
-          case 'bricks':
-            return rowBricks({ title, bricks });
+        rowsHtml = [...rows].sort((a, b) => a.order - b.order)
+          .map(({ meta, fields }) => {
+            switch (meta.templateHbs) {
+            case 'bricks':
+              return rowBricks({
+                title: fields.find(field => field.name === 'title').value,
+                bricks: fields.filter(field => field.name !== 'title'),
+              });
 
-          case 'with-image':
-            return rowWithImage({ title, content, image });
+            case 'withImage':
+              return rowWithImage({
+                backgroundImageURL: fields.find(field => field.name === 'backgroundImageURL').value,
+                title: fields.find(field => field.name === 'title').value,
+                description: fields.find(field => field.name === 'description').value,
+              });
 
-          default:
-            return;
-          }
-        }).join('');
+            default:
+              return;
+            }
+          })
+          .join('');
       }
 
       const html = layout({
-        domain,
         slug,
         title,
         descr,
-        header,
         canBeEdited: true,
         canBePublished: true,
         rows: rowsHtml,
@@ -144,16 +149,45 @@ module.exports = ({
     },
 
     createEditPageForm(ctx) {
-      const { fields } = ctx.params;
+      const { webPage, rows, fieldTypes } = ctx.params;
+      const { id, slug, title, description } = webPage;
+
+      const createField = (field) => {
+        if (field.type === fieldTypes.text) {
+          return inputText({ ...field });
+        }
+        if (field.type === fieldTypes.url) {
+          return inputUrl({ ...field });
+        }
+        if (field.type === fieldTypes.file) {
+          return inputFile({ ...field });
+        }
+        if (field.type === fieldTypes.select) {
+          return select({ ...field });
+        }
+      };
+
+      const rowsHtml = rows.map(row => {
+        const { meta, order, id, fields} = row;
+
+        return editRowForm({
+          id,
+          rowTitle: meta.title,
+          order,
+          fields: fields.map(field => createField(field)).join(''),
+        });
+      }).join('');
 
       const formHtml = editForm({
-        slug: fields.slug,
-        title: fields.title,
-        description: fields.description
+        id,
+        slug,
+        title,
+        description,
+        rowsHtml,
       });
 
       const html = layout({
-        title: `Edit Page: ${fields.title}`,
+        title: `Edit Page: ${webPage.title}`,
         canBePublished: true,
         body: formHtml,
       });

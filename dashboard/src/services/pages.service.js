@@ -1,4 +1,13 @@
-const mockPages = require('../data/mock-pages.json');
+const mockPages = require('../../data/mock-pages.json');
+
+class WebPageSchema {
+  constructor(slug, title, description) {
+    this.id = Date.now();
+    this.slug = slug;
+    this.title = title;
+    this.description = description;
+  }
+}
 
 class PagesStore {
   constructor(pages) {
@@ -18,14 +27,14 @@ class PagesStore {
     return this.getBySlug(slug);
   }
 
-  update(updatingPage) {
-    const { slug } = updatingPage;
+  update(pageFields) {
+    const { slug } = pageFields;
 
     this.pages = [...this.pages].map(page => {
       if (page.slug === slug) {
         return {
           ...page,
-          ...updatingPage,
+          ...pageFields,
         };
       }
 
@@ -35,16 +44,16 @@ class PagesStore {
     return this.getBySlug(slug);
   }
 
+  delete(slug) {
+    this.pages = this.pages.filter(page => page.slug === slug);
+  }
+
   getBySlug(slug) {
     return this.pages.find(page => page.slug === slug);
   }
 
   getAll() {
     return this.pages;
-  }
-
-  delete(slug) {
-    this.pages = this.pages.filter(page => page.slug === slug);
   }
 }
 
@@ -55,29 +64,19 @@ module.exports = ({
   actions: {
     createWebPage(ctx) {
       const { title, slug, description } = ctx.params;
-      const webPage = { slug, title, description };
+      const newWebPage = new WebPageSchema(title, slug, description);
 
-      this.logger.info('CREATE WEB PAGE: ', ctx.params);
+      webPagesStore.create(newWebPage);
 
-      webPagesStore.create(webPage);
+      this.logger.info('WEB PAGE CREATED: ', ctx.params);
 
-      const previews = webPagesStore.getAll()
-        .map(({ title, slug }) => ({
-          title,
-          slug,
-          section: 'preview',
-        }));
-
-
-      this.logger.info('LIST PREVIEWS: ', previews);
-
-      return this.broker.call('dashboard.editWebPage', webPage);
+      return this.broker.call('dashboard.editWebPage', newWebPage);
     },
 
     updateWebPage(ctx) {
-      this.logger.info('UPDATE WEB PAGE: ', ctx.params);
-
       webPagesStore.update(ctx.params);
+
+      this.logger.info('WEB PAGE UPDATED: ', ctx.params);
 
       return this.broker.call('dashboard.editWebPage', ctx.params);
     },
@@ -90,17 +89,17 @@ module.exports = ({
 
     previewWebPage(ctx) {
       const { slug } = ctx.params;
-      const page = webPagesStore.getBySlug(slug);
+      const webPage = webPagesStore.getBySlug(slug);
 
-      // this.logger.info("Draft.Preview: ", domain, slug);
-
-      return this.broker.call('builder.create', page);
+      return this.broker.call('rows.getPageRows', { id: webPage.id })
+        .then(rows => {
+          return this.broker.call('builder.create', { webPage, rows });
+        });
     },
 
-    listWebPages() {
+    getListWebPages() {
       return webPagesStore.getAll()
         .map(({ title, slug }) => ({ title, slug }));
-
     },
   }
 });

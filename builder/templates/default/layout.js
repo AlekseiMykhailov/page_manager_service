@@ -43,6 +43,7 @@ const layout = Handlebars.compile(`
         border: 1px solid #eaebf8;
         background-color: #fff;
         box-shadow: 0 8px 20px 0 rgba(63,67,191,.12);
+        z-index: 2;
       }
       .dashboard-nav__list {
         display: grid;

@@ -21,16 +21,16 @@ const list = Handlebars.compile(`
     padding: 0;
     border-bottom: 1px solid #eaebf8;
   }
+  .list__item:hover,
+  .list__item:focus {
+    background-color: #fff;
+  }
   .list__link {
     display: block;
     padding: 1rem 2rem;
     text-decoration: none;
     background-color: transparent;
     transition: background-color .3s;
-  }
-  .list__link:hover,
-  .list__link:focus {
-    background-color: #fff;
   }
   .list__buttons {
     display: flex;

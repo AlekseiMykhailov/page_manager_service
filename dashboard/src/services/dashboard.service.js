@@ -1,4 +1,10 @@
-const { FIELD_TYPES } = require('../../config/constants');
+const FIELD_TYPES = {
+  text: 'text',
+  email: 'email',
+  url: 'url',
+  file: 'file',
+  select: 'select',
+};
 
 module.exports = ({
   name: 'dashboard',
@@ -9,8 +15,6 @@ module.exports = ({
         { slug: 'pages/create', title: 'Create Web Page' },
       ];
 
-      this.broker.call('rows.getRows').then(res => console.log('MOCK ROWS ', res));
-
       return this.broker.call('builder.createList', {
         title: 'Dashboard',
         items,
@@ -18,7 +22,7 @@ module.exports = ({
     },
 
     listWebPages() {
-      return this.broker.call('pages.listWebPages')
+      return this.broker.call('pages.getListWebPages')
         .then(res => this.broker.call('builder.createList', {
           title: 'List of Web Pages',
           items: res.map(({ title, slug }) => ({
@@ -62,13 +66,18 @@ module.exports = ({
     },
 
     editWebPage(ctx) {
-      const { domain, slug } = ctx.params;
+      const { slug } = ctx.params;
+      let webPage;
 
-      return this.broker.call('pages.getWebPage', { domain, slug })
-        .then(res => this.broker.call('builder.createEditPageForm', {
-          title: 'Edit Web Page',
-          slug,
-          fields: res,
+      return this.broker.call('pages.getWebPage', { slug })
+        .then(res => {
+          webPage = res;
+          return this.broker.call('rows.getPageRows', { id: webPage.id });
+        })
+        .then(rows => this.broker.call('builder.createEditPageForm', {
+          webPage,
+          rows,
+          fieldTypes: FIELD_TYPES,
         }));
     },
   },

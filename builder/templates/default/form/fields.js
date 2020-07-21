@@ -22,16 +22,17 @@ const inputText = Handlebars.compile(`
     outline: none;
   }
 </style>
+
 <div class="form__field field">
   <label for="{{ name }}" class="field__label">
-    {{ label }}
+    {{ name }}
     <input
       type="text"
       name="{{ name }}"
       id="{{ name }}"
       {{#if required}}required{{/if}}
       class="field__element"
-      placeholder="{{ placeholder }}"
+      value="{{ value }}"
     />
   </label>
 </div>
@@ -39,6 +40,7 @@ const inputText = Handlebars.compile(`
 
 const inputUrl = Handlebars.compile(`
 <div class="form__field field">
+  <img src="{{ value }}" width="60" />
   <label for="{{ name }}" class="field__label">
     <input
       type="url"
@@ -46,7 +48,7 @@ const inputUrl = Handlebars.compile(`
       id="{{ name }}"
       {{#if required}}required{{/if}}
       class="field__element"
-      placeholder="{{ placeholder }}"
+      value="{{ value }}"
     />
   </label>
 </div>
@@ -54,6 +56,7 @@ const inputUrl = Handlebars.compile(`
 
 const inputFile = Handlebars.compile(`
 <div class="form__field field">
+  <img src="{{ value }}" width="60" />
   <label for="{{ name }}" class="field__label">
     <input
       type="file"
@@ -61,7 +64,6 @@ const inputFile = Handlebars.compile(`
       id="{{ name }}"
       {{#if required}}required{{/if}}
       class="field__element"
-      placeholder="{{ placeholder }}"
     />
   </label>
 </div>

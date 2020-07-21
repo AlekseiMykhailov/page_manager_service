@@ -1,4 +1,4 @@
-const drafts = require('../data/mock-pages.json');
+const drafts = require('../../data/mock-pages.json');
 
 class PageStore {
   constructor(pages) {

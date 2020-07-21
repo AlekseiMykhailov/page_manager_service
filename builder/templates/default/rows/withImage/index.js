@@ -1,4 +1,5 @@
 const Handlebars = require('handlebars');
+
 const rowWithImage = Handlebars.compile(`
   <style>
     .with-image {
@@ -6,7 +7,7 @@ const rowWithImage = Handlebars.compile(`
       align-items: center;
       min-height: 100vh;
       background-color: #fff;
-      background-image: url({{ image }});
+      background-image: url({{ backgroundImageURL }});
       background-size: contain;
       background-position: 130%;
       background-repeat: no-repeat;
@@ -49,7 +50,7 @@ const rowWithImage = Handlebars.compile(`
     <div class="with-image__wrapper">
       <div class="with-image__content">
         <h2 class="with-image__title">{{ title }}</h2>
-        <p class="with-image__content">{{ content }}</p>
+        <p class="with-image__content">{{ description }}</p>
       </div>
     </div>
   </section>

@@ -17,6 +17,7 @@ const editForm = Handlebars.compile(`
     display: grid;
     grid-auto-flow: column;
     gap: 1rem;
+    justify-items: center;
   }
   .form__button {}
 
@@ -43,8 +44,11 @@ const editForm = Handlebars.compile(`
   }
 
   .button {
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
+    max-width: 16rem;
     height: 48px;
     margin-top: 8px;
     padding: 0 22px;
@@ -53,9 +57,9 @@ const editForm = Handlebars.compile(`
     background-color: #737ad8;
     color: #fff;
     font-size: 20px;
-    line-height: 48px;
     font-weight: 500;
-    text-transform: none;
+    line-height: 48px;
+    text-decoration: none;
     transition: background-color 0.3s, color 0.3s, opacity 0.3s;
   }
 
@@ -83,27 +87,34 @@ const editForm = Handlebars.compile(`
 <section class="form-section container">
   <div class="form-section__wrapper">
     <form action="/pages/" method="POST" id="edit-form" class="form">
+      <input type="hidden" name="id" value="{{ id }}" />
       <div class="form__field field">
         <label for="title" class="field__label">
+          Title:
           <input type="text" name="title" id="title" required class="field__element" placeholder="Title" value="{{ title }}">
         </label>
       </div>
       <div class="form__field field">
         <label for="slug" class="field__label">
+          Slug:
           <input type="text" name="slug" id="slug" required class="field__element" placeholder="Slug" value="{{ slug }}" disabled>
         </label>
       </div>
       <div class="form__field field">
         <label for="description" class="field__label">
+          Description:
           <input type="text" name="description" id="description" class="field__element" placeholder="Description" value="{{ description }}">
         </label>
       </div>
       <div class="form__buttons">
-        <button type="submit" class="form__button button button--empty">Cancel</button>
-        <button type="submit" class="form__button button">Save Draft</button>
-        <button type="submit" class="form__button button button--success">Publish Page</button>
+        <a href="/pages" class="form__button button button--empty">Cancel</a>
+        <a href="/pages/preview/{{ slug }}" class="form__button button button--empty">Preview</a>
+        <button type="submit" class="form__button button">Save Page</button>
+        <button type="button" class="form__button button button--success">Publish Page</button>
       </div>
     </form>
+
+    {{{ rowsHtml }}}
   </div>
 <section>
 <script>
