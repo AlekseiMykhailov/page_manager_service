@@ -22,7 +22,7 @@ module.exports = {
     },
     assets: {
       // TODO: this don't work and need to fix it
-      folder: 'public',
+      folder: './public',
       options: {}
     },
     routes: [
@@ -51,6 +51,7 @@ module.exports = {
         aliases: {
           'POST /create': 'pages.createWebPage',
           'POST /:slug': 'pages.updateWebPage',
+          'POST /:slug/:rowId': 'rows.updateRow',
           'POST /publish': 'pages.publish',
         },
         authorization: false,
@@ -77,8 +78,8 @@ module.exports = {
         path: '/rows',
         aliases: {
           'POST /create': 'rows.createRow',
-          'POST /:slug': 'rows.updateRow',
-          'POST /delete/:id': 'rows.deleteRow',
+          'POST /:rowId': 'rows.updateRow',
+          'GET /delete/:id': 'rows.deleteRow',
         },
         authorization: false,
         bodyParsers: {

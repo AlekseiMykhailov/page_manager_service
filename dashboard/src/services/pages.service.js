@@ -1,8 +1,10 @@
+const { v4 } = require('uuid');
+
 const mockPages = require('../../data/mock-pages.json');
 
-class WebPageSchema {
+class WebPage {
   constructor(slug, title, description) {
-    this.id = Date.now();
+    this.id = v4();
     this.slug = slug;
     this.title = title;
     this.description = description;
@@ -52,54 +54,98 @@ class PagesStore {
     return this.pages.find(page => page.slug === slug);
   }
 
+  getById(id) {
+    return this.pages.find(page => page.id === id);
+  }
+
   getAll() {
     return this.pages;
   }
 }
 
-const webPagesStore = new PagesStore([...mockPages, { id: 3, slug: 'test', title: 'test'}]);
+const webPagesStore = new PagesStore([...mockPages, { id: '3', slug: 'test', title: 'test'}]);
 
 module.exports = ({
   name: 'pages',
   actions: {
-    createWebPage(ctx) {
-      const { title, slug, description } = ctx.params;
-      const newWebPage = new WebPageSchema(title, slug, description);
+    createWebPage: {
+      params: {
+        title: 'string',
+        slug: 'string',
+        description: 'string',
+      },
+      handler(ctx) {
+        const { title, slug, description } = ctx.params;
+        const newWebPage = new WebPage(title, slug, description);
 
-      webPagesStore.create(newWebPage);
+        webPagesStore.create(newWebPage);
 
-      this.logger.info('WEB PAGE CREATED: ', ctx.params);
+        this.logger.info('WEB PAGE CREATED: ', ctx.params);
 
-      return this.broker.call('dashboard.editWebPage', newWebPage);
+        return this.broker.call('dashboard.editWebPage', newWebPage);
+      },
     },
 
-    updateWebPage(ctx) {
-      webPagesStore.update(ctx.params);
+    updateWebPage: {
+      params: {
+        title: 'string',
+        slug: 'string',
+        description: 'string',
+      },
+      handler(ctx) {
+        webPagesStore.update(ctx.params);
 
-      this.logger.info('WEB PAGE UPDATED: ', ctx.params);
+        this.logger.info('WEB PAGE UPDATED: ', ctx.params);
 
-      return this.broker.call('dashboard.editWebPage', ctx.params);
+        return this.broker.call('dashboard.editWebPage', ctx.params);
+      },
     },
 
-    getWebPage(ctx) {
-      const { slug } = ctx.params;
+    getWebPage: {
+      params: {
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { slug } = ctx.params;
 
-      return webPagesStore.getBySlug(slug);
+        return webPagesStore.getBySlug(slug);
+      },
     },
 
-    previewWebPage(ctx) {
-      const { slug } = ctx.params;
-      const webPage = webPagesStore.getBySlug(slug);
+    getWebPageById: {
+      params: {
+        id: 'string',
+      },
+      handler(ctx) {
+        const { id } = ctx.params;
 
-      return this.broker.call('rows.getPageRows', { id: webPage.id })
-        .then(rows => {
-          return this.broker.call('builder.create', { webPage, rows });
-        });
+        this.logger.info('getWebPageById ctx.params: ', ctx.params);
+        this.logger.info('getWebPageById return: ', webPagesStore.getById(id));
+
+        return webPagesStore.getById(id);
+      },
     },
 
-    getListWebPages() {
-      return webPagesStore.getAll()
-        .map(({ title, slug }) => ({ title, slug }));
+    previewWebPage: {
+      params: {
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { slug } = ctx.params;
+        const webPage = webPagesStore.getBySlug(slug);
+
+        return this.broker.call('rows.getRowsForPage', { id: webPage.id })
+          .then(rows => {
+            return this.broker.call('builder.create', { webPage, rows });
+          });
+      },
+    },
+
+    getListWebPages: {
+      handler() {
+        return webPagesStore.getAll()
+          .map(({ title, slug }) => ({ title, slug }));
+      },
     },
   }
 });

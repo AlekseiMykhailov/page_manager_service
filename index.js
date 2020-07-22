@@ -4,4 +4,5 @@ const broker = new ServiceBroker();
 broker.loadServices('./dashboard/src/services/');
 broker.loadServices('./delivery/src/services/');
 broker.loadServices('./builder/src/services/');
+broker.loadServices('./web/services/');
 broker.start();

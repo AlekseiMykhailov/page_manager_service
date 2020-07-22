@@ -148,7 +148,7 @@ module.exports = ({
       return html;
     },
 
-    createEditPageForm(ctx) {
+    createFormPageEdit(ctx) {
       const { webPage, rows, fieldTypes } = ctx.params;
       const { id, slug, title, description } = webPage;
 
@@ -167,16 +167,19 @@ module.exports = ({
         }
       };
 
-      const rowsHtml = rows.map(row => {
-        const { meta, order, id, fields} = row;
+      const rowsHtml = rows.sort((a, b) => a.order - b.order)
+        .map(row => {
+          const { meta, order, id, fields} = row;
 
-        return editRowForm({
-          id,
-          rowTitle: meta.title,
-          order,
-          fields: fields.map(field => createField(field)).join(''),
-        });
-      }).join('');
+          return editRowForm({
+            id,
+            webPageSlug: slug,
+            rowTitle: meta.title,
+            order,
+            fields: [...fields].map(field => createField(field)).join(''),
+          });
+        })
+        .join('');
 
       const formHtml = editForm({
         id,

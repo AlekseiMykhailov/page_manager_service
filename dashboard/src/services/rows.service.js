@@ -1,3 +1,5 @@
+const { v4 } = require('uuid');
+
 const mockFieldsSchemas = [
   {
     name: 'title',
@@ -22,8 +24,8 @@ const mockFieldsSchemas = [
 
 const mockCreatedRows = [
   {
-    id: 1,
-    webPageId: 1,
+    id: '1',
+    webPageId: '1',
     order: 1,
     meta: {
       title: 'Row with image',
@@ -48,8 +50,8 @@ const mockCreatedRows = [
     ],
   },
   {
-    id: 2,
-    webPageId: 2,
+    id: '2',
+    webPageId: '2',
     order: 1,
     meta: {
       title: 'Row with image',
@@ -74,8 +76,8 @@ const mockCreatedRows = [
     ],
   },
   {
-    id: 3,
-    webPageId: 1,
+    id: '3',
+    webPageId: '1',
     order: 2,
     meta: {
       title: 'Row with bricks',
@@ -120,8 +122,8 @@ const mockCreatedRows = [
     ],
   },
   {
-    id: 4,
-    webPageId: 2,
+    id: '4',
+    webPageId: '2',
     order: 2,
     meta: {
       title: 'Row with bricks',
@@ -171,7 +173,7 @@ const mockRowsSchemas = [
   {
     webPageId: 'number',
     order: 'number',
-    meta: {
+    schema: {
       title: 'Block with image',
       templateHbs: 'withImage',
     },
@@ -190,6 +192,40 @@ const mockRowsSchemas = [
       },
     ],
   },
+  {
+    webPageId: 'number',
+    order: 'number',
+    schema: {
+      title: 'Block with image',
+      templateHbs: 'bricks',
+    },
+    fields: [
+      {
+        name: 'edge-1',
+        type: 'text',
+      },
+      {
+        name: 'edge-2',
+        type: 'text',
+      },
+      {
+        name: 'edge-3',
+        type: 'text',
+      },
+      {
+        name: 'edge-4',
+        type: 'text',
+      },
+      {
+        name: 'edge-5',
+        type: 'text',
+      },
+      {
+        name: 'edge-6',
+        type: 'text',
+      },
+    ],
+  },
 ];
 
 class RowFieldSchema {
@@ -200,18 +236,25 @@ class RowFieldSchema {
 }
 
 class RowSchema {
-  constructor(title, templateHbs) {
+  constructor(title, templateHbs, fields) {
     this.title = title;
     this.templateHbs = templateHbs;
+    this.fields = fields;
+  }
+}
+
+class RowField {
+  constructor() {
+
   }
 }
 
 class Row {
-  constructor(webPageId, order, meta, rowFields) {
-    this.id = Date.now();
+  constructor(webPageId, order, schema, rowFields) {
+    this.id = v4();
     this.webPageId = webPageId;
     this.order = order;
-    this.meta = {...meta};
+    this.schema = {...schema};
     this.fields = [...rowFields];
   }
 }
@@ -231,7 +274,7 @@ class RowsStore {
     return this.rows;
   }
 
-  getPageRows(webPageId) {
+  getRowsByPageId(webPageId) {
     return this.rows.filter(row => row.webPageId === webPageId);
   }
 
@@ -260,46 +303,95 @@ class RowsStore {
     return this.rows.find(row => row.id === id);
   }
 
-  deleteRow(rowId) {
+  delete(id) {
     const length = this.rows.length;
-    this.rows = [...this.rows].filter(row => row.id !== rowId);
+    this.rows = [...this.rows].filter(row => row.id !== id);
 
     return (length !== this.rows.length) ? 'Success' : 'Fail';
   }
 }
 
+class RowSchemasStore {
+  constructor(rowSchemas) {
+    this.schemas = rowSchemas;
+  }
+
+  add(schema) {
+    this.schemas = [...this.schemas, schema];
+  }
+}
+
 const rowsStore = new RowsStore(mockCreatedRows);
+const rowSchemasStore = new RowSchemasStore(mockRowsSchemas);
 
 module.exports = ({
   name: 'rows',
   actions: {
-    createRow(ctx) {
-      const { title, templateHbs, webPageId, order, rowFields } = ctx.params;
-      const rowMeta = new RowSchema(title, templateHbs);
-      const row = new Row(webPageId, order, rowMeta, rowFields);
+    createRow: {
+      params: {
+        title: 'string',
+        templateHbs: 'string',
+        webPageId: 'string',
+        order: 'number',
+        rowFields: 'array',
+      },
+      handler(ctx) {
+        const { title, templateHbs, webPageId, order, rowFields } = ctx.params;
+        const rowSchema = new RowSchema(title, templateHbs);
+        const row = new Row(webPageId, order, rowSchema, rowFields);
 
-      rowsStore.add(row);
+        rowsStore.add(row);
+      },
     },
 
-    getPageRows(ctx) {
-      return rowsStore.getPageRows(ctx.params.id);
+    getRowsForPage: {
+      params: { id: 'string' },
+      handler(ctx) {
+        return rowsStore.getRowsByPageId(ctx.params.id);
+      },
     },
 
-    getRows() {
-      return rowsStore.get();
+    getRows: {
+      handler() {
+        return rowsStore.get();
+      },
     },
 
-    updateRow(ctx) {
-      const data = {...ctx.params};
-      const { id, order } = ctx.params;
+    updateRow: {
+      params: {
+        rowId: 'string',
+        order: 'string',
+      },
+      handler(ctx) {
+        const data = {...ctx.params};
+        const { rowId, order } = ctx.params;
 
-      this.logger.info('UPDATE ROW', data);
+        this.logger.info('UPDATE ROW: ', data);
 
-      return rowsStore.update(+id, order, data);
+        const updatedRow = rowsStore.update(rowId, +order, data);
+
+        this.logger.info('UPDATED ROW: ', updatedRow);
+
+        return this.broker.call('pages.getWebPageById', { id: updatedRow.webPageId })
+          .then(webPage => {
+            this.logger.info('UPDATE ROW - GET WEBPAGE: ', webPage);
+            return this.broker.call('dashboard.editWebPage', webPage);
+          });
+      },
     },
 
-    deleteRow(ctx) {
-      return rowsStore.deleteRow(+ctx.params.id);
+
+    deleteRow: {
+      params: { id: 'number' },
+      handler(ctx) {
+        return rowsStore.delete(ctx.params.id);
+      },
+    },
+
+    getRowSchemas: {
+      handler() {
+        return rowSchemasStore.schemas;
+      }
     }
   },
 });

@@ -41,10 +41,13 @@ const appPageStore = new PageStore([...drafts, { id: 3, slug: 'test', title: 'te
 module.exports = ({
   name: 'publish',
   actions: {
-    getWebPage(ctx) {
-      const { slug } = ctx.params;
+    getWebPage: {
+      params: { slug: 'string' },
+      handler(ctx) {
+        const { slug } = ctx.params;
 
-      return appPageStore.get(slug);
+        return appPageStore.get(slug);
+      },
     },
   }
 });

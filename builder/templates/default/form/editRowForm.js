@@ -18,7 +18,7 @@ const editRowForm = Handlebars.compile(`
     border-color: white;
   }
 </style>
-<form action="/rows/{{ id }}" method="POST" class="form form--bordered">
+<form action="/pages/{{ webPageSlug }}/{{ id }}" method="POST" class="form form--bordered">
   <input type="hidden" name="id" value="{{ id }}" />
   <h2>{{ rowTitle }}</h2>
   <div class="form__field field">
