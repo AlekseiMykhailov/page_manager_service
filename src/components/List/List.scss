@@ -1,0 +1,26 @@
+.List {
+  margin: 0;
+  padding: 0;
+  box-shadow: 0 8px 20px 0 rgba(63,67,191,.12);
+
+  &__Item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    border-bottom: 1px solid #eaebf8;
+
+    &:hover {
+      background-color: #fff;
+    }
+  }
+
+  &__Link {
+    display: block;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    background-color: transparent;
+    transition: background-color .3s;
+  }
+}

@@ -1,0 +1,41 @@
+.Nav {
+  position: fixed;
+  top: 1rem;
+  right: 0;
+  border-radius: 12px 0 0 12px;
+  border: 1px solid #eaebf8;
+  background-color: #fff;
+  box-shadow: 0 8px 20px 0 rgba(63,67,191,.12);
+  overflow: hidden;
+  z-index: 2;
+
+  &__List {
+    display: flex;
+    padding: 0;
+    margin: 0;
+  }
+
+  &__Item {
+    list-style: none;
+    padding: 0;
+  }
+
+  &__Link {
+    display: block;
+    padding: 1rem 1.5rem;
+    color: #737ad8;
+    text-decoration: none;
+    transition: color .2s ease, background-color .2s ease;
+
+    &:hover,
+    &:focus {
+      color: #4049bc;
+      background-color: #f6f6fd;
+    }
+
+    &--active {
+      color: #4049bc;
+      background-color: #f6f6fd;
+    }
+  }
+}

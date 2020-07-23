@@ -1,0 +1,51 @@
+.Button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 20rem;
+  height: 48px;
+  padding: 0 22px;
+  box-sizing: border-box;
+  border-radius: 24px;
+  border: 0;
+  background-color: #737ad8;
+  transition: background-color .2s ease;
+  color: #fff;
+  font-size: 20px;
+  line-height: 48px;
+  font-weight: 500;
+  text-decoration: none;
+  outline: none;
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    background-color: #4049bc;
+    cursor: pointer;
+  }
+
+  &--round {
+    border-radius: 50%;
+    width: 48px;
+    padding: 0;
+  }
+
+  &--empty {
+    color: #737ad8;
+    background-color: transparent;
+    border: 1px solid #737ad8;
+  }
+
+  &--danger {
+    color: red;
+    background-color: transparent;
+    border-color: red;
+
+    &:hover,
+    &:focus {
+      background-color: red;
+      border-color: white;
+    }
+  }
+}
