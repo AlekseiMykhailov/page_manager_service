@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { getData } from '../helpers';
-import { Layout } from '../components/Layout';
+import React, { useEffect, useState } from 'react';
 import { List } from '../components/List';
 import { Spinner } from '../components/Spinner';
+import { getData } from '../helpers';
+import { Layout } from '../layouts';
 
 export const Dashboard = () => {
   const [sections, setSections] = useState([]);
@@ -10,7 +10,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (sections.length === 0) {
-      getData(`${API_URL}/api/nav`).then(res => setSections(res.nav));
+      getData(`${API_URL}/nav`).then(res => setSections(res.nav));
     }
   }, [sections.length, API_URL]);
 

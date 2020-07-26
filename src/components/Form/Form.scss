@@ -1,9 +1,27 @@
 .Form {
   padding: 2rem;
 
+  &__Header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &--center {
+      justify-content: center;
+      flex-direction: row;
+      text-align: center;
+    }
+  }
+
   &--bordered {
     margin-top: 4rem;
     box-shadow: 0 8px 20px 0 rgba(63,67,191,.12);
+  }
+
+  &__OrderButtons {
+    display: grid;
+    grid-auto-flow: column;
+    gap: 0.5rem;
   }
 
   &__BlockButtons {

@@ -1,0 +1,24 @@
+.Layout {
+  flex: 1 0 auto;
+  padding-bottom: 4rem;
+
+  &__StatusMessage {
+    position: fixed;
+    bottom: 0;
+    height: 3rem;
+    width: 100%;
+    padding-right: 2rem;
+    box-sizing: border-box;
+    color: white;
+    text-align: right;
+    line-height: 3rem;
+
+    &--success {
+      background-color: green;
+    }
+    
+    &--error {
+      background-color: red;
+    }
+  }
+}

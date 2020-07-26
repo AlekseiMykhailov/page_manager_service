@@ -1,7 +1,12 @@
 .Header {
   flex: 0;
+  top: 0;
+  position: sticky;
+  z-index: 1;
 
   &__Container {
     height: 5rem;
+    display: flex;
+    justify-content: flex-end;
   }
 }

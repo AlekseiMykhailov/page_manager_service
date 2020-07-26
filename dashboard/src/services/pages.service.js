@@ -1,30 +1,19 @@
-const { v4 } = require('uuid');
-
 const mockPages = require('../../data/mock-pages.json');
-
-class WebPage {
-  constructor(slug, title, description) {
-    this.id = v4();
-    this.slug = slug;
-    this.title = title;
-    this.description = description;
-  }
-}
 
 class PagesStore {
   constructor(pages) {
     this.pages = pages;
   }
 
-  create(draft) {
-    const { slug } = draft;
+  add(page) {
+    const { slug } = page;
     const inStorage = this.pages.find(page => page.slug === slug);
 
     if (inStorage) {
       throw 'This slug already used';
     }
 
-    this.pages = [...this.pages, draft];
+    this.pages = [...this.pages, page];
 
     return this.getBySlug(slug);
   }
@@ -75,14 +64,13 @@ module.exports = ({
         description: 'string',
       },
       handler(ctx) {
-        const { title, slug, description } = ctx.params;
-        const newWebPage = new WebPage(title, slug, description);
-
-        webPagesStore.create(newWebPage);
-
-        this.logger.info('WEB PAGE CREATED: ', ctx.params);
-
-        return this.broker.call('dashboard.editWebPage', newWebPage);
+        return this.broker.call('schemas.constructWebPage', ctx.params)
+          .then(webPage => {
+            webPagesStore.add(webPage);
+            return webPage.id;
+          })
+          .then(id => webPagesStore.getById(id))
+          .then(webPage => JSON.stringify({ ok: true, webPageId: webPage.id }));
       },
     },
 
@@ -101,7 +89,7 @@ module.exports = ({
       },
     },
 
-    getWebPage: {
+    getWebPageBySlug: {
       params: {
         slug: 'string',
       },
@@ -118,9 +106,6 @@ module.exports = ({
       },
       handler(ctx) {
         const { id } = ctx.params;
-
-        this.logger.info('getWebPageById ctx.params: ', ctx.params);
-        this.logger.info('getWebPageById return: ', webPagesStore.getById(id));
 
         return webPagesStore.getById(id);
       },
@@ -150,9 +135,6 @@ module.exports = ({
           ok: true,
           pages: [...webPagesList],
         }, null, 2);
-
-        // return webPagesStore.getAll()
-        //   .map(({ title, slug }) => ({ title, slug }));
       },
     },
   }

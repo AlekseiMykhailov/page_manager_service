@@ -1,33 +1,9 @@
-const { v4 } = require('uuid');
-
-const mockFieldsSchemas = [
-  {
-    name: 'title',
-    type: 'text',
-  },
-  {
-    name: 'description',
-    type: 'text',
-  },{
-    name: 'slug',
-    type: 'text',
-  },
-  {
-    name: 'content',
-    type: 'text',
-  },
-  {
-    name: 'image',
-    type: 'file',
-  },
-];
-
 const mockCreatedRows = [
   {
     id: 'row-1',
     webPageId: '1',
     order: 1,
-    schema: {
+    meta: {
       title: 'Row with image',
       templateHbs: 'withImage',
     },
@@ -53,7 +29,7 @@ const mockCreatedRows = [
     id: 'row-2',
     webPageId: '2',
     order: 1,
-    schema: {
+    meta: {
       title: 'Row with image',
       templateHbs: 'withImage',
     },
@@ -79,7 +55,7 @@ const mockCreatedRows = [
     id: 'row-3',
     webPageId: '1',
     order: 2,
-    schema: {
+    meta: {
       title: 'Row with bricks',
       templateHbs: 'bricks',
     },
@@ -125,7 +101,7 @@ const mockCreatedRows = [
     id: 'row-4',
     webPageId: '2',
     order: 2,
-    schema: {
+    meta: {
       title: 'Row with bricks',
       templateHbs: 'bricks',
     },
@@ -168,98 +144,6 @@ const mockCreatedRows = [
     ],
   }
 ];
-
-const mockRowsSchemas = [
-  {
-    id: 'schema-1',
-    webPageId: 'number',
-    order: 'number',
-    schema: {
-      title: 'Row with image',
-      templateHbs: 'withImage',
-    },
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-      },
-      {
-        name: 'description',
-        type: 'text',
-      },
-      {
-        name: 'backgroundImageURL',
-        type: 'url',
-      },
-    ],
-  },
-  {
-    id: 'schema-2',
-    webPageId: 'number',
-    order: 'number',
-    schema: {
-      title: 'Row with bricks',
-      templateHbs: 'bricks',
-    },
-    fields: [
-      {
-        name: 'edge-1',
-        type: 'text',
-      },
-      {
-        name: 'edge-2',
-        type: 'text',
-      },
-      {
-        name: 'edge-3',
-        type: 'text',
-      },
-      {
-        name: 'edge-4',
-        type: 'text',
-      },
-      {
-        name: 'edge-5',
-        type: 'text',
-      },
-      {
-        name: 'edge-6',
-        type: 'text',
-      },
-    ],
-  },
-];
-
-class RowFieldSchema {
-  constructor(name, type) {
-    this.name = name;
-    this.type = type;
-  }
-}
-
-class RowSchema {
-  constructor(title, templateHbs, fields) {
-    this.title = title;
-    this.templateHbs = templateHbs;
-    this.fields = fields;
-  }
-}
-
-class RowField {
-  constructor() {
-
-  }
-}
-
-class Row {
-  constructor(id, webPageId, order, schema, rowFields) {
-    this.id = id;
-    this.webPageId = webPageId;
-    this.order = order;
-    this.schema = {...schema};
-    this.fields = [...rowFields];
-  }
-}
 
 class RowsStore {
   constructor(rows) {
@@ -304,46 +188,20 @@ class RowsStore {
   }
 }
 
-class RowSchemasStore {
-  constructor(rowSchemas) {
-    this.schemas = rowSchemas;
-  }
-
-  add(schema) {
-    this.schemas = [...this.schemas, schema];
-  }
-
-  getList() {
-    return this.schemas;
-  }
-}
-
 const rowsStore = new RowsStore(mockCreatedRows);
-const rowSchemasStore = new RowSchemasStore(mockRowsSchemas);
 
 module.exports = ({
   name: 'rows',
   actions: {
     createRow: {
-      // params: {
-      //   title: 'string',
-      //   templateHbs: 'string',
-      //   webPageId: 'string',
-      //   order: 'number',
-      //   rowFields: 'array',
-      // },
       handler(ctx) {
-        const { schema, webPageId, order, fields } = ctx.params;
-        const { title, templateHbs } = schema;
-        const rowSchema = new RowSchema(title, templateHbs);
-        const id = v4();
-        const row = new Row(id, webPageId, order, rowSchema, fields);
-
-        this.logger.info('CREATE NEW ROW: ', ctx.params);
-
-        rowsStore.add(row);
-
-        return JSON.stringify({ok: true, id});
+        return this.broker.call('schemas.constructRow', ctx.params)
+          .then(row => {
+            rowsStore.add(row);
+            return row.id;
+          })
+          .then(rowId => rowsStore.getRowById(rowId))
+          .then(row => JSON.stringify({ ok:true, rowId: row.id }));
       },
     },
 
@@ -369,9 +227,8 @@ module.exports = ({
         const data = {...ctx.params};
         const { rowId, order } = ctx.params;
 
-        this.logger.info('UPDATE ROW INCOMING DATA: ', data);
-
         rowsStore.update(rowId, +order, data);
+
         const updatedRow = rowsStore.getRowById(rowId);
 
         this.logger.info('UPDATED ROW: ', updatedRow);
@@ -387,19 +244,13 @@ module.exports = ({
     deleteRow: {
       params: { id: 'string' },
       handler(ctx) {
-        rowsStore.delete(ctx.params.id);
+        const { id } = ctx.params;
 
-        return JSON.stringify({ ok: true });
+        rowsStore.delete(id);
+        this.logger.info('DELETED ROW ID: ', id);
+
+        return JSON.stringify({ ok: true, id });
       },
     },
-
-    getRowSchemas: {
-      handler() {
-        return JSON.stringify({
-          ok: true,
-          schemas: rowSchemasStore.getList(),
-        }, null, 2);
-      }
-    }
   },
 });

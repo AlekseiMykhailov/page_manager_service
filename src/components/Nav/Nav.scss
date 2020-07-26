@@ -1,8 +1,7 @@
 .Nav {
-  position: fixed;
-  top: 1rem;
-  right: 0;
-  border-radius: 12px 0 0 12px;
+  width: max-content;
+  height: max-content;
+  border-radius: 0 0 12px 12px;
   border: 1px solid #eaebf8;
   background-color: #fff;
   box-shadow: 0 8px 20px 0 rgba(63,67,191,.12);
@@ -22,7 +21,7 @@
 
   &__Link {
     display: block;
-    padding: 1rem 1.5rem;
+    padding: 1rem 2rem;
     color: #737ad8;
     text-decoration: none;
     transition: color .2s ease, background-color .2s ease;

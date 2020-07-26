@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { getData } from '../helpers';
 import { Spinner } from '../components/Spinner';
 
-export const PreviewPage = () => {
+export const PagePreview = () => {
   const [pageHTML, setPageHTML] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
   const { slug } = useParams();

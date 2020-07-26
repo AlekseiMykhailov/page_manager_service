@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { getData } from '../helpers';
-import { Layout } from '../components/Layout';
+import React, { useEffect, useState } from 'react';
 import { List } from '../components/List';
 import { Spinner } from '../components/Spinner';
+import { getData } from '../helpers';
+import { Layout } from '../layouts';
 
-export const Pages = () => {
+export const PageList = () => {
   const [pagesList, setPagesList] = useState([]);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
-    if (pagesList.length === 0) {
-      getData('http://localhost:3010/api/pages').then(res => setPagesList(res.pages));
-    }
-  }, [pagesList.length]);
+    getData(`${API_URL}/pages`).then(res => setPagesList(res.pages));
+  }, [API_URL]);
 
   return (
     <Layout title="Web Pages">

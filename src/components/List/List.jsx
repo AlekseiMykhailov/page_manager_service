@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import './List.scss';
 
@@ -33,4 +34,18 @@ export const List = ({ list, section }) => {
       })}
     </ul>
   );
+};
+
+List.defaultProps = {
+  section: '',
+};
+
+List.propTypes = {
+  list: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    slug: PropTypes.string,
+    path: PropTypes.string,
+  })).isRequired,
+  section: PropTypes.string,
 };

@@ -1,16 +1,16 @@
-import React from 'react';
 import cn from 'classnames';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import './Button.scss';
 
 export const Button = ({
   children,
   handleClick,
-  className = 'Button',
+  className,
   activeClassName = 'Button--active',
   disabled,
   buttonType = 'button',
-  color,
   ...attrs
 }) => {
 
@@ -52,4 +52,21 @@ export const Button = ({
       {children}
     </button>
   );
+};
+
+Button.defaultProps = {
+  handleClick: () => {},
+  className: '',
+  activeClassName: 'Button--active',
+  disabled: false,
+  buttonType: 'button',
+};
+
+Button.propTypes = {
+  children: PropTypes.string.isRequired,
+  handleClick: PropTypes.func,
+  className: PropTypes.string,
+  activeClassName: PropTypes.string,
+  disabled: PropTypes.bool,
+  buttonType: PropTypes.string,
 };

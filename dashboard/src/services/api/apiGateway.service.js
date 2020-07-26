@@ -26,32 +26,11 @@ module.exports = {
       options: {}
     },
     routes: [
-      // DASHBOARD
+      // NAV
       {
         path: '/',
         aliases: {
-          'GET /': 'dashboard.dashboard',
-          'GET /pages': 'dashboard.listWebPages',
-          'GET /pages/create': 'dashboard.createWebPage',
-          'GET /pages/:slug': 'dashboard.editWebPage',
-        },
-        bodyParsers: {
-          json: false,
-          urlencoded: { extended: true },
-        },
-        onBeforeCall: (ctx, route, req, res) => {
-          ctx.meta.$responseType = 'text/html; charset=utf-8';
-          ctx.meta.userAgent = req.headers['user-agent'];
-        },
-      },
-
-      // PAGES CREATE, UPDATE AND PUBLISH
-      {
-        path: '/api',
-        aliases: {
           'GET /nav': 'dashboard.nav',
-          'GET /pages': 'dashboard.listWebPages',
-          'GET /pages/:slug': 'dashboard.editWebPage',
         },
         authorization: false,
         bodyParsers: {
@@ -64,13 +43,16 @@ module.exports = {
         },
       },
 
-      // PAGES CREATE, UPDATE AND PUBLISH
+      // PAGES
       {
         path: '/pages',
         aliases: {
-          'POST /': 'pages.createWebPage',
-          'PUT /:slug': 'pages.updateWebPage',
+          'GET /': 'dashboard.listWebPages',
+          'GET /:slug': 'dashboard.editWebPage',
+          'GET /schema': 'schemas.getWebPageSchema',
+          'POST /': 'dashboard.createWebPage',
           'POST /publish': 'pages.publish',
+          'PUT /:slug': 'pages.updateWebPage',
         },
         authorization: false,
         bodyParsers: {
@@ -95,10 +77,10 @@ module.exports = {
       {
         path: '/rows',
         aliases: {
+          'GET /schemas': 'schemas.getRowSchemas',
           'POST /': 'rows.createRow',
           'PUT /:rowId': 'rows.updateRow',
           'DELETE /:id': 'rows.deleteRow',
-          'GET /schemas': 'rows.getRowSchemas',
         },
         authorization: false,
         bodyParsers: {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Nav } from '../Nav';
+import { NavContainer } from '../../containers/NavContainer';
 import './Header.scss';
 
 export const Header = () => {
@@ -9,7 +9,7 @@ export const Header = () => {
   return (
     <header className="Header">
       <div className="Header__Container container">
-        {pathname !== '/' && <Nav />}
+        {pathname !== '/' && <NavContainer />}
       </div>
     </header>
   );

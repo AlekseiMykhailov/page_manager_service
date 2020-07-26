@@ -20,7 +20,7 @@ insert_final_newline = true
 [*.md]
 trim_trailing_whitespace = false
 indent_style = space
-indent_size = 4
+indent_size = 2
 
 [{package,bower}.json]
 indent_style = space
@@ -32,4 +32,4 @@ indent_style = space
 indent_size = 2
 
 [*.js]
-quote_type = "double"
+quote_type = "single"

@@ -1,16 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
+import { Provider as StoreProvider } from 'react-redux';
+import { configureStore } from './store';
 import './styles/index.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+const store = configureStore();
+
 
 const Root = () => {
   return (
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <StoreProvider store={store}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </StoreProvider>
   );
 };
 

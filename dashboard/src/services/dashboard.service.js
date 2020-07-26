@@ -6,7 +6,7 @@ const FIELD_TYPES = {
   select: 'select',
 };
 
-const mainNav = [
+const nav = [
   { id: '1', path: '/', title: 'Dashboard' },
   { id: '2', path: '/pages', title: 'Pages' },
   { id: '3', path: '/create-page', title: 'Create Web Page' },
@@ -23,73 +23,25 @@ module.exports = ({
 
     nav: {
       handler() {
-        const res = {
-          ok: true,
-          nav: [
-            ...mainNav,
-          ],
-        };
-        return JSON.stringify(res, null, 2);
+        return JSON.stringify({ ok: true, nav }, null, 2);
       },
     },
 
     dashboard: {
       handler() {
-        return JSON.stringify(dashboardSections, null, 2);
-        // return this.broker.call('builder.createList', {
-        //   title: 'Dashboard',
-        //   items: dashboardSections,
-        // });
+        return JSON.stringify({ ok: true, dashboardSections }, null, 2);
       },
     },
 
     listWebPages: {
       handler() {
         return this.broker.call('pages.getListWebPages');
-
-        // return this.broker.call('pages.getListWebPages')
-        //   .then(res => this.broker.call('builder.createList', {
-        //     title: 'List of Web Pages',
-        //     items: res.map(({ title, slug }) => ({
-        //       title,
-        //       slug,
-        //       editLink: true,
-        //       previewLink: true,
-        //       section: 'pages',
-        //     })),
-        //   }));
       },
     },
 
     createWebPage: {
-      handler() {
-        return this.broker.call('builder.createAddPageForm', {
-          actionURL: '/pages/create',
-          fields: [
-            {
-              name: 'title',
-              label: 'Title',
-              placeholder: 'Title of the page',
-              require: true,
-              type: FIELD_TYPES.text,
-            },
-            {
-              name: 'slug',
-              label: 'Slug',
-              placeholder: 'People friendly URL of the page',
-              require: true,
-              type: FIELD_TYPES.text,
-            },
-            {
-              name: 'description',
-              label: 'Description',
-              placeholder: 'Description of the page',
-              require: true,
-              type: FIELD_TYPES.text,
-            },
-          ],
-          fieldTypes: FIELD_TYPES,
-        });
+      handler(ctx) {
+        return this.broker.call('pages.createWebPage', ctx.params);
       },
     },
 
@@ -101,19 +53,19 @@ module.exports = ({
         const { slug } = ctx.params;
         let webPage;
 
-        return this.broker.call('pages.getWebPage', { slug })
+        this.logger.info('EDIT WEB PAGE', ctx.params);
+
+        return this.broker.call('pages.getWebPageBySlug', { slug })
           .then(res => {
             webPage = res;
+
+            this.logger.info('EDITING WEB PAGE: ', slug, webPage);
+
             return this.broker.call('rows.getRowsForPage', { id: webPage.id });
           })
           .then(rows => {
             return JSON.stringify({ ok: true, webPage, rows }, null, 2);
           });
-        // .then(rows => this.broker.call('builder.createFormPageEdit', {
-        //   webPage,
-        //   rows,
-        //   fieldTypes: FIELD_TYPES,
-        // }));
       }
     }
   },
