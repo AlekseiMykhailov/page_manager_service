@@ -1,8 +1,9 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography } from '@material-ui/core';
+import { Typography, colors } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 import { getStatusMessage } from 'src/selectors';
+import gradient from 'src/utils/gradients';
 
 const useStyles = makeStyles(() => ({
   root: {},
@@ -14,20 +15,20 @@ const useStyles = makeStyles(() => ({
     height: '3rem',
     width: '100%',
     boxSizing: 'border-box',
-    color: 'white',
+    color: colors.common.white,
     textAlign: 'right',
     lineHeight: '3rem',
     zIndex: 1,
   },
   error: {
-    backgroundColor: 'red',
+    background: gradient.red,
   },
   success: {
-    backgroundColor: 'green',
+    background: gradient.green,
   },
   message: {
     padding: '1rem 4rem',
-    color: '#fff',
+    color: colors.common.white,
   }
 }));
 

@@ -1,15 +1,15 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import {
-  Button,
   Card,
   CardContent,
   CardHeader,
   Divider,
+  // IconButton,
   Link,
   List,
   ListItem,
@@ -20,7 +20,7 @@ import {
 import PostAddIcon from '@material-ui/icons/PostAdd';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import PublishIcon from '@material-ui/icons/Publish';
+import Label from 'src/components/Label';
 import * as fetch from 'src/utils/fetch';
 
 const useStyles = makeStyles((theme) => ({
@@ -45,7 +45,8 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   link: {
-    display: 'block',
+    display: 'flex',
+    alignItems: 'center',
     marginLeft: theme.spacing(2),
 
     '&:hover': {
@@ -57,25 +58,40 @@ const useStyles = makeStyles((theme) => ({
 function PageList({ className, ...rest }) {
   const classes = useStyles();
   const [pages, setPages] = useState([]);
+  const [publishedPages, setPublishedPages] = useState([]);
+
+  // const [openFormBar, setOpenFormBar] = useState(false);
+  // const [editingPage, setEditingPages] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
+  const PUBLISH_URL = process.env.REACT_APP_PUBLISH_URL;
+
+  const fetchPages = useCallback(() => {
+    fetch.getData(`${API_URL}/pages`).then((response) => {
+      setPages(response.pages);
+    });
+  }, [API_URL]);
+
+  const fetchPublishedPages = useCallback(() => {
+    fetch.getData(`${PUBLISH_URL}/published`).then((response) => {
+      setPublishedPages(response.pages);
+    });
+  }, [PUBLISH_URL]);
 
   useEffect(() => {
-    let mounted = true;
-
-    const fetchPages = () => {
-      fetch.getData(`${API_URL}/pages`).then((response) => {
-        if (mounted) {
-          setPages(response.pages);
-        }
-      });
-    };
-
     fetchPages();
+  }, [fetchPages]);
 
-    return () => {
-      mounted = false;
-    };
-  }, [API_URL]);
+  useEffect(() => {
+    fetchPublishedPages();
+  }, [fetchPublishedPages]);
+
+
+  // const handleFormBarOpen = () => {
+  //   setOpenFormBar(true);
+  // };
+  // const handleFormBarClose = () => {
+  //   setOpenFormBar(false);
+  // };
 
   return (
     <Card
@@ -84,16 +100,19 @@ function PageList({ className, ...rest }) {
     >
       <CardHeader
         action={(
-          <Button
+          <Link
+            component={RouterLink}
+            to="/pages/create"
+            variant="button"
             color="primary"
-            size="small"
-            href="/pages/create"
+            underline="none"
+            className={classes.link}
           >
             <PostAddIcon className={classes.addIcon} />
             Add
-          </Button>
+          </Link>
         )}
-        title=""
+        title="Pages"
       />
       <Divider />
       <CardContent className={classes.content}>
@@ -116,19 +135,13 @@ function PageList({ className, ...rest }) {
                   {page.title}
                 </Link>
               </ListItemText>
-              <Tooltip title="Publish">
-                <Link
-                  component={RouterLink}
-                  to="#"
-                  variant="h5"
-                  color="textPrimary"
-                  underline="none"
-                  className={classes.link}
-                  target="_blank"
-                >
-                  <PublishIcon />
-                </Link>
-              </Tooltip>
+
+              {publishedPages.find((published) => published.uuid === page.id) && (
+                <Label color={colors.green[600]}>
+                  Published
+                </Label>
+              )}
+
               <Tooltip title="Preview">
                 <Link
                   component={RouterLink}
@@ -154,9 +167,22 @@ function PageList({ className, ...rest }) {
                   <EditIcon />
                 </Link>
               </Tooltip>
+              {/* <Tooltip title="New Edit">
+                <IconButton
+                  className={classes.chatButton}
+                  color="inherit"
+                  onClick={handleFormBarOpen}
+                >
+                  <EditIcon />
+                </IconButton>
+              </Tooltip> */}
             </ListItem>
           ))}
         </List>
+        {/* <FormBar
+          onClose={handleFormBarClose}
+          open={openFormBar}
+        /> */}
       </CardContent>
     </Card>
   );

@@ -1,5 +1,6 @@
 const { ServiceBroker } = require('moleculer');
 const ApiService = require('moleculer-web');
+
 const broker = new ServiceBroker();
 
 broker.createService(ApiService);
@@ -18,23 +19,10 @@ module.exports = {
     },
     routes: [
       {
-        path: '/api',
-        cors: {
-          origin: [
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'http://localhost:3002',
-            'https://localhost:4000',
-            'https://localhost:5000',
-          ],
-          methods: ['GET'],
-          allowedHeaders: ['Content-Type', 'Origin', 'User-Agent'],
-          credentials: true,
-          maxAge: 3600,
-        },
+        path: '/',
         aliases: {
-          'GET /pages': 'publish.getWebPage',
-          'GET /pages/:slug': 'publish.getWebPage',
+          'GET /published': 'publish.getPublished',
+          'GET /published/:slug': 'publish.getPublished',
         },
         bodyParsers: {
           json: true,
@@ -43,6 +31,22 @@ module.exports = {
           ctx.meta.$responseType = 'application/json; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         }
+      },
+
+      {
+        path: '/',
+        aliases: {
+          'GET /': 'dbPages.getAll',
+          'GET /:slug': 'dbPages.getHtml',
+          'GET /destroy/:slug': 'dbPages.destroy',
+        },
+        bodyParsers: {
+          json: true,
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
       }
     ],
   },

@@ -161,15 +161,15 @@ class RowsStore {
   }
 
   getRowById(rowId) {
-    return this.rows.find(row => row.id === rowId);
+    return this.rows.find((row) => row.id === rowId);
   }
 
   getRowsByPageId(webPageId) {
-    return this.rows.filter(row => row.webPageId === webPageId);
+    return this.rows.filter((row) => row.webPageId === webPageId);
   }
 
   update(id, order, data) {
-    this.rows = this.rows.map(row => {
+    this.rows = this.rows.map((row) => {
       if (row.id === id) {
         return { ...data };
       }
@@ -177,12 +177,12 @@ class RowsStore {
       return row;
     });
 
-    return this.rows.find(row => row.id === id);
+    return this.rows.find((row) => row.id === id);
   }
 
   delete(id) {
-    const length = this.rows.length;
-    this.rows = [...this.rows].filter(row => row.id !== id);
+    const { length } = this.rows;
+    this.rows = [...this.rows].filter((row) => row.id !== id);
 
     return (length !== this.rows.length) ? 'Success' : 'Fail';
   }
@@ -196,12 +196,12 @@ module.exports = ({
     createRow: {
       handler(ctx) {
         return this.broker.call('schemas.constructRow', ctx.params)
-          .then(row => {
+          .then((row) => {
             rowsStore.add(row);
             return row.id;
           })
-          .then(rowId => rowsStore.getRowById(rowId))
-          .then(row => JSON.stringify({ ok:true, rowId: row.id }));
+          .then((rowId) => rowsStore.getRowById(rowId))
+          .then((row) => JSON.stringify({ ok: true, rowId: row.id }));
       },
     },
 

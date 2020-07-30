@@ -6,6 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import {
   ButtonGroup,
   Button,
+  Divider,
   InputLabel,
   Grid,
   FormControl,
@@ -13,6 +14,7 @@ import {
   Select,
   TextField,
   Typography,
+  colors
 } from '@material-ui/core';
 import * as FETCH from 'src/utils/fetch';
 import * as CONST from 'src/utils/const';
@@ -20,14 +22,11 @@ import { setStatusMessage, removeStatusMessage } from 'src/actions/messageAction
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    maxWidth: 640,
-    margin: '0 auto',
-
-    '& > *': {
-      margin: theme.spacing(1),
-      maxWidth: 640,
-    },
+  root: {},
+  divider: {
+    backgroundColor: colors.grey[300],
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(3),
   },
   formControl: {
     margin: theme.spacing(1),
@@ -85,13 +84,11 @@ function RowAddForm({
       selectedRowSchema,
     ).then((response) => {
       if (response.ok) {
-        console.log(response);
         setSelectedRowSchemaId('');
         setSelectedRowSchema('');
         getPageData(slug);
         handleStatusMessage(CONST.SUCCESS, 'Row was added');
       } else {
-        console.log(`Error: ${JSON.stringify(response)}`);
         handleStatusMessage(CONST.ERROR, 'Something went wrong...');
       }
     });
@@ -134,6 +131,7 @@ function RowAddForm({
     <>
       {rowSchemas && (
         <>
+          <Divider className={classes.divider} />
           <Grid
             container
             direction="row"
@@ -184,18 +182,14 @@ function RowAddForm({
                   name="webPageId"
                   type="hidden"
                   value={pageId}
-                  key="new-row-page-id"
                 />
                 <TextField
                   id="new-row-order"
                   name="order"
                   type="hidden"
                   value={newRowOrder}
-                  key="new-row-order"
                 />
-
                   {selectedRowSchema.fields.map(({ name, type, value }) => (
-
                     <TextField
                       fullWidth
                       id={name}
@@ -235,10 +229,8 @@ function RowAddForm({
                     </ButtonGroup>
                   </Grid>
                 </Grid>
-
               </form>
             )}
-
         </>
       )}
     </>

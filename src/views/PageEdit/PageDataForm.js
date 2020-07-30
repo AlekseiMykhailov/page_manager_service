@@ -7,13 +7,15 @@ import {
   Button,
   Grid,
   TextField,
+  Typography,
 } from '@material-ui/core';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
-  buttons: {
-    marginTop: theme.spacing(2)
+  buttonGroup: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(4),
   }
 }));
 
@@ -36,6 +38,9 @@ function PageDataForm({
       action={`${API_URL}/pages/${slug}`}
       onSubmit={handleSubmit}
     >
+      <Typography gutterBottom variant="h3">
+        {pageData.title}
+      </Typography>
       {Object.entries(pageData).map(([fieldName, fieldValue]) => {
         if (fieldName === 'title' || fieldName === 'description' || fieldName === 'slug') {
           return (
@@ -66,11 +71,10 @@ function PageDataForm({
             variant="contained"
             size="small"
             aria-label="small outlined button group"
-            className={classes.buttons}
+            className={classes.buttonGroup}
           >
             <Button
               className={classes.resetButton}
-              fullWidth
               variant="contained"
               onClick={handleReset}
             >
@@ -80,7 +84,6 @@ function PageDataForm({
               className={classes.submitButton}
               color="primary"
               type="submit"
-              fullWidth
               variant="contained"
               startIcon={<SaveAltIcon />}
             >

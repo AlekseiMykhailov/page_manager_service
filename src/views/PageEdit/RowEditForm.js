@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import {
   ButtonGroup,
   Button,
+  IconButton,
+  Divider,
   Grid,
   TextField,
   Typography,
@@ -11,6 +13,35 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    '& > *': {
+      margin: theme.spacing(1),
+    },
+  },
+  divider: {
+    backgroundColor: colors.grey[300],
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(3),
+  },
+  buttonGroup: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(4),
+  },
+  deleteButton: {
+    color: theme.palette.common.white,
+    backgroundColor: colors.red[600],
+    '&:hover': {
+      backgroundColor: colors.red[900]
+    }
+  }
+}));
 
 function RowEditContainer({
   row,
@@ -24,28 +55,6 @@ function RowEditContainer({
 }) {
   const { id, fields, meta } = row;
   const API_URL = process.env.REACT_APP_API_URL;
-
-  const useStyles = makeStyles((theme) => ({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      '& > *': {
-        margin: theme.spacing(1),
-      },
-    },
-    buttonGroup: {
-      margin: '2rem 0',
-    },
-    deleteButton: {
-      color: theme.palette.common.white,
-      backgroundColor: colors.red[600],
-      '&:hover': {
-        backgroundColor: colors.red[900]
-      }
-    }
-  }));
-
   const classes = useStyles();
 
   return (
@@ -58,6 +67,7 @@ function RowEditContainer({
       className={className}
       onSubmit={handleSubmit}
     >
+      <Divider className={classes.divider} />
       <Grid
         container
         direction="row"
@@ -73,25 +83,25 @@ function RowEditContainer({
           </Typography>
         </Grid>
         <Grid item>
-          {maxIndex && (
+          {(maxIndex > 0) && (
             <div className={classes.root}>
               <ButtonGroup size="small" aria-label="small outlined button group">
-                <Button
+                <IconButton
                   data-row-id={id}
                   data-direction="up"
                   disabled={index === 0}
                   onClick={handleChangeOrder}
                 >
-                  &uarr;
-                </Button>
-                <Button
+                  <ArrowUpwardIcon />
+                </IconButton>
+                <IconButton
                   data-row-id={id}
                   data-direction="down"
                   disabled={index === maxIndex}
                   onClick={handleChangeOrder}
                 >
-                  &darr;
-                </Button>
+                  <ArrowDownwardIcon />
+                </IconButton>
               </ButtonGroup>
             </div>
           )}
@@ -101,6 +111,7 @@ function RowEditContainer({
         <TextField
           fullWidth
           id={`${id}-${name}`}
+          inputProps={{ 'data-row-id': id }}
           label={name}
           margin="normal"
           name={name}

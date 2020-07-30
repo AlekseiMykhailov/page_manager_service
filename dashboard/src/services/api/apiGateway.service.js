@@ -1,5 +1,6 @@
 const { ServiceBroker } = require('moleculer');
 const ApiService = require('moleculer-web');
+
 const broker = new ServiceBroker();
 
 broker.createService(ApiService);
@@ -51,7 +52,6 @@ module.exports = {
           'GET /:slug': 'dashboard.editWebPage',
           'GET /schema': 'schemas.getWebPageSchema',
           'POST /': 'dashboard.createWebPage',
-          'POST /publish': 'pages.publish',
           'PUT /:slug': 'pages.updateWebPage',
         },
         authorization: false,
@@ -108,6 +108,25 @@ module.exports = {
           ctx.meta.$responseType = 'text/html; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         }
+      },
+
+      // PUBLISH
+      {
+        path: '/publish',
+        aliases: {
+          'POST /': 'pages.publishWebPage',
+          'PUT /': 'pages.updatePublishedWebPage',
+          'DELETE /:slug': 'pages.unPublishWebPage',
+        },
+        authorization: false,
+        bodyParsers: {
+          json: true,
+          urlencoded: { extended: true }
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
       },
     ],
   },
