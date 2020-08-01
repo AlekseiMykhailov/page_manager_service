@@ -9,7 +9,6 @@ import {
   CardContent,
   CardHeader,
   Divider,
-  // IconButton,
   Link,
   List,
   ListItem,
@@ -63,7 +62,6 @@ function PageList({ className, ...rest }) {
   // const [openFormBar, setOpenFormBar] = useState(false);
   // const [editingPage, setEditingPages] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
-  const PUBLISH_URL = process.env.REACT_APP_PUBLISH_URL;
 
   const fetchPages = useCallback(() => {
     fetch.getData(`${API_URL}/pages`).then((response) => {
@@ -72,10 +70,10 @@ function PageList({ className, ...rest }) {
   }, [API_URL]);
 
   const fetchPublishedPages = useCallback(() => {
-    fetch.getData(`${PUBLISH_URL}/published`).then((response) => {
-      setPublishedPages(response.pages);
+    fetch.getData(`${API_URL}/published`).then((response) => {
+      setPublishedPages(JSON.parse(response).pages);
     });
-  }, [PUBLISH_URL]);
+  }, [API_URL]);
 
   useEffect(() => {
     fetchPages();
@@ -84,7 +82,6 @@ function PageList({ className, ...rest }) {
   useEffect(() => {
     fetchPublishedPages();
   }, [fetchPublishedPages]);
-
 
   // const handleFormBarOpen = () => {
   //   setOpenFormBar(true);
@@ -136,9 +133,25 @@ function PageList({ className, ...rest }) {
                 </Link>
               </ListItemText>
 
-              {publishedPages.find((published) => published.uuid === page.id) && (
+              {publishedPages
+              && Boolean(page.isHomePage)
+              && (
+                <Label color={colors.yellow[600]}>
+                  Saved as Home Page
+                </Label>
+              )}
+              {publishedPages 
+              && publishedPages.find((published) => (published.slug === page.slug && !published.isHomePage)) 
+              && (
                 <Label color={colors.green[600]}>
                   Published
+                </Label>
+              )}
+              {publishedPages 
+              && publishedPages.find((published) => published.slug === page.slug && published.isHomePage) 
+              && (
+                <Label color={colors.green[600]}>
+                  Published as Home Page
                 </Label>
               )}
 

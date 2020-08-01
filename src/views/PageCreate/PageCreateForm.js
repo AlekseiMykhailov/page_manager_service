@@ -7,6 +7,8 @@ import { makeStyles } from '@material-ui/styles';
 import {
   Card,
   CardContent,
+  Checkbox,
+  InputLabel,
   TextField,
   Button,
 } from '@material-ui/core';
@@ -43,15 +45,14 @@ function FormPageCreate({ className, ...rest }) {
         if (response.ok) {
           const newPageData = {};
 
-          Object.values(response.schema).map(({ name }) => { 
-            newPageData[name] = '';
+          Object.values(response.schema).map(({ name, type }) => {
+            newPageData[name] = (type === 'checkbox') ? false : '';
+
             return name;
           });
 
           setPagesSchema(response.schema);
           setPagesData(newPageData);
-        } else if (response.error) {
-          console.log(response.error);
         }
       });
   }, [API_URL]);
@@ -60,8 +61,20 @@ function FormPageCreate({ className, ...rest }) {
     getPageSchema();
   }, [getPageSchema]);
 
-  const handleStatusMessage = (status, text) => {
-    dispatch(setStatusMessage(status, text));
+  const handleResponse = (
+    response,
+    successAction,
+    successMessage,
+    errorMessage = 'Something went wrong...',
+  ) => {
+    if (response.ok) {
+      dispatch(setStatusMessage(CONST.SUCCESS, successMessage));
+      if (successAction) {
+        successAction();
+      }
+    } else {
+      dispatch(setStatusMessage(CONST.ERROR, errorMessage));
+    }
 
     setTimeout(() => {
       dispatch(removeStatusMessage());
@@ -69,19 +82,17 @@ function FormPageCreate({ className, ...rest }) {
   };
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type } = event.target;
 
-    event.persist();
-    setPagesData({
-      ...pageData,
-      [name]: value,
-    });
+    if (type === 'checkbox') {
+      setPagesData({ ...pageData, [name]: !pageData[name] });
+    } else {
+      setPagesData({ ...pageData, [name]: value });
+    }
   };
 
   const createWebPage = (e) => {
     e.preventDefault();
-
-    console.log('Create', pageData.title, pageData.slug);
 
     if (!pageData.title || !pageData.slug) {
       return;
@@ -91,14 +102,7 @@ function FormPageCreate({ className, ...rest }) {
       `${API_URL}/pages`,
       pageData,
     ).then((response) => {
-      if (response.ok) {
-        console.log(response);
-        setIsCreated(true);
-        handleStatusMessage(CONST.SUCCESS, 'New page was created');
-      } else {
-        console.log(`Error: ${response}`);
-        handleStatusMessage(CONST.ERROR, 'Something went wrong...');
-      }
+      handleResponse(response, setIsCreated(true), 'New page was created');
     });
   };
 
@@ -111,19 +115,38 @@ function FormPageCreate({ className, ...rest }) {
       <CardContent>
         {pageSchema && pageData && (
           <form autoComplete="off" onSubmit={createWebPage}>
-            {Object.values(pageSchema).map(({ name, type }) => (
-              <TextField
-                fullWidth
-                label={name}
-                margin="normal"
-                name={name}
-                type={type}
-                onChange={handleChange}
-                value={pageData[name]}
-                variant="outlined"
-                key={name}
-              />
-            ))}
+            {Object.values(pageSchema).map(({ name, type }) => {
+              if (type === 'checkbox') {
+                return (
+                  <InputLabel htmlFor={name} key={name}>
+                    <Checkbox
+                      id={name}
+                      label={name}
+                      margin="normal"
+                      name={name}
+                      variant="outlined"
+                      checked={pageData[name]}
+                      onChange={handleChange}
+                    />
+                    Set as home page
+                  </InputLabel>
+                );
+              }
+
+              return (
+                <TextField
+                  fullWidth
+                  label={name}
+                  margin="normal"
+                  name={name}
+                  type={type}
+                  onChange={handleChange}
+                  value={pageData[name]}
+                  variant="outlined"
+                  key={name}
+                />
+              );
+            })}
             <Button
               className={classes.submitButton}
               color="secondary"

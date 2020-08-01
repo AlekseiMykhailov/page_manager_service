@@ -67,7 +67,6 @@ function PageCreate() {
   const { slug } = useParams();
   const classes = useStyles();
   const API_URL = process.env.REACT_APP_API_URL;
-  const PUBLISH_URL = process.env.REACT_APP_PUBLISH_URL;
   const publishBtnText = (publishData) ? 'Publish Update' : 'Publish';
 
   const getPageData = useCallback(() => {
@@ -81,7 +80,7 @@ function PageCreate() {
   }, [API_URL, slug]);
 
   const getPublishData = useCallback(() => {
-    FETCH.getData(`${PUBLISH_URL}/published/${slug}`)
+    FETCH.getData(`${API_URL}/published/${slug}`)
       .then((response) => {
         if (response.ok) {
           const { publishedAt, url } = response.data;
@@ -90,7 +89,7 @@ function PageCreate() {
           setPublishData(null);
         }
       });
-  }, [PUBLISH_URL, slug]);
+  }, [API_URL, slug]);
 
   useEffect(() => {
     getPageData();
@@ -118,9 +117,13 @@ function PageCreate() {
   };
 
   const handlePageDataInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
 
-    setPagesData({ ...pageData, [name]: value });
+    if (type === 'checkbox') {
+      setPagesData({ ...pageData, [name]: !pageData[name] });
+    } else {
+      setPagesData({ ...pageData, [name]: value });
+    }
   };
 
   const savePageData = (e) => {

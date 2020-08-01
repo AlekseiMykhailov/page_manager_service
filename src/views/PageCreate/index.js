@@ -7,7 +7,7 @@ import {
   Typography,
   colors,
 } from '@material-ui/core';
-import FormPageCreate from './FormPageCreate';
+import FormPageCreate from './PageCreateForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {

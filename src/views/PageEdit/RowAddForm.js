@@ -242,7 +242,7 @@ RowAddForm.defaultProps = {
 };
 
 RowAddForm.propTypes = {
-  pageId: PropTypes.string.isRequired,
+  pageId: PropTypes.number.isRequired,
   className: PropTypes.string,
   newRowOrder: PropTypes.number.isRequired,
   getPageData: PropTypes.func,

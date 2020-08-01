@@ -1,36 +1,49 @@
 module.exports = ({
   name: 'publish',
   actions: {
-    getPublished: {
+    getPublishedPage: {
       params: {},
       handler(ctx) {
         const { slug } = ctx.params;
 
-        if (!slug) {
-          return this.broker.call('dbPages.getAll')
-            .then((pages) => JSON.stringify(pages, null, 2));
-        }
-
-        return this.broker.call('dbPages.getBySlug', { slug })
-          .then((page) => JSON.stringify(page, null, 2));
+        return this.broker.call('dbPublishedPages.getPageBySlug', { slug });
       },
     },
 
-    addPublishedPage: {
+    getAllPublishedPages: {
+      params: {},
+      handler() {
+        return this.broker.call('dbPublishedPages.getAllPublishedPages');
+      },
+    },
+
+    createPublishedPage: {
       params: {},
       handler(ctx) {
-        const { id, slug, html } = ctx.params;
+        const {
+          id, slug, isHomePage, html
+        } = ctx.params;
 
-        return this.broker.call('dbPages.create', { id, slug, html });
+        this.logger.info('CREATE PUBLISHED PAGE: ', ctx.params);
+
+        return this.broker.call('dbPublishedPages.createPublishedPage', {
+          id, slug, isHomePage, html
+        });
       },
     },
 
     updatePublishedPage: {
       params: {},
       handler(ctx) {
-        const { id, slug, html } = ctx.params;
+        const {
+          id, slug, isHomePage, html
+        } = ctx.params;
 
-        return this.broker.call('dbPages.update', { id, slug, html });
+        this.logger.info('UPDATE PUBLISHED PAGE: ', ctx.params);
+
+        return this.broker.call('dbPublishedPages.updatePublishedPage', {
+          id, slug, isHomePage, html
+        });
       },
     },
 
@@ -39,7 +52,7 @@ module.exports = ({
       handler(ctx) {
         const { slug } = ctx.params;
 
-        return this.broker.call('dbPages.destroy', { slug });
+        return this.broker.call('dbPublishedPages.destroyPublishedPage', { slug });
       }
     },
 

@@ -12,7 +12,7 @@ module.exports = {
     port: process.env.DELIVERY_PORT || 3011,
     cors: {
       origin: ['*'],
-      methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'DELETE'],
+      methods: ['GET'],
       allowedHeaders: ['Content-Type', 'Origin', 'User-Agent', 'method'],
       credentials: true,
       maxAge: 3600,
@@ -21,30 +21,30 @@ module.exports = {
       {
         path: '/',
         aliases: {
-          'GET /published': 'publish.getPublished',
-          'GET /published/:slug': 'publish.getPublished',
+          'GET /': 'dbPublishedPages.getHomePageHtml',
+          'GET /all': 'dbPublishedPages.getAllPublishedPages',
+          'GET /:slug': 'dbPublishedPages.getPageHtml',
+        },
+        bodyParsers: {
+          json: true,
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = 'text/html; charset=utf-8';
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
+      },
+
+      {
+        path: '/all',
+        aliases: {
+          'GET /': 'dbPublishedPages.getAllPublishedPages',
+          'GET /delete-published': 'dbPublishedPages.destroyAllPublishedPages',
         },
         bodyParsers: {
           json: true,
         },
         onBeforeCall: (ctx, route, req, res) => {
           ctx.meta.$responseType = 'application/json; charset=utf-8';
-          ctx.meta.userAgent = req.headers['user-agent'];
-        }
-      },
-
-      {
-        path: '/',
-        aliases: {
-          'GET /': 'dbPages.getAll',
-          'GET /:slug': 'dbPages.getHtml',
-          'GET /destroy/:slug': 'dbPages.destroy',
-        },
-        bodyParsers: {
-          json: true,
-        },
-        onBeforeCall: (ctx, route, req, res) => {
-          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
           ctx.meta.userAgent = req.headers['user-agent'];
         },
       }

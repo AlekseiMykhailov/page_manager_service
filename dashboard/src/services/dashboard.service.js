@@ -1,11 +1,3 @@
-const FIELD_TYPES = {
-  text: 'text',
-  email: 'email',
-  url: 'url',
-  file: 'file',
-  select: 'select',
-};
-
 const nav = [
   { id: '1', path: '/', title: 'Dashboard' },
   { id: '2', path: '/pages', title: 'Pages' },
@@ -35,13 +27,7 @@ module.exports = ({
 
     listWebPages: {
       handler() {
-        return this.broker.call('pages.getListWebPages');
-      },
-    },
-
-    createWebPage: {
-      handler(ctx) {
-        return this.broker.call('pages.createWebPage', ctx.params);
+        return this.broker.call('webPages.getListWebPages');
       },
     },
 
@@ -53,20 +39,14 @@ module.exports = ({
         const { slug } = ctx.params;
         let webPage;
 
-        this.logger.info('EDIT WEB PAGE', ctx.params);
-
-        return this.broker.call('pages.getWebPageBySlug', { slug })
-          .then(res => {
-            webPage = res;
-
-            this.logger.info('EDITING WEB PAGE: ', slug, webPage);
+        return this.broker.call('webPages.getWebPageBySlug', { slug })
+          .then((res) => {
+            webPage = res.data;
 
             return this.broker.call('rows.getRowsForPage', { id: webPage.id });
           })
-          .then(rows => {
-            return JSON.stringify({ ok: true, webPage, rows }, null, 2);
-          });
-      }
+          .then((rows) => JSON.stringify({ ok: true, webPage, rows }, null, 2));
+      },
     }
   },
 });

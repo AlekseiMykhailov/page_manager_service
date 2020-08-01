@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 const { v4 } = require('uuid');
 
 class FieldSchema {
@@ -8,9 +9,10 @@ class FieldSchema {
 }
 
 class WebPage {
-  constructor(slug, title, description) {
+  constructor(slug, title, description, isHomePage) {
     this.id = v4();
     this.slug = slug;
+    this.isHomePage = isHomePage;
     this.title = title;
     this.description = description;
   }
@@ -28,13 +30,14 @@ class Row {
     this.id = id;
     this.webPageId = webPageId;
     this.order = order;
-    this.meta = {...schema};
+    this.meta = { ...schema };
     this.fields = [...rowFields];
   }
 }
 
 const webPageSchema = {
   slug: new FieldSchema('slug', 'text'),
+  isHomePage: new FieldSchema('isHomePage', 'checkbox'),
   title: new FieldSchema('title', 'text'),
   description: new FieldSchema('description', 'text'),
 };
@@ -151,15 +154,17 @@ module.exports = ({
 
     constructWebPage: {
       handler(ctx) {
-        const { slug, title, description } = ctx.params;
+        const { slug, title, description, isHomePage } = ctx.params;
 
-        return new WebPage(slug, title, description);
+        return new WebPage(slug, title, description, isHomePage);
       },
     },
 
     constructRow: {
       handler(ctx) {
-        const { meta, webPageId, order, fields } = ctx.params;
+        const {
+          meta, webPageId, order, fields
+        } = ctx.params;
         const { title, templateHbs } = meta;
         const rowMeta = new RowMeta(title, templateHbs);
         const id = v4();

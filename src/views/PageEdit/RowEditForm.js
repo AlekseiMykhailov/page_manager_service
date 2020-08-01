@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import {
   ButtonGroup,
   Button,
-  IconButton,
   Divider,
   Grid,
   TextField,
@@ -86,22 +85,22 @@ function RowEditContainer({
           {(maxIndex > 0) && (
             <div className={classes.root}>
               <ButtonGroup size="small" aria-label="small outlined button group">
-                <IconButton
+                <Button
                   data-row-id={id}
                   data-direction="up"
                   disabled={index === 0}
                   onClick={handleChangeOrder}
                 >
                   <ArrowUpwardIcon />
-                </IconButton>
-                <IconButton
+                </Button>
+                <Button
                   data-row-id={id}
                   data-direction="down"
                   disabled={index === maxIndex}
                   onClick={handleChangeOrder}
                 >
                   <ArrowDownwardIcon />
-                </IconButton>
+                </Button>
               </ButtonGroup>
             </div>
           )}

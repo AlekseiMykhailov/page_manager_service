@@ -7,6 +7,8 @@ import {
   Button,
   Grid,
   TextField,
+  Checkbox,
+  InputLabel,
   Typography,
 } from '@material-ui/core';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
@@ -42,7 +44,10 @@ function PageDataForm({
         {pageData.title}
       </Typography>
       {Object.entries(pageData).map(([fieldName, fieldValue]) => {
-        if (fieldName === 'title' || fieldName === 'description' || fieldName === 'slug') {
+        if (fieldName === 'title'
+          || fieldName === 'description'
+          || fieldName === 'slug'
+        ) {
           return (
             <TextField
               fullWidth
@@ -55,6 +60,22 @@ function PageDataForm({
               onChange={handleChange}
               key={fieldName}
             />
+          );
+        }
+        if (fieldName === 'isHomePage') {
+          return (
+            <InputLabel htmlFor={fieldName} key={fieldName}>
+              <Checkbox
+                id={fieldName}
+                label={fieldName}
+                margin="normal"
+                name={fieldName}
+                variant="outlined"
+                checked={fieldValue}
+                onChange={handleChange}
+              />
+              Set as home page
+            </InputLabel>
           );
         }
 

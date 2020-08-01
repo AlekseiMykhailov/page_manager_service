@@ -18,21 +18,20 @@ module.exports = ({
         rowsHtml = [...rows].sort((a, b) => a.order - b.order)
           .map(({ meta, fields }) => {
             switch (meta.templateHbs) {
-            case 'bricks':
-              return rowBricks({
-                title: fields.find(field => field.name === 'title').value,
-                bricks: fields.filter(field => field.name !== 'title'),
-              });
+              case 'bricks':
+                return rowBricks({
+                  title: fields.find((field) => field.name === 'title').value,
+                  bricks: fields.filter((field) => field.name !== 'title'),
+                });
 
-            case 'withImage':
-              return rowWithImage({
-                backgroundImageURL: fields.find(field => field.name === 'backgroundImageURL').value,
-                title: fields.find(field => field.name === 'title').value,
-                description: fields.find(field => field.name === 'description').value,
-              });
+              case 'withImage':
+                return rowWithImage({
+                  backgroundImageURL: fields.find((field) => field.name === 'backgroundImageURL').value,
+                  title: fields.find((field) => field.name === 'title').value,
+                  description: fields.find((field) => field.name === 'description').value,
+                });
 
-            default:
-              return;
+              default:
             }
           })
           .join('');
@@ -80,7 +79,7 @@ module.exports = ({
 
       const formHtml = addForm({
         actionURL,
-        fields: fields && Object.values(fields).map(field => createField(field)).join(''),
+        fields: fields && Object.values(fields).map((field) => createField(field)).join(''),
         button: buttonHtml({ text: 'Submit', type: 'submit' })
       });
 
@@ -110,15 +109,14 @@ module.exports = ({
         }
       };
 
-      const rowsFieldSets = config.rows.rowsConfig.rows.map(row => {
-        const fields = row.fields && Object.values(row.fields).map(field => (
-          createField(field, row.fieldSetName))
-        ).join('');
-        const blocks = row.blocks && row.blocks.map(block => (
+      const rowsFieldSets = config.rows.rowsConfig.rows.map((row) => {
+        const fields = row.fields && Object.values(row.fields).map((field) => (
+          createField(field, row.fieldSetName))).join('');
+        const blocks = row.blocks && row.blocks.map((block) => (
           fieldSet({
             title: block.name,
             fieldSetName: block.fieldSetName,
-            fields: Object.values(block.fields).map(field => createField(field, block.fieldSetName)).join(''),
+            fields: Object.values(block.fields).map((field) => createField(field, block.fieldSetName)).join(''),
           })
         )).join('');
         // TODO: change the output from all types of block to select and add one of a selected type
@@ -133,7 +131,7 @@ module.exports = ({
       }).join('');
 
       const formHtml = addForm({
-        fields: config.fields && Object.values(config.fields).map(field => createField(field)).join(''),
+        fields: config.fields && Object.values(config.fields).map((field) => createField(field)).join(''),
         fieldSet: rowsFieldSets,
         button: buttonHtml({ text: 'Submit', type: 'submit' })
       });
@@ -150,7 +148,9 @@ module.exports = ({
 
     createFormPageEdit(ctx) {
       const { webPage, rows, fieldTypes } = ctx.params;
-      const { id, slug, title, description } = webPage;
+      const {
+        id, slug, title, description
+      } = webPage;
 
       const createField = (field) => {
         if (field.type === fieldTypes.text) {
@@ -168,15 +168,17 @@ module.exports = ({
       };
 
       const rowsHtml = rows.sort((a, b) => a.order - b.order)
-        .map(row => {
-          const { meta, order, id, fields} = row;
+        .map((row) => {
+          const {
+            meta, order, id, fields
+          } = row;
 
           return editRowForm({
             id,
             webPageSlug: slug,
             rowTitle: meta.title,
             order,
-            fields: [...fields].map(field => createField(field)).join(''),
+            fields: [...fields].map((field) => createField(field)).join(''),
           });
         })
         .join('');

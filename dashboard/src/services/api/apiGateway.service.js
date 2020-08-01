@@ -32,6 +32,7 @@ module.exports = {
         path: '/',
         aliases: {
           'GET /nav': 'dashboard.nav',
+          'GET /temp': 'dbWebPages.temp',
         },
         authorization: false,
         bodyParsers: {
@@ -39,7 +40,7 @@ module.exports = {
           urlencoded: { extended: true }
         },
         onBeforeCall: (ctx, route, req, res) => {
-          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         },
       },
@@ -51,8 +52,8 @@ module.exports = {
           'GET /': 'dashboard.listWebPages',
           'GET /:slug': 'dashboard.editWebPage',
           'GET /schema': 'schemas.getWebPageSchema',
-          'POST /': 'dashboard.createWebPage',
-          'PUT /:slug': 'pages.updateWebPage',
+          'POST /': 'webPages.createWebPage',
+          'PUT /:slug': 'webPages.updateWebPage',
         },
         authorization: false,
         bodyParsers: {
@@ -60,7 +61,7 @@ module.exports = {
           urlencoded: { extended: true }
         },
         onBeforeCall: (ctx, route, req, res) => {
-          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         },
         onError(req, res, err) {
@@ -88,7 +89,7 @@ module.exports = {
           urlencoded: { extended: true }
         },
         onBeforeCall: (ctx, route, req, res) => {
-          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         },
       },
@@ -97,8 +98,8 @@ module.exports = {
       {
         path: '/preview',
         aliases: {
-          'GET /': 'pages.previewWebPageList',
-          'GET /:slug': 'pages.previewWebPage',
+          'GET /': 'webPages.previewWebPageList',
+          'GET /:slug': 'webPages.previewWebPage',
         },
         bodyParsers: {
           json: false,
@@ -114,9 +115,9 @@ module.exports = {
       {
         path: '/publish',
         aliases: {
-          'POST /': 'pages.publishWebPage',
-          'PUT /': 'pages.updatePublishedWebPage',
-          'DELETE /:slug': 'pages.unPublishWebPage',
+          'POST /': 'webPages.publishWebPage',
+          'PUT /': 'webPages.updatePublishedWebPage',
+          'DELETE /:slug': 'webPages.unPublishWebPage',
         },
         authorization: false,
         bodyParsers: {
@@ -124,7 +125,24 @@ module.exports = {
           urlencoded: { extended: true }
         },
         onBeforeCall: (ctx, route, req, res) => {
-          ctx.meta.$responseType = { 'Content-Type': 'application/json; charset=utf-8' };
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
+      },
+
+      {
+        path: '/published',
+        aliases: {
+          'GET /': 'webPages.getAllPublishedPagesData',
+          'GET /:slug': 'webPages.getPublishedPageData',
+        },
+        authorization: false,
+        bodyParsers: {
+          json: true,
+          urlencoded: { extended: true }
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
           ctx.meta.userAgent = req.headers['user-agent'];
         },
       },

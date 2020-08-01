@@ -1,7 +1,7 @@
 const mockCreatedRows = [
   {
     id: 'row-1',
-    webPageId: '1',
+    webPageId: 2,
     order: 1,
     meta: {
       title: 'Row with image',
@@ -27,7 +27,7 @@ const mockCreatedRows = [
   },
   {
     id: 'row-2',
-    webPageId: '2',
+    webPageId: 3,
     order: 1,
     meta: {
       title: 'Row with image',
@@ -53,7 +53,7 @@ const mockCreatedRows = [
   },
   {
     id: 'row-3',
-    webPageId: '1',
+    webPageId: 2,
     order: 2,
     meta: {
       title: 'Row with bricks',
@@ -99,7 +99,7 @@ const mockCreatedRows = [
   },
   {
     id: 'row-4',
-    webPageId: '2',
+    webPageId: 3,
     order: 2,
     meta: {
       title: 'Row with bricks',
@@ -206,7 +206,6 @@ module.exports = ({
     },
 
     getRowsForPage: {
-      params: { id: 'string' },
       handler(ctx) {
         return rowsStore.getRowsByPageId(ctx.params.id);
       },
@@ -233,8 +232,8 @@ module.exports = ({
 
         this.logger.info('UPDATED ROW: ', updatedRow);
 
-        return this.broker.call('pages.getWebPageById', { id: updatedRow.webPageId })
-          .then(webPage => {
+        return this.broker.call('webPages.getWebPageById', { id: updatedRow.webPageId })
+          .then((webPage) => {
             this.logger.info('UPDATE ROW - GET WEBPAGE: ', webPage);
             return this.broker.call('dashboard.editWebPage', webPage);
           });
