@@ -15,7 +15,17 @@ module.exports = ({
 
         return this.broker.call('dbWebPages.createWebPage', {
           slug, isHomePage, title, description
-        });
+        })
+          .then(({ id }) => {
+            if (isHomePage) {
+              return this.broker.call('dbSettings.setHomePageId', {
+                domain: 'localhost: 3011',
+                homePageId: id
+              }).then(() => ({ ok: true, id }));
+            }
+
+            return { ok: true, id };
+          });
       },
     },
 
@@ -28,12 +38,32 @@ module.exports = ({
       },
       handler(ctx) {
         const {
-          slug, isHomePage, title, description
+          id, slug, isHomePage, title, description
         } = ctx.params;
 
+        this.logger.info('UPDATE WEB PAGE: ', ctx.params);
+
+        if (isHomePage) {
+          return this.broker.call('dbSettings.setHomePageId', { domain: 'localhost:3011', homePageId: id })
+            .then(() => this.broker.call('dbWebPages.updateWebPage', {
+              slug, title, description
+            }));
+        }
+
         return this.broker.call('dbWebPages.updateWebPage', {
-          slug, isHomePage, title, description
+          slug, title, description
         });
+      },
+    },
+
+    deleteWebPage: {
+      handler(ctx) {
+        const { slug } = ctx.params;
+
+        this.logger.info('DELETE WEB PAGE: ', ctx.params);
+
+        return this.broker.call('dbWebPages.deleteWebPage', { slug })
+          .then((res) => JSON.stringify(res, null, 2));
       },
     },
 
@@ -81,11 +111,15 @@ module.exports = ({
     getListWebPages: {
       handler() {
         return this.broker.call('dbWebPages.getAllWebPages')
-          .then((res) => JSON.stringify(res, null, 2));
+          .then((res) => res.pages)
+          .then((pages) => ({ ok: true, pages }));
       },
     },
 
     publishWebPage: {
+      params: {
+        slug: 'string',
+      },
       handler(ctx) {
         const { slug } = ctx.params;
         let webPage;
@@ -99,7 +133,6 @@ module.exports = ({
           .then((html) => this.broker.call('publish.createPublishedPage', {
             id: webPage.id,
             slug,
-            isHomePage: webPage.isHomePage,
             html,
           }))
           .then((response) => JSON.stringify(response, null, 2))
@@ -111,6 +144,9 @@ module.exports = ({
     },
 
     updatePublishedWebPage: {
+      params: {
+        slug: 'string',
+      },
       handler(ctx) {
         const { slug } = ctx.params;
         let webPage;
@@ -125,7 +161,6 @@ module.exports = ({
           .then((html) => this.broker.call('dbPublishedPages.updatePublishedPage', {
             id: webPage.id,
             slug,
-            isHomePage: webPage.isHomePage,
             html,
           }))
           .then((response) => JSON.stringify(response, null, 2))
@@ -137,6 +172,9 @@ module.exports = ({
     },
 
     unPublishWebPage: {
+      params: {
+        slug: 'string',
+      },
       handler(ctx) {
         const { slug } = ctx.params;
 

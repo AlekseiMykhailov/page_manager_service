@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 import moment from 'moment';
 import {
   Button,
@@ -39,10 +39,20 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(3),
   },
+  label: {
+    color: theme.palette.common.white,
+  },
   button: {
     paddingRight: theme.spacing(3),
     paddingLeft: theme.spacing(3),
     color: theme.palette.common.white,
+  },
+  deleteButton: {
+    color: theme.palette.common.white,
+    backgroundColor: colors.red[600],
+    '&:hover': {
+      backgroundColor: colors.red[900]
+    }
   },
   publishButton: {
     backgroundColor: colors.green[600],
@@ -51,23 +61,23 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   unPublishButton: {
-    backgroundColor: colors.red[600],
+    backgroundColor: colors.yellow[600],
     '&:hover': {
-      backgroundColor: colors.red[900],
+      backgroundColor: colors.yellow[900],
     }
   },
 }));
 
 function PageCreate() {
+  const dispatch = useDispatch();
+  const classes = useStyles();
+  const { slug } = useParams();
   const [pageData, setPagesData] = useState(null);
   const [rowsData, setRowsData] = useState([]);
   const [publishData, setPublishData] = useState(null);
-
-  const dispatch = useDispatch();
-  const { slug } = useParams();
-  const classes = useStyles();
+  const [homePageId, setHomePageId] = useState(null);
+  const [isDeleted, setIsDeleted] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
-  const publishBtnText = (publishData) ? 'Publish Update' : 'Publish';
 
   const getPageData = useCallback(() => {
     FETCH.getData(`${API_URL}/pages/${slug}`)
@@ -78,6 +88,15 @@ function PageCreate() {
         }
       });
   }, [API_URL, slug]);
+
+  const getHomePageData = useCallback(() => {
+    FETCH.getData(`${API_URL}/settings`)
+      .then((response) => {
+        if (response.ok) {
+          setHomePageId(response.webPageId);
+        }
+      });
+  }, [API_URL]);
 
   const getPublishData = useCallback(() => {
     FETCH.getData(`${API_URL}/published/${slug}`)
@@ -94,7 +113,8 @@ function PageCreate() {
   useEffect(() => {
     getPageData();
     getPublishData();
-  }, [getPageData, getPublishData]);
+    getHomePageData();
+  }, [getPageData, getPublishData, getHomePageData]);
 
   const handleResponse = (
     response,
@@ -135,6 +155,11 @@ function PageCreate() {
 
   const resetPageData = () => {
     getPageData();
+  };
+
+  const deleteWepPage = () => {
+    FETCH.deleteData(`${API_URL}/pages/${slug}`)
+      .then((response) => handleResponse(response, setIsDeleted(true), 'Page was deleted', response.err));
   };
 
   const saveRowData = (rowData) => {
@@ -265,6 +290,7 @@ function PageCreate() {
       className={classes.root}
       title="Edit Page"
     >
+      {isDeleted && (<Redirect to="/pages" />)}
       <Container maxWidth="lg">
         <Grid
           container
@@ -275,9 +301,18 @@ function PageCreate() {
           <Grid item>
             <Typography variant="overline">Pages</Typography>
             <Typography gutterBottom variant="h3">Edit Page</Typography>
-            {publishData && (
+            {pageData && publishData && (
               <Typography variant="body2">
-                <Label color={colors.green[600]}>Published</Label>
+                <Label color={colors.green[600]}>
+                  <a
+                    href={pageData.id === homePageId ? 'http://localhost:3011' : publishData.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={classes.label}
+                  >
+                    {pageData.id === homePageId ? 'Published as Home Page' : 'Published'}
+                  </a>
+                </Label>
                 {moment(publishData.publishedAt).format('LLLL')}
               </Typography>
             )}
@@ -290,6 +325,16 @@ function PageCreate() {
                 aria-label="large outlined button group"
                 className={classes.buttons}
               >
+                {!publishData && (
+                  <Button
+                    variant="contained"
+                    className={clsx(classes.button, classes.deleteButton)}
+                    onClick={deleteWepPage}
+                    startIcon={<DeleteIcon />}
+                  >
+                    Delete Page
+                  </Button>
+                )}
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.previewButton)}
@@ -316,7 +361,7 @@ function PageCreate() {
                   onClick={handlePublish}
                   startIcon={<PublishIcon />}
                 >
-                  {publishBtnText}
+                  {publishData ? 'Publish Update' : 'Publish'}
                 </Button>
               </ButtonGroup>
             )}

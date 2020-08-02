@@ -1,10 +1,13 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
+import { removeStatusMessage, setStatusMessage } from 'src/actions/messageActions';
 import { makeStyles } from '@material-ui/styles';
 import {
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -19,8 +22,10 @@ import {
 import PostAddIcon from '@material-ui/icons/PostAdd';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import DeleteIcon from '@material-ui/icons/Delete';
+import * as CONST from 'src/utils/const';
+import * as FETCH from 'src/utils/fetch';
 import Label from 'src/components/Label';
-import * as fetch from 'src/utils/fetch';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -44,9 +49,17 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   link: {
+    display: 'block',
+  },
+  label: {
+    color: colors.common.white,
+  },
+  button: {
     display: 'flex',
     alignItems: 'center',
+    minWidth: 'auto',
     marginLeft: theme.spacing(2),
+    padding: 0,
 
     '&:hover': {
       color: colors.blue[900],
@@ -57,22 +70,47 @@ const useStyles = makeStyles((theme) => ({
 function PageList({ className, ...rest }) {
   const classes = useStyles();
   const [pages, setPages] = useState([]);
-  const [publishedPages, setPublishedPages] = useState([]);
+  const [homePageId, setHomePageId] = useState(null);
 
-  // const [openFormBar, setOpenFormBar] = useState(false);
-  // const [editingPage, setEditingPages] = useState(null);
+  const dispatch = useDispatch();
   const API_URL = process.env.REACT_APP_API_URL;
 
   const fetchPages = useCallback(() => {
-    fetch.getData(`${API_URL}/pages`).then((response) => {
-      setPages(response.pages);
-    });
+    let pageList;
+
+    FETCH.getData(`${API_URL}/pages`)
+      .then((response) => { pageList = response.pages; })
+      .then(() => FETCH.getData(`${API_URL}/published`))
+      .then((published) => {
+        const pagesWithPublishData = pageList.map((page) => {
+          const publishedPageData = published.pages.find((publishedPage) => (
+            publishedPage.webPageId === page.id
+          ));
+
+          if (publishedPageData) {
+            return {
+              ...page,
+              published: {
+                url: publishedPageData.url,
+                publishedAt: publishedPageData.publishedAt,
+              },
+            };
+          }
+
+          return page;
+        });
+
+        setPages(pagesWithPublishData);
+      });
   }, [API_URL]);
 
-  const fetchPublishedPages = useCallback(() => {
-    fetch.getData(`${API_URL}/published`).then((response) => {
-      setPublishedPages(JSON.parse(response).pages);
-    });
+  const getHomePageData = useCallback(() => {
+    FETCH.getData(`${API_URL}/settings`)
+      .then((response) => {
+        if (response.ok) {
+          setHomePageId(response.webPageId);
+        }
+      });
   }, [API_URL]);
 
   useEffect(() => {
@@ -80,15 +118,35 @@ function PageList({ className, ...rest }) {
   }, [fetchPages]);
 
   useEffect(() => {
-    fetchPublishedPages();
-  }, [fetchPublishedPages]);
+    getHomePageData();
+  }, [getHomePageData]);
 
-  // const handleFormBarOpen = () => {
-  //   setOpenFormBar(true);
-  // };
-  // const handleFormBarClose = () => {
-  //   setOpenFormBar(false);
-  // };
+  const handleResponse = (
+    response,
+    successAction,
+    successMessage,
+    errorMessage = 'Something went wrong...',
+  ) => {
+    if (response.ok) {
+      dispatch(setStatusMessage(CONST.SUCCESS, successMessage));
+      if (successAction) {
+        successAction();
+      }
+    } else {
+      dispatch(setStatusMessage(CONST.ERROR, errorMessage));
+    }
+
+    setTimeout(() => {
+      dispatch(removeStatusMessage());
+    }, CONST.TIME_VISIBILITY_MESSAGES);
+  };
+
+  const deleteWepPage = (e) => {
+    const { slug } = e.currentTarget.dataset;
+
+    FETCH.deleteData(`${API_URL}/pages/${slug}`)
+      .then((response) => handleResponse(response, fetchPages, 'Page was deleted', response.err));
+  };
 
   return (
     <Card
@@ -114,7 +172,7 @@ function PageList({ className, ...rest }) {
       <Divider />
       <CardContent className={classes.content}>
         <List className={classes.list}>
-          {pages.map((page, i) => (
+          {pages && pages.map((page, i) => (
             <ListItem
               divider={i < pages.length - 1}
               className={classes.item}
@@ -133,25 +191,16 @@ function PageList({ className, ...rest }) {
                 </Link>
               </ListItemText>
 
-              {publishedPages
-              && Boolean(page.isHomePage)
-              && (
-                <Label color={colors.yellow[600]}>
-                  Saved as Home Page
-                </Label>
-              )}
-              {publishedPages 
-              && publishedPages.find((published) => (published.slug === page.slug && !published.isHomePage)) 
-              && (
+              {Object.prototype.hasOwnProperty.call(page, 'published') && (
                 <Label color={colors.green[600]}>
-                  Published
-                </Label>
-              )}
-              {publishedPages 
-              && publishedPages.find((published) => published.slug === page.slug && published.isHomePage) 
-              && (
-                <Label color={colors.green[600]}>
-                  Published as Home Page
+                  <a
+                    href={page.id === homePageId ? 'http://localhost:3011' : page.published.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={classes.label}
+                  >
+                    {page.id === homePageId ? 'Published as Home Page' : 'Published'}
+                  </a>
                 </Label>
               )}
 
@@ -162,7 +211,7 @@ function PageList({ className, ...rest }) {
                   variant="h5"
                   color="textPrimary"
                   underline="none"
-                  className={classes.link}
+                  className={classes.button}
                   target="_blank"
                 >
                   <VisibilityIcon />
@@ -175,27 +224,25 @@ function PageList({ className, ...rest }) {
                   variant="h5"
                   color="textPrimary"
                   underline="none"
-                  className={classes.link}
+                  className={classes.button}
                 >
                   <EditIcon />
                 </Link>
               </Tooltip>
-              {/* <Tooltip title="New Edit">
-                <IconButton
-                  className={classes.chatButton}
+              <Tooltip title="Delete Page">
+                <Button
                   color="inherit"
-                  onClick={handleFormBarOpen}
+                  underline="none"
+                  data-slug={page.slug}
+                  className={classes.button}
+                  onClick={deleteWepPage}
                 >
-                  <EditIcon />
-                </IconButton>
-              </Tooltip> */}
+                  <DeleteIcon />
+                </Button>
+              </Tooltip>
             </ListItem>
           ))}
         </List>
-        {/* <FormBar
-          onClose={handleFormBarClose}
-          open={openFormBar}
-        /> */}
       </CardContent>
     </Card>
   );

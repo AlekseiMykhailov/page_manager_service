@@ -76,6 +76,10 @@ const mockRowsSchemas = [
     },
     fields: [
       {
+        name: 'title',
+        type: 'text',
+      },
+      {
         name: 'edge-1',
         type: 'text',
       },
@@ -154,7 +158,9 @@ module.exports = ({
 
     constructWebPage: {
       handler(ctx) {
-        const { slug, title, description, isHomePage } = ctx.params;
+        const {
+          slug, title, description, isHomePage
+        } = ctx.params;
 
         return new WebPage(slug, title, description, isHomePage);
       },

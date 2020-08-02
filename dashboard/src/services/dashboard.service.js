@@ -27,7 +27,16 @@ module.exports = ({
 
     listWebPages: {
       handler() {
-        return this.broker.call('webPages.getListWebPages');
+        let pages;
+
+        return this.broker.call('webPages.getListWebPages')
+          .then((res) => { pages = res.pages; })
+          .then(() => this.broker.call('dbSettings.getHomePageId', { domain: 'localhost:3011' }))
+          .then((res) => JSON.stringify({
+            ok: true,
+            homePageId: res.webPageId,
+            pages,
+          }, null, 2));
       },
     },
 
@@ -40,11 +49,10 @@ module.exports = ({
         let webPage;
 
         return this.broker.call('webPages.getWebPageBySlug', { slug })
-          .then((res) => {
-            webPage = res.data;
-
-            return this.broker.call('rows.getRowsForPage', { id: webPage.id });
-          })
+          .then((res) => { webPage = res.data; })
+          .then(() => this.broker.call('dbSettings.getHomePageId', { domain: 'localhost:3011' }))
+          .then((res) => { webPage.isHomePage = (webPage.id === res.webPageId); })
+          .then(() => this.broker.call('rows.getRowsForPage', { id: webPage.id }))
           .then((rows) => JSON.stringify({ ok: true, webPage, rows }, null, 2));
       },
     }

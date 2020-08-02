@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 
 const config = require('../config/config.js');
 const WebPage = require('./webPage');
+const Settings = require('./settings');
 
 const db = {};
 const sequelize = new Sequelize(
@@ -12,5 +13,6 @@ const sequelize = new Sequelize(
 );
 
 db.WebPage = WebPage(sequelize, Sequelize);
+db.Settings = Settings(sequelize, Sequelize);
 
 module.exports = db;

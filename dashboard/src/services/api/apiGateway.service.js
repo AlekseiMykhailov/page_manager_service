@@ -27,12 +27,12 @@ module.exports = {
       options: {}
     },
     routes: [
-      // NAV
+      // COMMON
       {
         path: '/',
         aliases: {
           'GET /nav': 'dashboard.nav',
-          'GET /temp': 'dbWebPages.temp',
+          'GET /settings': 'settings.getHomePageId',
         },
         authorization: false,
         bodyParsers: {
@@ -54,6 +54,7 @@ module.exports = {
           'GET /schema': 'schemas.getWebPageSchema',
           'POST /': 'webPages.createWebPage',
           'PUT /:slug': 'webPages.updateWebPage',
+          'DELETE /:slug': 'webPages.deleteWebPage',
         },
         authorization: false,
         bodyParsers: {

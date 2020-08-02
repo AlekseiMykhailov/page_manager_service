@@ -22,7 +22,6 @@ module.exports = {
         path: '/',
         aliases: {
           'GET /': 'dbPublishedPages.getHomePageHtml',
-          'GET /all': 'dbPublishedPages.getAllPublishedPages',
           'GET /:slug': 'dbPublishedPages.getPageHtml',
         },
         bodyParsers: {
@@ -38,7 +37,6 @@ module.exports = {
         path: '/all',
         aliases: {
           'GET /': 'dbPublishedPages.getAllPublishedPages',
-          'GET /delete-published': 'dbPublishedPages.destroyAllPublishedPages',
         },
         bodyParsers: {
           json: true,

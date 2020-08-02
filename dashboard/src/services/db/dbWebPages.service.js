@@ -11,23 +11,23 @@ module.exports = {
 
     createWebPage(ctx) {
       const {
-        slug, isHomePage, title, description
+        slug, title, description
       } = ctx.params;
       const webPage = {
-        slug, isHomePage, title, description
+        slug, title, description
       };
 
       return this.settings.model.create(webPage)
-        .then((res) => ({ ok: true, res }))
+        .then((res) => ({ ok: true, id: res.dataValues.id }))
         .catch((err) => ({ ok: false, err }));
     },
 
     updateWebPage(ctx) {
       const {
-        slug, isHomePage, title, description
+        slug, title, description
       } = ctx.params;
 
-      return this.settings.model.update({ isHomePage, title, description }, {
+      return this.settings.model.update({ title, description }, {
         where: {
           slug,
         }
@@ -36,16 +36,23 @@ module.exports = {
         .catch((err) => ({ ok: false, err }));
     },
 
-    destroyWebPage(ctx) {
+    deleteWebPage(ctx) {
       const { slug } = ctx.params;
 
-      return this.settings.model.destroy({
-        where: {
-          slug,
-        }
-      })
-        .then(() => ({ ok: true }))
-        .catch((err) => ({ ok: false, err }));
+      return this.broker.call('dbPublishedPages.isPublished', { slug })
+        .then((res) => {
+          if (res.ok) {
+            return { ok: false, err: 'Published Page could not be deleted' };
+          }
+
+          return this.settings.model.destroy({
+            where: {
+              slug,
+            }
+          })
+            .then(() => ({ ok: true }))
+            .catch((err) => ({ ok: false, err }));
+        });
     },
 
     getWebPageBySlug(ctx) {

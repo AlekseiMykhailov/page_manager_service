@@ -12,26 +12,14 @@ module.exports = {
   actions: {
 
     createPublishedPage(ctx) {
-      const {
-        id, slug, isHomePage, html
-      } = ctx.params;
+      const { id, slug, html } = ctx.params;
       const publishedAt = Date.now();
       const publishingPage = {
         webPageId: id,
         slug,
-        isHomePage,
         publishedAt,
         html,
       };
-
-      if (isHomePage) {
-        this.logger.info('CHANGE HOMEPAGE - CREATE');
-        this.settings.model.update({ isHomePage: false }, {
-          where: {
-            isHomePage,
-          }
-        });
-      }
 
       return this.settings.model.create(publishingPage)
         .then(() => ({ ok: true, data: { url: `${PUBLISHED_SERVER}/${slug}`, publishedAt } }))
@@ -42,21 +30,10 @@ module.exports = {
     },
 
     updatePublishedPage(ctx) {
-      const {
-        slug, isHomePage, html
-      } = ctx.params;
+      const { slug, html } = ctx.params;
       const publishedAt = Date.now();
 
-      this.logger.info('CHANGE HOMEPAGE - UPDATE: ', isHomePage);
-      if (isHomePage) {
-        this.settings.model.update({ isHomePage: false }, {
-          where: {
-            isHomePage,
-          }
-        });
-      }
-
-      return this.settings.model.update({ publishedAt, isHomePage, html }, {
+      return this.settings.model.update({ publishedAt, html }, {
         where: {
           slug,
         }
@@ -69,9 +46,11 @@ module.exports = {
     },
 
     destroyPublishedPage(ctx) {
+      const { slug } = ctx.params;
+
       return this.settings.model.destroy({
         where: {
-          slug: ctx.params.slug,
+          slug,
         }
       })
         .then(() => ({ ok: true }))
@@ -79,32 +58,39 @@ module.exports = {
     },
 
     getPageBySlug(ctx) {
+      const { slug } = ctx.params;
+
       return this.settings.model.findOne({
         where: {
-          slug: ctx.params.slug,
+          slug,
         },
       })
-        .then((res) => ({ ok: true, data: res.dataValues }))
+        .then((res) => ({ ok: true, data: { ...res.dataValues, url: `${PUBLISHED_SERVER}/${slug}`} }))
         .catch((err) => ({ ok: false, err }));
     },
 
     getHomePage() {
-      return this.settings.model.findOne({
-        where: {
-          isHomePage: true,
-        },
-      })
+      return this.broker.call('dbSettings.getHomePageId', { domain: 'localhost:3011' })
+        .then((res) => this.settings.model.findOne({
+          where: {
+            webPageId: res.webPageId,
+          },
+        }))
         .then((res) => ({ ok: true, data: res.dataValues }))
         .catch((err) => ({ ok: false, err }));
     },
 
     getHomePageHtml(ctx) {
-      return this.broker.call('dbPublishedPages.getHomePage', ctx.params)
+      const { slug } = ctx.params;
+
+      return this.broker.call('dbPublishedPages.getHomePage', { slug })
         .then((res) => ((res.ok) ? res.data.html : res));
     },
 
     getPageHtml(ctx) {
-      return this.broker.call('dbPublishedPages.getPageBySlug', ctx.params)
+      const { slug } = ctx.params;
+
+      return this.broker.call('dbPublishedPages.getPageBySlug', { slug })
         .then((res) => ((res.ok) ? res.data.html : res));
     },
 
@@ -112,18 +98,17 @@ module.exports = {
       return this.settings.model.findAll({ raw: true })
         .then(
           (pages) => (pages.map(({
-            id, webPageId, slug, isHomePage, publishedAt
+            id, webPageId, slug, publishedAt
           }) => ({
             id,
             webPageId,
             slug,
-            isHomePage,
             url: `${PUBLISHED_SERVER}/${slug}`,
             publishedAt,
           })))
         )
-        .then((pages) => (JSON.stringify({ ok: true, pages }, null, 2)))
-        .catch((err) => (JSON.stringify({ ok: false, err }, null, 2)));
+        .then((pages) => ({ ok: true, pages }))
+        .catch((err) => ({ ok: false, err }));
     },
 
     isPublished(ctx) {

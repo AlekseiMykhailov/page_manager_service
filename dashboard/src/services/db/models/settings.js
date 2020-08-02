@@ -1,27 +1,22 @@
 module.exports = (sequelize, DataTypes) => {
-  const WebPage = sequelize.define('web_page', {
+  const Settings = sequelize.define('setting', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    slug: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    title: {
+    domain: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    homePageId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
   }, {
     paranoid: true,
   });
 
-  return WebPage;
+  return Settings;
 };

@@ -1,6 +1,7 @@
 module.exports = ({
   name: 'publish',
   actions: {
+
     getPublishedPage: {
       params: {},
       handler(ctx) {
@@ -21,13 +22,13 @@ module.exports = ({
       params: {},
       handler(ctx) {
         const {
-          id, slug, isHomePage, html
+          id, slug, html
         } = ctx.params;
 
         this.logger.info('CREATE PUBLISHED PAGE: ', ctx.params);
 
         return this.broker.call('dbPublishedPages.createPublishedPage', {
-          id, slug, isHomePage, html
+          id, slug, html
         });
       },
     },
@@ -36,13 +37,13 @@ module.exports = ({
       params: {},
       handler(ctx) {
         const {
-          id, slug, isHomePage, html
+          id, slug, html
         } = ctx.params;
 
         this.logger.info('UPDATE PUBLISHED PAGE: ', ctx.params);
 
         return this.broker.call('dbPublishedPages.updatePublishedPage', {
-          id, slug, isHomePage, html
+          id, slug, html
         });
       },
     },
