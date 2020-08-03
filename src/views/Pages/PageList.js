@@ -235,6 +235,7 @@ function PageList({ className, ...rest }) {
                   underline="none"
                   data-slug={page.slug}
                   className={classes.button}
+                  disabled={Object.prototype.hasOwnProperty.call(page, 'published')}
                   onClick={deleteWepPage}
                 >
                   <DeleteIcon />
