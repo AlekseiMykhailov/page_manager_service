@@ -11,133 +11,133 @@ module.exports = {
   },
   actions: {
 
-    createPublishedPage(ctx) {
-      const { id, slug, html } = ctx.params;
-      const publishedAt = Date.now();
-      const publishingPage = {
-        webPageId: id,
-        slug,
-        publishedAt,
-        html,
-      };
-
-      return this.settings.model.create(publishingPage)
-        .then(() => ({ ok: true, data: { url: `${PUBLISHED_SERVER}/${slug}`, publishedAt } }))
-        .catch((err) => {
-          this.logger.error('ERROR: ', err);
-          return JSON.stringify(err, null, 2);
-        });
-    },
-
-    updatePublishedPage(ctx) {
-      const { slug, html } = ctx.params;
-      const publishedAt = Date.now();
-
-      return this.settings.model.update({ publishedAt, html }, {
-        where: {
+    createPublishedPage: {
+      params: {
+        id: 'number',
+        slug: 'string',
+        html: 'string',
+      },
+      handler(ctx) {
+        const { id, slug, html } = ctx.params;
+        const publishedAt = Date.now();
+        const publishingPage = {
+          webPageId: id,
           slug,
-        }
-      })
-        .then(() => ({ ok: true, data: { url: `${PUBLISHED_SERVER}/${slug}`, publishedAt } }))
-        .catch((err) => {
-          this.logger.error('ERROR: ', err);
-          return JSON.stringify(err, null, 2);
-        });
+          publishedAt,
+          html,
+        };
+
+        return this.settings.model.create(publishingPage)
+          .then(() => ({ ok: true, data: { url: `${PUBLISHED_SERVER}/${slug}`, publishedAt } }))
+          .catch((err) => {
+            this.logger.error('ERROR CREATE PUBLISH PAGE: ', err);
+
+            return { ok: false, error: err };
+          });
+      },
     },
 
-    destroyPublishedPage(ctx) {
-      const { slug } = ctx.params;
+    updatePublishedPage: {
+      params: {
+        slug: 'string',
+        html: 'string',
+      },
+      handler(ctx) {
+        const { slug, html } = ctx.params;
+        const publishedAt = Date.now();
 
-      return this.settings.model.destroy({
-        where: {
-          slug,
-        }
-      })
-        .then(() => ({ ok: true }))
-        .catch((err) => ({ ok: false, err }));
-    },
-
-    getPageBySlug(ctx) {
-      const { slug } = ctx.params;
-
-      return this.settings.model.findOne({
-        where: {
-          slug,
-        },
-      })
-        .then((res) => ({ ok: true, data: { ...res.dataValues, url: `${PUBLISHED_SERVER}/${slug}`} }))
-        .catch((err) => ({ ok: false, err }));
-    },
-
-    getHomePage() {
-      return this.broker.call('dbSettings.getHomePageId', { domain: 'localhost:3011' })
-        .then((res) => this.settings.model.findOne({
+        return this.settings.model.update({ publishedAt, html }, {
           where: {
-            webPageId: res.webPageId,
-          },
-        }))
-        .then((res) => ({ ok: true, data: res.dataValues }))
-        .catch((err) => ({ ok: false, err }));
-    },
-
-    getHomePageHtml(ctx) {
-      const { slug } = ctx.params;
-
-      return this.broker.call('dbPublishedPages.getHomePage', { slug })
-        .then((res) => ((res.ok) ? res.data.html : res));
-    },
-
-    getPageHtml(ctx) {
-      const { slug } = ctx.params;
-
-      return this.broker.call('dbPublishedPages.getPageBySlug', { slug })
-        .then((res) => ((res.ok) ? res.data.html : res));
-    },
-
-    getAllPublishedPages() {
-      return this.settings.model.findAll({ raw: true })
-        .then(
-          (pages) => (pages.map(({
-            id, webPageId, slug, publishedAt
-          }) => ({
-            id,
-            webPageId,
             slug,
-            url: `${PUBLISHED_SERVER}/${slug}`,
-            publishedAt,
-          })))
-        )
-        .then((pages) => ({ ok: true, pages }))
-        .catch((err) => ({ ok: false, err }));
-    },
-
-    isPublished(ctx) {
-      const { slug } = ctx.params;
-
-      return this.broker.call('dbPublishedPages.getPageBySlug', { slug })
-        .then((res) => {
-          if (res.ok) {
-            const { publishedAt } = res.data;
-            return {
-              ok: true,
-              data: {
-                publishedAt,
-                slug,
-                url: `${PUBLISHED_SERVER}/${slug}`,
-              }
-            };
           }
+        })
+          .then(() => ({ ok: true, data: { url: `${PUBLISHED_SERVER}/${slug}`, publishedAt } }))
+          .catch((err) => {
+            this.logger.error('ERROR UPDATE PUBLISH PAGE: ', err);
 
-          return { ok: false };
-        });
+            return { ok: false, error: err };
+          });
+      },
     },
 
-    destroyAllPublishedPages() {
-      return this.settings.model.destroy({
-        where: {}
-      })
-        .then(() => ({ ok: true }))
-        .catch((err) => ({ ok: false, err }));
+    destroyPublishedPage: {
+      params: {
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { slug } = ctx.params;
+
+        return this.settings.model.destroy({
+          where: {
+            slug,
+          }
+        })
+          .then(() => ({ ok: true }))
+          .catch((err) => {
+            this.logger.error('ERROR DESTROY PUBLISH PAGE: ', err);
+
+            return { ok: false, error: err };
+          });
+      },
+    },
+
+    getPublishedPageBySlug: {
+      params: {
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { slug } = ctx.params;
+
+        return this.settings.model.findOne({
+          where: {
+            slug,
+          },
+        })
+          .then((res) => ({ ok: true, data: { ...res.dataValues, url: `${PUBLISHED_SERVER}/${slug}` } }))
+          .catch((err) => ({ ok: false, error: err }));
+      },
+    },
+
+    getPublishedPageByWebPageId: {
+      params: {
+        webPageId: 'number',
+      },
+      handler(ctx) {
+        const { webPageId } = ctx.params;
+
+        return this.settings.model.findOne({
+          where: {
+            webPageId,
+          },
+        })
+          .then((res) => ({
+            ok: true,
+            data: {
+              ...res.dataValues,
+              url: `${PUBLISHED_SERVER}/${res.dataValues.slug}`,
+            }
+          }))
+          .catch((err) => ({ ok: false, error: err }));
+      },
+    },
+
+    getAllPublishedPages: {
+      handler() {
+        return this.settings.model.findAll({ raw: true })
+          .then(
+            (pages) => (pages.map(({
+              id, webPageId, slug, publishedAt
+            }) => ({
+              id,
+              webPageId,
+              slug,
+              url: `${PUBLISHED_SERVER}/${slug}`,
+              publishedAt,
+            })))
+          )
+          .then((pages) => ({ ok: true, pages }))
+          .catch((err) => ({ ok: false, error: err }));
+      },
     },
   },
 };

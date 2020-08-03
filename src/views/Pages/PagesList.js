@@ -67,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function PageList({ className, ...rest }) {
+function PagesList({ className, ...rest }) {
   const classes = useStyles();
   const [pages, setPages] = useState([]);
   const [homePageId, setHomePageId] = useState(null);
@@ -249,8 +249,8 @@ function PageList({ className, ...rest }) {
   );
 }
 
-PageList.propTypes = {
-  className: PropTypes.string
+PagesList.propTypes = {
+  className: PropTypes.string,
 };
 
-export default PageList;
+export default PagesList;

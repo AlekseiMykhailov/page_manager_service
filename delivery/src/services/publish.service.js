@@ -2,54 +2,40 @@ module.exports = ({
   name: 'publish',
   actions: {
 
-    getPublishedPage: {
-      params: {},
-      handler(ctx) {
-        const { slug } = ctx.params;
-
-        return this.broker.call('dbPublishedPages.getPageBySlug', { slug });
-      },
-    },
-
-    getAllPublishedPages: {
-      params: {},
-      handler() {
-        return this.broker.call('dbPublishedPages.getAllPublishedPages');
-      },
-    },
-
     createPublishedPage: {
-      params: {},
+      params: {
+        id: 'number',
+        slug: 'string',
+        html: 'string',
+      },
       handler(ctx) {
-        const {
-          id, slug, html
-        } = ctx.params;
+        const { id, slug, html } = ctx.params;
 
         this.logger.info('CREATE PUBLISHED PAGE: ', ctx.params);
 
-        return this.broker.call('dbPublishedPages.createPublishedPage', {
-          id, slug, html
-        });
+        return this.broker.call('dbPublishedPages.createPublishedPage', { id, slug, html });
       },
     },
 
     updatePublishedPage: {
-      params: {},
+      params: {
+        id: 'number',
+        slug: 'string',
+        html: 'string',
+      },
       handler(ctx) {
-        const {
-          id, slug, html
-        } = ctx.params;
+        const { id, slug, html } = ctx.params;
 
         this.logger.info('UPDATE PUBLISHED PAGE: ', ctx.params);
 
-        return this.broker.call('dbPublishedPages.updatePublishedPage', {
-          id, slug, html
-        });
+        return this.broker.call('dbPublishedPages.updatePublishedPage', { id, slug, html });
       },
     },
 
     destroyPublishedPage: {
-      params: {},
+      params: {
+        slug: 'string',
+      },
       handler(ctx) {
         const { slug } = ctx.params;
 
@@ -57,5 +43,56 @@ module.exports = ({
       }
     },
 
+    getPublishedPage: {
+      params: {
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { slug } = ctx.params;
+
+        return this.broker.call('dbPublishedPages.getPublishedPageBySlug', { slug });
+      },
+    },
+
+    getPublishedPageHTML: {
+      params: {
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { slug } = ctx.params;
+
+        return this.broker.call('dbPublishedPages.getPublishedPageBySlug', { slug })
+          .then((res) => ((res.ok) ? res.data.html : res));
+      },
+    },
+
+    getPublishedHomePageHTML: {
+      handler() {
+        return this.broker.call('dbSettings.getHomePageId', { domain: 'localhost:3011' })
+          .then((res) => {
+            const { webPageId } = res;
+            return this.broker.call('dbPublishedPages.getPublishedPageByWebPageId', { webPageId });
+          })
+          .then((res) => ((res.ok) ? res.data.html : res));
+      },
+    },
+
+    getAllPublishedPages: {
+      handler() {
+        return this.broker.call('dbPublishedPages.getAllPublishedPages');
+      },
+    },
+
+    isPublished: {
+      params: {
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { slug } = ctx.params;
+
+        return this.broker.call('dbPublishedPages.getPublishedPageBySlug', { slug })
+          .then((res) => ({ ok: res.ok }));
+      }
+    },
   }
 });

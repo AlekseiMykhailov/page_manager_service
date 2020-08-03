@@ -7,7 +7,7 @@ import {
   Typography,
   colors,
 } from '@material-ui/core';
-import PageList from './PageList';
+import PagesList from './PagesList';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,7 +38,7 @@ function Pages() {
           Pages List
         </Typography>
         <Divider className={classes.divider} />
-        <PageList className={classes.pages} />
+        <PagesList className={classes.pages} />
       </Container>
     </Page>
   );

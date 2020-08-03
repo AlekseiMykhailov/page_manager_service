@@ -21,8 +21,8 @@ module.exports = {
       {
         path: '/',
         aliases: {
-          'GET /': 'dbPublishedPages.getHomePageHtml',
-          'GET /:slug': 'dbPublishedPages.getPageHtml',
+          'GET /': 'publish.getPublishedHomePageHTML',
+          'GET /:slug': 'publish.getPublishedPageHTML',
         },
         bodyParsers: {
           json: true,
@@ -33,7 +33,7 @@ module.exports = {
         },
       },
 
-      {
+      { // TODO: delete it after testing
         path: '/all',
         aliases: {
           'GET /': 'dbPublishedPages.getAllPublishedPages',

@@ -39,7 +39,7 @@ module.exports = {
     deleteWebPage(ctx) {
       const { slug } = ctx.params;
 
-      return this.broker.call('dbPublishedPages.isPublished', { slug })
+      return this.broker.call('publish.isPublished', { slug })
         .then((res) => {
           if (res.ok) {
             return { ok: false, err: 'Published Page could not be deleted' };
