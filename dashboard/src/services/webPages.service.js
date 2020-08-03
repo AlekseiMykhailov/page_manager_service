@@ -57,6 +57,9 @@ module.exports = ({
     },
 
     deleteWebPage: {
+      params: {
+        slug: 'string',
+      },
       handler(ctx) {
         const { slug } = ctx.params;
 
@@ -185,6 +188,9 @@ module.exports = ({
     },
 
     getPublishedPageData: {
+      params: {
+        slug: 'string',
+      },
       handler(ctx) {
         const { slug } = ctx.params;
 

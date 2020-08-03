@@ -4,11 +4,6 @@ const nav = [
   { id: '3', path: '/create-page', title: 'Create Web Page' },
 ];
 
-const dashboardSections = [
-  { path: '/pages', title: 'WebPages' },
-  { path: '/create-page', title: 'Create Web Page' },
-];
-
 module.exports = ({
   name: 'dashboard',
   actions: {
@@ -19,22 +14,11 @@ module.exports = ({
       },
     },
 
-    dashboard: {
-      handler() {
-        return JSON.stringify({ ok: true, dashboardSections }, null, 2);
-      },
-    },
-
     listWebPages: {
       handler() {
-        let pages;
-
         return this.broker.call('webPages.getListWebPages')
-          .then((res) => { pages = res.pages; })
-          .then(() => this.broker.call('dbSettings.getHomePageId', { domain: 'localhost:3011' }))
-          .then((res) => JSON.stringify({
+          .then(({ pages }) => JSON.stringify({
             ok: true,
-            homePageId: res.webPageId,
             pages,
           }, null, 2));
       },

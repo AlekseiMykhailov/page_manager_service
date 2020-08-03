@@ -23,10 +23,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    isHomePage: {
-      type: DataTypes.BOOLEAN,
-      allowNull: true,
-    },
   }, {
     paranoid: true,
   });

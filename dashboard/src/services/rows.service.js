@@ -207,7 +207,8 @@ module.exports = ({
 
     getRowsForPage: {
       handler(ctx) {
-        return rowsStore.getRowsByPageId(ctx.params.id);
+        const { id } = ctx.params;
+        return rowsStore.getRowsByPageId(id);
       },
     },
 
@@ -223,7 +224,7 @@ module.exports = ({
         order: 'number',
       },
       handler(ctx) {
-        const data = {...ctx.params};
+        const data = { ...ctx.params };
         const { rowId, order } = ctx.params;
 
         rowsStore.update(rowId, +order, data);
