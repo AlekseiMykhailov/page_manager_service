@@ -1,6 +1,7 @@
 module.exports = ({
   name: 'webPages',
   actions: {
+
     createWebPage: {
       params: {
         title: 'string',
@@ -14,12 +15,12 @@ module.exports = ({
         } = ctx.params;
 
         return this.broker.call('dbWebPages.createWebPage', {
-          slug, isHomePage, title, description
+          slug, title, description
         })
           .then(({ id }) => {
             if (isHomePage) {
               return this.broker.call('dbSettings.setHomePageId', {
-                domain: 'localhost: 3011',
+                domain: 'localhost:3011',
                 homePageId: id
               }).then(() => ({ ok: true, id }));
             }

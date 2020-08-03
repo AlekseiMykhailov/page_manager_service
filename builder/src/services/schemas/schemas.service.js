@@ -141,6 +141,7 @@ const rowSchemasStore = new RowSchemasStore(mockRowsSchemas);
 module.exports = ({
   name: 'schemas',
   actions: {
+
     getWebPageSchema: {
       handler() {
         return JSON.stringify({ ok: true, schema: webPageSchema }, null, 2);
@@ -157,16 +158,25 @@ module.exports = ({
     },
 
     constructWebPage: {
+      params: {
+        slug: 'string',
+        title: 'string',
+        description: 'string',
+      },
       handler(ctx) {
         const {
-          slug, title, description, isHomePage
+          slug, title, description
         } = ctx.params;
 
-        return new WebPage(slug, title, description, isHomePage);
+        return new WebPage(slug, title, description);
       },
     },
 
     constructRow: {
+      params: {
+        webPageId: 'number',
+        order: 'number',
+      },
       handler(ctx) {
         const {
           meta, webPageId, order, fields
