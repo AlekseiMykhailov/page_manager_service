@@ -204,6 +204,12 @@ function PagesList({ className, ...rest }) {
                 </Label>
               )}
 
+              {!Object.prototype.hasOwnProperty.call(page, 'published') && (page.id === homePageId) && (
+                <Label color={colors.yellow[900]}>
+                  Home Page
+                </Label>
+              )}
+
               <Tooltip title="Preview">
                 <Link
                   component={RouterLink}
