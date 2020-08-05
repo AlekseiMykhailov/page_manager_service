@@ -106,11 +106,15 @@ module.exports = ({
         return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
           .then((res) => {
             webPage = res.data;
-            return this.broker.call('rows.getRowsForWebPage', { id: webPage.id });
+
+            return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
           })
           .then((rows) => this.broker.call('builder.create', { webPage, rows }))
           .then((html) => JSON.stringify({ ok: true, html }, null, 2))
-          .catch((err) => JSON.stringify(err, null, 2));
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
