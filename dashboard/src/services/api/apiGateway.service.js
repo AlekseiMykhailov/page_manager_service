@@ -34,7 +34,6 @@ module.exports = {
           'GET /nav': 'dashboard.nav',
           'GET /settings': 'settings.getHomePageId',
           'GET /rows': 'rows.getAllRows',
-          'GET /schemas': 'dbRowSchemas.getAllSchemas',
         },
         authorization: false,
         bodyParsers: {

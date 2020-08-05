@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -41,9 +41,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function RowAddForm({
-  pageId, className, newRowOrder, getPageData
+  pageId, className, schemas, newRowOrder, getPageData
 }) {
-  const [rowSchemas, setRowSchemas] = useState([]);
   const [selectedRowSchemaId, setSelectedRowSchemaId] = useState('');
   const [selectedRowSchema, setSelectedRowSchema] = useState();
 
@@ -51,22 +50,6 @@ function RowAddForm({
   const { slug } = useParams();
   const classes = useStyles();
   const API_URL = process.env.REACT_APP_API_URL;
-
-  const getRowSchemas = useCallback(() => {
-    FETCH.getData(
-      `${API_URL}/schemas/rows`,
-    ).then((response) => {
-      if (response.ok) {
-        setRowSchemas(response.schemas);
-      } else if (response.error) {
-        console.log(response.error);
-      }
-    });
-  }, [API_URL]);
-
-  useEffect(() => {
-    getRowSchemas();
-  }, [getRowSchemas]);
 
   const handleStatusMessage = (status, text) => {
     dispatch(setStatusMessage(status, text));
@@ -114,7 +97,7 @@ function RowAddForm({
 
   const handleSelectRowSchema = (e) => {
     const { value } = e.target;
-    const selectedSchema = { ...rowSchemas.find((rowSchema) => rowSchema.id === value) };
+    const selectedSchema = { ...schemas.find((rowSchema) => rowSchema.id === value) };
 
     selectedSchema.schemaId = selectedSchema.id;
     selectedSchema.webPageId = pageId;
@@ -132,115 +115,113 @@ function RowAddForm({
 
   return (
     <>
-      {rowSchemas && (
-        <>
-          <Divider className={classes.divider} />
-          <Grid
-            container
-            direction="row"
-            justify="space-between"
-            alignItems="center"
+      <Divider className={classes.divider} />
+      <Grid
+        container
+        direction="row"
+        justify="space-between"
+        alignItems="center"
+      >
+        <Grid item>
+          <Typography
+            gutterBottom
+            variant="h4"
           >
-            <Grid item>
-              <Typography
-                gutterBottom
-                variant="h4"
-              >
-                Add New Row
-              </Typography>
-            </Grid>
-            <Grid item>
-              <FormControl variant="outlined" className={classes.formControl}>
-                <InputLabel id="new-row-schema-label">Row Schema</InputLabel>
-                <Select
-                  labelId="new-row-schema-label"
-                  id="new-row-schema"
-                  value={selectedRowSchemaId}
-                  onChange={handleSelectRowSchema}
-                  label="Row Schema"
-                  fullWidth
-                >
-                  {rowSchemas.map((schema) => (
-                    <MenuItem value={schema.id} key={schema.id}>
-                      {schema.meta.title}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+            {selectedRowSchemaId
+              ? `Add New ${schemas.find((rowSchema) => rowSchema.id === selectedRowSchemaId).meta.title}`
+              : 'Add New Row'}
+          </Typography>
+        </Grid>
+        <Grid item>
+          <FormControl variant="outlined" className={classes.formControl}>
+            <InputLabel id="new-row-schema-label">Row Schema</InputLabel>
+            <Select
+              labelId="new-row-schema-label"
+              id="new-row-schema"
+              value={selectedRowSchemaId}
+              onChange={handleSelectRowSchema}
+              label="Row Schema"
+              fullWidth
+            >
+              {schemas.map((schema) => (
+                <MenuItem value={schema.id} key={schema.id}>
+                  {schema.meta.title}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
 
-            {selectedRowSchema && (
-              <form
-                id="new-row"
-                action={`${API_URL}/rows`}
-                noValidate
-                autoComplete="off"
-                onSubmit={handleSubmit}
-                className={className}
-                key="new-row"
+      {selectedRowSchema && (
+      <form
+        id="new-row"
+        action={`${API_URL}/rows`}
+        noValidate
+        autoComplete="off"
+        onSubmit={handleSubmit}
+        className={className}
+        key="new-row"
+      >
+        <TextField
+          id="new-row-webPageId"
+          name="webPageId"
+          type="hidden"
+          value={pageId}
+        />
+        <TextField
+          id="new-row-schemaId"
+          name="order"
+          type="hidden"
+          value={selectedRowSchemaId}
+        />
+        <TextField
+          id="new-row-order"
+          name="order"
+          type="hidden"
+          value={newRowOrder}
+        />
+        {selectedRowSchema.fields.map(({ name, type, value }) => (
+          <TextField
+            fullWidth
+            id={name}
+            label={name}
+            margin="normal"
+            name={name}
+            type={type}
+            variant="outlined"
+            value={value}
+            onChange={handleInputChange}
+            key={name}
+          />
+        ))}
+        <Grid
+          container
+          direction="row"
+          justify="flex-end"
+          alignItems="center"
+        >
+          <Grid item>
+            <ButtonGroup
+              variant="contained"
+              className={classes.buttonGroup}
+              size="small"
+              color="primary"
+              aria-label="contained primary button group"
+            >
+              <Button
+                type="submit"
+                size="small"
+                variant="contained"
+                color="primary"
+                startIcon={<SaveAltIcon />}
               >
-                <TextField
-                  id="new-row-webPageId"
-                  name="webPageId"
-                  type="hidden"
-                  value={pageId}
-                />
-                <TextField
-                  id="new-row-schemaId"
-                  name="order"
-                  type="hidden"
-                  value={selectedRowSchemaId}
-                />
-                <TextField
-                  id="new-row-order"
-                  name="order"
-                  type="hidden"
-                  value={newRowOrder}
-                />
-                  {selectedRowSchema.fields.map(({ name, type, value }) => (
-                    <TextField
-                      fullWidth
-                      id={name}
-                      label={name}
-                      margin="normal"
-                      name={name}
-                      type={type}
-                      variant="outlined"
-                      value={value}
-                      onChange={handleInputChange}
-                      key={name}
-                    />
-                  ))}
-                <Grid
-                  container
-                  direction="row"
-                  justify="flex-end"
-                  alignItems="center"
-                >
-                  <Grid item>
-                    <ButtonGroup
-                      variant="contained"
-                      className={classes.buttonGroup}
-                      size="small"
-                      color="primary"
-                      aria-label="contained primary button group"
-                    >
-                      <Button
-                        type="submit"
-                        size="small"
-                        variant="contained"
-                        color="primary"
-                        startIcon={<SaveAltIcon />}
-                      >
-                        Save Row
-                      </Button>
-                    </ButtonGroup>
-                  </Grid>
-                </Grid>
-              </form>
-            )}
-        </>
+                Save Row
+              </Button>
+            </ButtonGroup>
+          </Grid>
+        </Grid>
+      </form>
       )}
     </>
   );
@@ -253,6 +234,7 @@ RowAddForm.defaultProps = {
 RowAddForm.propTypes = {
   pageId: PropTypes.number.isRequired,
   className: PropTypes.string,
+  schemas: PropTypes.array.isRequired,
   newRowOrder: PropTypes.number.isRequired,
   getPageData: PropTypes.func,
 };

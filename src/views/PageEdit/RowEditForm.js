@@ -47,12 +47,13 @@ function RowEditContainer({
   index,
   maxIndex,
   className,
+  schemas,
   handleSubmit,
   handleInputChange,
   handleChangeOrder,
   handleDelete,
 }) {
-  const { id, fields, schema } = row;
+  const { id, fields, schemaId } = row;
   const API_URL = process.env.REACT_APP_API_URL;
   const classes = useStyles();
 
@@ -78,7 +79,7 @@ function RowEditContainer({
             gutterBottom
             variant="h4"
           >
-            {schema}
+            {schemas.find((rowSchema) => rowSchema.id === schemaId).meta.title}
           </Typography>
         </Grid>
         <Grid item>
@@ -164,14 +165,13 @@ RowEditContainer.defaultProps = {
 RowEditContainer.propTypes = {
   row: PropTypes.shape({
     id: PropTypes.number.isRequired,
+    schemaId: PropTypes.string.isRequired,
     fields: PropTypes.array,
-    schema: PropTypes.shape({
-      title: PropTypes.string,
-    }),
   }),
   index: PropTypes.number.isRequired,
   maxIndex: PropTypes.number.isRequired,
   className: PropTypes.string,
+  schemas: PropTypes.array.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   handleInputChange: PropTypes.func.isRequired,
   handleChangeOrder: PropTypes.func.isRequired,

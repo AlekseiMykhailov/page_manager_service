@@ -73,6 +73,7 @@ function PageCreate() {
   const classes = useStyles();
   const { slug } = useParams();
   const [pageData, setPagesData] = useState(null);
+  const [rowsSchemas, setRowSchemas] = useState([]);
   const [rowsData, setRowsData] = useState([]);
   const [publishData, setPublishData] = useState(null);
   const [homePageId, setHomePageId] = useState(null);
@@ -98,6 +99,15 @@ function PageCreate() {
       });
   }, [API_URL]);
 
+  const getHomeRowSchemas = useCallback(() => {
+    FETCH.getData(`${API_URL}/schemas/rows`)
+      .then((response) => {
+        if (response.ok) {
+          setRowSchemas(response.schemas);
+        }
+      });
+  }, [API_URL]);
+
   const getPublishData = useCallback(() => {
     FETCH.getData(`${API_URL}/published/${slug}`)
       .then((response) => {
@@ -114,7 +124,8 @@ function PageCreate() {
     getPageData();
     getPublishData();
     getHomePageData();
-  }, [getPageData, getPublishData, getHomePageData]);
+    getHomeRowSchemas();
+  }, [getPageData, getPublishData, getHomePageData, getHomeRowSchemas]);
 
   const handleResponse = (
     response,
@@ -391,6 +402,7 @@ function PageCreate() {
                 index={i}
                 maxIndex={rowsData.length - 1}
                 className={classes.section}
+                schemas={rowsSchemas}
                 handleSubmit={handleSaveRow}
                 handleInputChange={changeRowInput}
                 handleDelete={deleteRow}
@@ -403,6 +415,7 @@ function PageCreate() {
               <RowAddForm
                 pageId={pageData.id}
                 className={classes.section}
+                schemas={rowsSchemas}
                 newRowOrder={rowsData.length + 1}
                 getPageData={getPageData}
               />
