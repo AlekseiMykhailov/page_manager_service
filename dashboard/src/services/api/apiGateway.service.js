@@ -33,6 +33,8 @@ module.exports = {
         aliases: {
           'GET /nav': 'dashboard.nav',
           'GET /settings': 'settings.getHomePageId',
+          'GET /rows': 'rows.getAllRows',
+          'GET /schemas': 'dbRowSchemas.getAllSchemas',
         },
         authorization: false,
         bodyParsers: {
@@ -79,10 +81,27 @@ module.exports = {
       {
         path: '/rows',
         aliases: {
-          'GET /schemas': 'schemas.getRowSchemas',
           'POST /': 'rows.createRow',
           'PUT /:rowId': 'rows.updateRow',
+          'PUT /order/:rowId': 'rows.updateRowOrder',
           'DELETE /:id': 'rows.deleteRow',
+        },
+        authorization: false,
+        bodyParsers: {
+          json: true,
+          urlencoded: { extended: true }
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
+      },
+
+      // SCHEMAS
+      {
+        path: '/schemas',
+        aliases: {
+          'GET /rows': 'schemas.getRowSchemas',
         },
         authorization: false,
         bodyParsers: {

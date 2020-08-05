@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 /* eslint-disable max-classes-per-file */
 const { v4 } = require('uuid');
 
@@ -44,7 +45,7 @@ const webPageSchema = {
 
 const mockRowsSchemas = [
   {
-    id: 'schema-1',
+    id: '1',
     webPageId: 'number',
     order: 'number',
     meta: {
@@ -67,7 +68,7 @@ const mockRowsSchemas = [
     ],
   },
   {
-    id: 'schema-2',
+    id: '2',
     webPageId: 'number',
     order: 'number',
     meta: {
@@ -150,10 +151,10 @@ module.exports = ({
 
     getRowSchemas: {
       handler() {
-        return JSON.stringify({
+        return {
           ok: true,
           schemas: rowSchemasStore.getList(),
-        }, null, 2);
+        };
       }
     },
 

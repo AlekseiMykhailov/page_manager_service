@@ -20,8 +20,13 @@ module.exports = {
         const webPage = { slug, title, description };
 
         return this.settings.model.create(webPage)
-          .then((res) => ({ ok: true, id: res.dataValues.id }))
-          .catch((err) => ({ ok: false, err }));
+          .then((res) => {
+            return { ok: true, id: res.dataValues.id };
+          })
+          .catch((error) => {
+            this.logger.error('ERROR CREATE PAGE: ', error);
+            return { ok: false, error };
+          });
       },
     },
 
@@ -35,12 +40,10 @@ module.exports = {
         const { slug, title, description } = ctx.params;
 
         return this.settings.model.update({ title, description }, {
-          where: {
-            slug,
-          }
+          where: { slug }
         })
           .then(() => ({ ok: true }))
-          .catch((err) => ({ ok: false, err }));
+          .catch((error) => ({ ok: false, error }));
       },
     },
 
@@ -54,16 +57,14 @@ module.exports = {
         return this.broker.call('publish.isPublished', { slug })
           .then((res) => {
             if (res.ok) {
-              return { ok: false, err: 'Published Page could not be deleted' };
+              return { ok: false, error: 'Published Page could not be deleted' };
             }
 
             return this.settings.model.destroy({
-              where: {
-                slug,
-              }
+              where: { slug }
             })
               .then(() => ({ ok: true }))
-              .catch((err) => ({ ok: false, err }));
+              .catch((error) => ({ ok: false, error }));
           });
       },
     },
@@ -74,14 +75,16 @@ module.exports = {
       },
       handler(ctx) {
         const { slug } = ctx.params;
-
         return this.settings.model.findOne({
-          where: {
-            slug,
-          },
-        })
-          .then((res) => ({ ok: true, data: res.dataValues }))
-          .catch((err) => ({ ok: false, err }));
+          where: { slug },
+        }).then(({ dataValues }) => {
+          const {
+            id, title, description
+          } = dataValues;
+          return {
+            id, slug, title, description
+          };
+        }).then((data) => ({ ok: true, data }));
       },
     },
 
@@ -93,12 +96,16 @@ module.exports = {
         const { id } = ctx.params;
 
         return this.settings.model.findOne({
-          where: {
-            id,
-          },
+          where: { id },
         })
-          .then(() => ({ ok: true }))
-          .catch((err) => ({ ok: false, err }));
+          .then(({ dataValues }) => {
+            const { slug, title, description } = dataValues;
+            return {
+              id, slug, title, description
+            };
+          })
+          .then((data) => ({ ok: true, data }))
+          .catch((error) => ({ ok: false, error }));
       },
     },
 
@@ -107,16 +114,13 @@ module.exports = {
         return this.settings.model.findAll({ raw: true })
           .then(
             (pages) => (pages.map(({
-              id, slug, isHomePage, title
+              id, slug, title
             }) => ({
-              id,
-              slug,
-              isHomePage,
-              title,
+              id, slug, title
             })))
           )
           .then((pages) => ({ ok: true, pages }))
-          .catch((err) => ({ ok: false, err }));
+          .catch((error) => ({ ok: false, error }));
       },
     },
   },

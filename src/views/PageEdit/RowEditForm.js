@@ -52,7 +52,7 @@ function RowEditContainer({
   handleChangeOrder,
   handleDelete,
 }) {
-  const { id, fields, meta } = row;
+  const { id, fields, schema } = row;
   const API_URL = process.env.REACT_APP_API_URL;
   const classes = useStyles();
 
@@ -78,7 +78,7 @@ function RowEditContainer({
             gutterBottom
             variant="h4"
           >
-            {meta.title}
+            {schema}
           </Typography>
         </Grid>
         <Grid item>
@@ -163,11 +163,11 @@ RowEditContainer.defaultProps = {
 
 RowEditContainer.propTypes = {
   row: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    fields: PropTypes.array.isRequired,
-    meta: PropTypes.shape({
-      title: PropTypes.string.isRequired
-    }).isRequired,
+    id: PropTypes.number.isRequired,
+    fields: PropTypes.array,
+    schema: PropTypes.shape({
+      title: PropTypes.string,
+    }),
   }),
   index: PropTypes.number.isRequired,
   maxIndex: PropTypes.number.isRequired,

@@ -167,11 +167,16 @@ function PageCreate() {
       .then((response) => handleResponse(response, null, 'Row was edited'));
   };
 
+  const saveRowOrder = (rowId, order) => {
+    FETCH.putData(`${API_URL}/rows/order/${rowId}`, { rowId, order })
+      .then((response) => handleResponse(response, null, 'Row order was changed'));
+  };
+
   const handleSaveRow = (e) => {
     e.preventDefault();
 
     const { id } = e.target;
-    const rowData = rowsData.find((row) => row.id === id);
+    const rowData = rowsData.find((row) => row.id === +id);
 
     saveRowData(rowData);
   };
@@ -180,7 +185,7 @@ function PageCreate() {
     const { name, value } = e.target;
     const { rowId } = e.currentTarget.dataset;
     const rowsDataUpdated = [...rowsData].map((row) => {
-      if (row.id === rowId) {
+      if (row.id === +rowId) {
         return {
           ...row,
           fields: [...row.fields].map((field) => {
@@ -222,8 +227,7 @@ function PageCreate() {
     });
 
     setRowsData(updatedRows);
-    saveRowData(updatedRows.find((row) => row.id === changingRows.rowA.id));
-    saveRowData(updatedRows.find((row) => row.id === changingRows.rowB.id));
+    updatedRows.forEach(({ id, order }) => saveRowOrder(id, order));
   };
 
   const handleRowsOrder = (e) => {
@@ -234,7 +238,7 @@ function PageCreate() {
     };
 
     rowsData.forEach((row, i) => {
-      if (rowsData[i].id === rowId && direction === 'down' && i < (rowsData.length - 1)) {
+      if (rowsData[i].id === +rowId && direction === 'down' && i < (rowsData.length - 1)) {
         changingRows.rowA = {
           id: row.id,
           order: rowsData[i + 1].order,
@@ -245,7 +249,7 @@ function PageCreate() {
         };
       }
 
-      if (rowsData[i].id === rowId && direction === 'up' && i > 0) {
+      if (rowsData[i].id === +rowId && direction === 'up' && i > 0) {
         changingRows.rowA = {
           id: row.id,
           order: rowsData[i - 1].order,

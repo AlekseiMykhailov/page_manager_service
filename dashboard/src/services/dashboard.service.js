@@ -30,14 +30,28 @@ module.exports = ({
       },
       handler(ctx) {
         const { slug } = ctx.params;
-        let webPage;
+        const response = {};
 
         return this.broker.call('webPages.getWebPageBySlug', { slug })
-          .then((res) => { webPage = res.data; })
+          .then((webPage) => { response.webPage = webPage.data; })
           .then(() => this.broker.call('dbSettings.getHomePageId', { domain: 'localhost:3011' }))
-          .then((res) => { webPage.isHomePage = (webPage.id === res.webPageId); })
-          .then(() => this.broker.call('rows.getRowsForPage', { id: webPage.id }))
-          .then((rows) => JSON.stringify({ ok: true, webPage, rows }, null, 2));
+          .then((res) => { response.webPage.isHomePage = (response.webPage.id === res.webPageId); })
+          .then(() => this.broker.call('rows.getRowsForWebPage', { webPageId: response.webPage.id }))
+          .then((rows) => {
+            response.rows = rows;
+            return rows.map((row) => row.id);
+          })
+          .then((rowIds) => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
+          .then(({ fields }) => response.rows.map((row) => ({
+            ...row,
+            fields: fields.filter((field) => field.rowId === row.id),
+          })))
+          .then((rows) => { response.rows = rows; })
+          .then(() => JSON.stringify({
+            ok: true,
+            webPage: response.webPage,
+            rows: response.rows,
+          }, null, 2));
       },
     }
   },

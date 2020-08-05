@@ -25,6 +25,8 @@ module.exports = ({
               }).then(() => ({ ok: true, id }));
             }
 
+            this.logger.info('@@@@@@@@@@@@@: ', id);
+
             return { ok: true, id };
           });
       },
@@ -104,7 +106,7 @@ module.exports = ({
         return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
           .then((res) => {
             webPage = res.data;
-            return this.broker.call('rows.getRowsForPage', { id: webPage.id });
+            return this.broker.call('rows.getRowsForWebPage', { id: webPage.id });
           })
           .then((rows) => this.broker.call('builder.create', { webPage, rows }))
           .then((html) => JSON.stringify({ ok: true, html }, null, 2))
@@ -131,7 +133,7 @@ module.exports = ({
         return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
           .then((res) => {
             webPage = res.data;
-            return this.broker.call('rows.getRowsForPage', { id: webPage.id });
+            return this.broker.call('rows.getRowsForWebPage', { id: webPage.id });
           })
           .then((rows) => this.broker.call('builder.create', { webPage, rows }))
           .then((html) => this.broker.call('publish.createPublishedPage', {
@@ -159,8 +161,9 @@ module.exports = ({
           .then((res) => {
             webPage = res.data;
 
-            return this.broker.call('rows.getRowsForPage', { id: webPage.id });
+            return webPage.id;
           })
+          .then((webPageId) => this.broker.call('rows.getRowsForWebPage', { webPageId }))
           .then((rows) => this.broker.call('builder.create', { webPage, rows }))
           .then((html) => this.broker.call('dbPublishedPages.updatePublishedPage', {
             id: webPage.id,

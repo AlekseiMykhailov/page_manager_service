@@ -54,7 +54,7 @@ function RowAddForm({
 
   const getRowSchemas = useCallback(() => {
     FETCH.getData(
-      `${API_URL}/rows/schemas`,
+      `${API_URL}/schemas/rows`,
     ).then((response) => {
       if (response.ok) {
         setRowSchemas(response.schemas);
@@ -116,12 +116,15 @@ function RowAddForm({
     const { value } = e.target;
     const selectedSchema = { ...rowSchemas.find((rowSchema) => rowSchema.id === value) };
 
+    selectedSchema.schemaId = selectedSchema.id;
     selectedSchema.webPageId = pageId;
     selectedSchema.order = newRowOrder;
     selectedSchema.fields = selectedSchema.fields.map((field) => ({
       ...field,
       value: '',
     }));
+
+    delete selectedSchema.id;
 
     setSelectedRowSchemaId(value);
     setSelectedRowSchema(selectedSchema);
@@ -182,6 +185,12 @@ function RowAddForm({
                   name="webPageId"
                   type="hidden"
                   value={pageId}
+                />
+                <TextField
+                  id="new-row-schemaId"
+                  name="order"
+                  type="hidden"
+                  value={selectedRowSchemaId}
                 />
                 <TextField
                   id="new-row-order"

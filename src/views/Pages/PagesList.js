@@ -64,7 +64,11 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       color: colors.blue[900],
     }
-  }
+  },
+  disabled: {
+    marginLeft: theme.spacing(2),
+    color: colors.grey[300],
+  },
 }));
 
 function PagesList({ className, ...rest }) {
@@ -235,18 +239,22 @@ function PagesList({ className, ...rest }) {
                   <EditIcon />
                 </Link>
               </Tooltip>
-              <Tooltip title="Delete Page">
-                <Button
-                  color="inherit"
-                  underline="none"
-                  data-slug={page.slug}
-                  className={classes.button}
-                  disabled={Object.prototype.hasOwnProperty.call(page, 'published')}
-                  onClick={deleteWepPage}
-                >
-                  <DeleteIcon />
-                </Button>
-              </Tooltip>
+              {!Object.prototype.hasOwnProperty.call(page, 'published') && (
+                <Tooltip title="Delete Page">
+                  <Button
+                    color="inherit"
+                    underline="none"
+                    data-slug={page.slug}
+                    className={classes.button}
+                    onClick={deleteWepPage}
+                  >
+                    <DeleteIcon />
+                  </Button>
+                </Tooltip>
+              )}
+              {Object.prototype.hasOwnProperty.call(page, 'published') && (
+                <DeleteIcon className={classes.disabled} />
+              )}
             </ListItem>
           ))}
         </List>

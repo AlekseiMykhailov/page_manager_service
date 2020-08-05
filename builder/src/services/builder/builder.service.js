@@ -4,49 +4,63 @@ const { rowBricks, rowWithImage } = require('../../../templates/default/rows');
 const {
   addForm, editForm, editRowForm, fieldSet, inputText, inputUrl, inputFile, select, buttonHtml,
 } = require('../../../templates/default/form');
+const row = require('../../../../dashboard/src/services/db/models/row');
 
 module.exports = ({
   name: 'builder',
   actions: {
     create(ctx) {
-      const { rows, webPage } = ctx.params;
+      const { webPage, rows } = ctx.params;
       const { title, descr, slug } = webPage;
+      const rowIds = rows.map((row) => row.id);
+      let rowSchemas;
 
-      let rowsHtml;
+      return this.broker.call('schemas.getRowSchemas')
+        .then(({ schemas }) => { rowSchemas = schemas; })
+        .then(() => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
+        .then(({ fields }) => {
+          let rowsHtml;
 
-      if (rows) {
-        rowsHtml = [...rows].sort((a, b) => a.order - b.order)
-          .map(({ meta, fields }) => {
-            switch (meta.templateHbs) {
-              case 'bricks':
-                return rowBricks({
-                  title: fields.find((field) => field.name === 'title').value,
-                  bricks: fields.filter((field) => field.name !== 'title'),
-                });
+          if (rows) {
+            rowsHtml = [...rows].sort((a, b) => a.order - b.order)
+              .map(({ id, schemaId }) => {
+                const rowSchema = rowSchemas.find((schema) => schema.id === schemaId);
+                const rowFields = fields.filter((field) => field.rowId === id);
+                const { meta } = rowSchema;
+                const { templateHbs } = meta;
 
-              case 'withImage':
-                return rowWithImage({
-                  backgroundImageURL: fields.find((field) => field.name === 'backgroundImageURL').value,
-                  title: fields.find((field) => field.name === 'title').value,
-                  description: fields.find((field) => field.name === 'description').value,
-                });
+                switch (templateHbs) {
+                  case 'bricks':
+                    return rowBricks({
+                      title: rowFields.find((field) => field.name === 'title').value,
+                      bricks: rowFields.filter((field) => field.name !== 'title'),
+                    });
 
-              default:
-            }
-          })
-          .join('');
-      }
+                  case 'withImage':
+                    return rowWithImage({
+                      backgroundImageURL: rowFields.find((field) => field.name === 'backgroundImageURL').value,
+                      title: rowFields.find((field) => field.name === 'title').value,
+                      description: rowFields.find((field) => field.name === 'description').value,
+                    });
 
-      const html = layout({
-        slug,
-        title,
-        descr,
-        canBeEdited: true,
-        canBePublished: true,
-        rows: rowsHtml,
-      });
+                  default:
+                    return '';
+                }
+              })
+              .join('');
+          }
 
-      return html;
+          const html = layout({
+            slug,
+            title,
+            descr,
+            canBeEdited: true,
+            canBePublished: true,
+            rows: rowsHtml,
+          });
+
+          return html;
+        });
     },
 
     createList(ctx) {

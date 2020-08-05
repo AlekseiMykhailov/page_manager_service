@@ -5,7 +5,7 @@ module.exports = {
   name: 'dbSettings',
   mixins: [Rest],
   settings: {
-    model: db.Settings,
+    model: db.Setting,
   },
   actions: {
 
