@@ -79,7 +79,10 @@ function RowEditContainer({
             gutterBottom
             variant="h4"
           >
-            {schemas.find((rowSchema) => rowSchema.id === schemaId).meta.title}
+            {
+              (schemas.length > 0)
+              && schemas.find((rowSchema) => rowSchema.id === schemaId).meta.title
+            }
           </Typography>
         </Grid>
         <Grid item>

@@ -128,7 +128,7 @@ function RowAddForm({
             variant="h4"
           >
             {selectedRowSchemaId
-              ? `Add New ${schemas.find((rowSchema) => rowSchema.id === selectedRowSchemaId).meta.title}`
+              ? `Add New ${(schemas.length > 0) && schemas.find((rowSchema) => rowSchema.id === selectedRowSchemaId).meta.title}`
               : 'Add New Row'}
           </Typography>
         </Grid>

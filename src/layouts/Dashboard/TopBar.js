@@ -32,8 +32,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import axios from 'src/utils/axios';
 import NotificationsPopover from 'src/components/NotificationsPopover';
 import PricingModal from 'src/components/PricingModal';
-import { logout } from 'src/actions';
-import ChatBar from './ChatBar';
+// import { logout } from 'src/actions';
+// import ChatBar from './ChatBar';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -170,23 +170,23 @@ function TopBar({
     setOpenSearchPopover(false);
   };
 
-  useEffect(() => {
-    let mounted = true;
+  // useEffect(() => {
+  //   let mounted = true;
 
-    const fetchNotifications = () => {
-      axios.get('/api/account/notifications').then((response) => {
-        if (mounted) {
-          setNotifications(response.data.notifications);
-        }
-      });
-    };
+  //   const fetchNotifications = () => {
+  //     axios.get('/api/account/notifications').then((response) => {
+  //       if (mounted) {
+  //         setNotifications(response.data.notifications);
+  //       }
+  //     });
+  //   };
 
-    fetchNotifications();
+  //   fetchNotifications();
 
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  //   return () => {
+  //     mounted = false;
+  //   };
+  // }, []);
 
   return (
     <AppBar
@@ -309,10 +309,10 @@ function TopBar({
         onClose={handlePricingModalClose}
         open={pricingModalOpen}
       />
-      <ChatBar
+      {/* <ChatBar
         onClose={handleChatBarClose}
         open={openChatBar}
-      />
+      /> */}
     </AppBar>
   );
 }
