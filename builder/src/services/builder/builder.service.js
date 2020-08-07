@@ -4,7 +4,6 @@ const { rowBricks, rowWithImage } = require('../../../templates/default/rows');
 const {
   addForm, editForm, editRowForm, fieldSet, inputText, inputUrl, inputFile, select, buttonHtml,
 } = require('../../../templates/default/form');
-const row = require('../../../../dashboard/src/services/db/models/row');
 
 module.exports = ({
   name: 'builder',

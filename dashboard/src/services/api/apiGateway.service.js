@@ -1,5 +1,6 @@
 const { ServiceBroker } = require('moleculer');
 const ApiService = require('moleculer-web');
+const path = require('path');
 
 const broker = new ServiceBroker();
 
@@ -13,8 +14,9 @@ module.exports = {
     cors: {
       origin: [
         'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:3002',
+        'http://localhost:3010',
+        'http://localhost:3011',
+        'http://localhost:3012',
       ],
       methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'DELETE'],
       allowedHeaders: ['Content-Type', 'Origin', 'User-Agent', 'method'],
@@ -22,9 +24,8 @@ module.exports = {
       maxAge: 3600,
     },
     assets: {
-      // TODO: this don't work and need to fix it
-      folder: './public',
-      options: {}
+      folder: path.resolve(__dirname, '..', '..', '..', '..', 'build'),
+      options: {},
     },
     routes: [
       // COMMON
@@ -32,7 +33,8 @@ module.exports = {
         path: '/',
         aliases: {
           'GET /nav': 'dashboard.nav',
-          'GET /settings': 'settings.getHomePageId',
+          'GET /settings': 'domainSettings.getHomePageId',
+          'GET /domains': 'domainSettings.getDomains',
           'GET /rows': 'rows.getAllRows',
         },
         authorization: false,
@@ -119,6 +121,7 @@ module.exports = {
         aliases: {
           'GET /': 'webPages.previewWebPageList',
           'GET /:slug': 'webPages.previewWebPage',
+          'GET /test/:slug': 'webPages.test', // TODO: remove this line
         },
         bodyParsers: {
           json: false,

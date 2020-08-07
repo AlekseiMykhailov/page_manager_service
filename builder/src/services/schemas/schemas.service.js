@@ -37,6 +37,7 @@ class Row {
 }
 
 const webPageSchema = {
+  domain: new FieldSchema('domain', 'select'),
   slug: new FieldSchema('slug', 'text'),
   isHomePage: new FieldSchema('isHomePage', 'checkbox'),
   title: new FieldSchema('title', 'text'),
@@ -151,10 +152,7 @@ module.exports = ({
 
     getRowSchemas: {
       handler() {
-        return {
-          ok: true,
-          schemas: rowSchemasStore.getList(),
-        };
+        return { ok: true, schemas: rowSchemasStore.getList() };
       }
     },
 

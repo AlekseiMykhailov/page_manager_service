@@ -1,5 +1,5 @@
-const db = require('./models');
-const Rest = require('./mixins/rest');
+const db = require('../models');
+const Rest = require('../mixins/rest');
 
 module.exports = {
   name: 'dbWebPages',
@@ -11,18 +11,21 @@ module.exports = {
 
     createWebPage: {
       params: {
+        domain: 'string',
         slug: 'string',
         title: 'string',
         description: 'string',
       },
       handler(ctx) {
-        const { slug, title, description } = ctx.params;
-        const webPage = { slug, title, description };
+        const {
+          domain, slug, title, description
+        } = ctx.params;
+        const webPage = {
+          domain, slug, title, description
+        };
 
         return this.settings.model.create(webPage)
-          .then((res) => {
-            return { ok: true, id: res.dataValues.id };
-          })
+          .then((res) => ({ ok: true, id: res.dataValues.id }))
           .catch((error) => {
             this.logger.error('ERROR CREATE PAGE: ', error);
             return { ok: false, error };
@@ -43,7 +46,10 @@ module.exports = {
           where: { slug }
         })
           .then(() => ({ ok: true }))
-          .catch((error) => ({ ok: false, error }));
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
@@ -64,7 +70,10 @@ module.exports = {
               where: { slug }
             })
               .then(() => ({ ok: true }))
-              .catch((error) => ({ ok: false, error }));
+              .catch((err) => {
+                this.logger.error('ERROR: ', err);
+                return JSON.stringify(err, null, 2);
+              });
           });
       },
     },
@@ -79,10 +88,10 @@ module.exports = {
           where: { slug },
         }).then(({ dataValues }) => {
           const {
-            id, title, description
+            id, domain, title, description
           } = dataValues;
           return {
-            id, slug, title, description
+            id, domain, slug, title, description
           };
         }).then((data) => ({ ok: true, data }));
       },
@@ -99,9 +108,9 @@ module.exports = {
           where: { id },
         })
           .then(({ dataValues }) => {
-            const { slug, title, description } = dataValues;
+            const { domain, slug, title, description } = dataValues;
             return {
-              id, slug, title, description
+              id, domain, slug, title, description
             };
           })
           .then((data) => ({ ok: true, data }))
@@ -114,9 +123,9 @@ module.exports = {
         return this.settings.model.findAll({ raw: true })
           .then(
             (pages) => (pages.map(({
-              id, slug, title
+              id, domain, slug, title
             }) => ({
-              id, slug, title
+              id, domain, slug, title
             })))
           )
           .then((pages) => ({ ok: true, pages }))

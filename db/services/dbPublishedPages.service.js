@@ -1,10 +1,10 @@
-const db = require('./models');
-const Rest = require('./mixins/rest');
+const db = require('../models');
+const Rest = require('../mixins/rest');
 
 const PUBLISHED_SERVER = 'http://localhost:3011';
 
 module.exports = {
-  name: 'dbPublishedPages',
+  name: 'dbPublishedPage',
   mixins: [Rest],
   settings: {
     model: db.PublishedPage,
@@ -94,7 +94,10 @@ module.exports = {
           },
         })
           .then((res) => ({ ok: true, data: { ...res.dataValues, url: `${PUBLISHED_SERVER}/${slug}` } }))
-          .catch((err) => ({ ok: false, error: err }));
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return { ok: false, error: err };
+          });
       },
     },
 
@@ -117,7 +120,10 @@ module.exports = {
               url: `${PUBLISHED_SERVER}/${res.dataValues.slug}`,
             }
           }))
-          .catch((err) => ({ ok: false, error: err }));
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return { ok: false, error: err };
+          });
       },
     },
 
@@ -136,7 +142,10 @@ module.exports = {
             })))
           )
           .then((pages) => ({ ok: true, pages }))
-          .catch((err) => ({ ok: false, error: err }));
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return { ok: false, error: err };
+          });
       },
     },
   },

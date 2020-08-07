@@ -1,5 +1,5 @@
-const db = require('./models');
-const Rest = require('./mixins/rest');
+const db = require('../models');
+const Rest = require('../mixins/rest');
 
 module.exports = {
   name: 'dbRows',

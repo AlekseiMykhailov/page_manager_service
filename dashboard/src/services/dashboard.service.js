@@ -17,10 +17,7 @@ module.exports = ({
     listWebPages: {
       handler() {
         return this.broker.call('webPages.getListWebPages')
-          .then(({ pages }) => JSON.stringify({
-            ok: true,
-            pages,
-          }, null, 2));
+          .then(({ pages }) => JSON.stringify({ ok: true, pages }, null, 2));
       },
     },
 
@@ -34,7 +31,7 @@ module.exports = ({
 
         return this.broker.call('webPages.getWebPageBySlug', { slug })
           .then((webPage) => { response.webPage = webPage.data; })
-          .then(() => this.broker.call('dbSettings.getHomePageId', { domain: 'localhost:3011' }))
+          .then(() => this.broker.call('dbDomainSettings.getHomePageId', { domain: response.webPage.domain }))
           .then((res) => { response.webPage.isHomePage = (response.webPage.id === res.webPageId); })
           .then(() => this.broker.call('rows.getRowsForWebPage', { webPageId: response.webPage.id }))
           .then((rows) => {

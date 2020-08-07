@@ -35,7 +35,7 @@ function Pages() {
           gutterBottom
           variant="h3"
         >
-          Pages List
+          Web Page List
         </Typography>
         <Divider className={classes.divider} />
         <PagesList className={classes.pages} />

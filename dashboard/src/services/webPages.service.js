@@ -4,30 +4,33 @@ module.exports = ({
 
     createWebPage: {
       params: {
-        title: 'string',
+        domain: 'string',
         slug: 'string',
+        title: 'string',
         isHomePage: 'boolean',
         description: 'string',
       },
       handler(ctx) {
         const {
-          slug, isHomePage, title, description
+          domain, slug, isHomePage, title, description
         } = ctx.params;
 
         return this.broker.call('dbWebPages.createWebPage', {
-          slug, title, description
+          domain, slug, title, description
         })
           .then(({ id }) => {
             if (isHomePage) {
-              return this.broker.call('dbSettings.setHomePageId', {
+              return this.broker.call('dbDomainSettings.setHomePageId', {
                 domain: 'localhost:3011',
                 homePageId: id
               }).then(() => ({ ok: true, id }));
             }
 
-            this.logger.info('@@@@@@@@@@@@@: ', id);
-
             return { ok: true, id };
+          })
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
           });
       },
     },
@@ -44,18 +47,24 @@ module.exports = ({
           id, slug, isHomePage, title, description
         } = ctx.params;
 
-        this.logger.info('UPDATE WEB PAGE: ', ctx.params);
-
         if (isHomePage) {
-          return this.broker.call('dbSettings.setHomePageId', { domain: 'localhost:3011', homePageId: id })
+          return this.broker.call('dbDomainSettings.setHomePageId', { domain: 'localhost:3011', homePageId: id })
             .then(() => this.broker.call('dbWebPages.updateWebPage', {
               slug, title, description
-            }));
+            }))
+            .catch((err) => {
+              this.logger.error('ERROR: ', err);
+              return JSON.stringify(err, null, 2);
+            });
         }
 
         return this.broker.call('dbWebPages.updateWebPage', {
           slug, title, description
-        });
+        })
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
@@ -66,10 +75,12 @@ module.exports = ({
       handler(ctx) {
         const { slug } = ctx.params;
 
-        this.logger.info('DELETE WEB PAGE: ', ctx.params);
-
         return this.broker.call('dbWebPages.deleteWebPage', { slug })
-          .then((res) => JSON.stringify(res, null, 2));
+          .then((res) => JSON.stringify(res, null, 2))
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
@@ -80,7 +91,11 @@ module.exports = ({
       handler(ctx) {
         const { slug } = ctx.params;
 
-        return this.broker.call('dbWebPages.getWebPageBySlug', { slug });
+        return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
@@ -91,7 +106,11 @@ module.exports = ({
       handler(ctx) {
         const { id } = ctx.params;
 
-        return this.broker.call('dbWebPages.getWebPageById', { id });
+        return this.broker.call('dbWebPages.getWebPageById', { id })
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
@@ -110,7 +129,8 @@ module.exports = ({
             return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
           })
           .then((rows) => this.broker.call('builder.create', { webPage, rows }))
-          .then((html) => JSON.stringify({ ok: true, html }, null, 2))
+          // TODO: decide what should return this method - html or JSON
+          // .then((html) => JSON.stringify({ ok: true, html }, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
@@ -122,7 +142,11 @@ module.exports = ({
       handler() {
         return this.broker.call('dbWebPages.getAllWebPages')
           .then((res) => res.pages)
-          .then((pages) => ({ ok: true, pages }));
+          .then((pages) => ({ ok: true, pages }))
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
@@ -137,7 +161,7 @@ module.exports = ({
         return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
           .then((res) => {
             webPage = res.data;
-            return this.broker.call('rows.getRowsForWebPage', { id: webPage.id });
+            return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
           })
           .then((rows) => this.broker.call('builder.create', { webPage, rows }))
           .then((html) => this.broker.call('publish.createPublishedPage', {
@@ -169,7 +193,7 @@ module.exports = ({
           })
           .then((webPageId) => this.broker.call('rows.getRowsForWebPage', { webPageId }))
           .then((rows) => this.broker.call('builder.create', { webPage, rows }))
-          .then((html) => this.broker.call('dbPublishedPages.updatePublishedPage', {
+          .then((html) => this.broker.call('dbPublishedPage.updatePublishedPage', {
             id: webPage.id,
             slug,
             html,
@@ -191,7 +215,10 @@ module.exports = ({
 
         return this.broker.call('publish.destroyPublishedPage', { slug })
           .then((response) => JSON.stringify(response, null, 2))
-          .catch((err) => JSON.stringify(err, null, 2));
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
@@ -204,7 +231,10 @@ module.exports = ({
 
         return this.broker.call('publish.getPublishedPage', { slug })
           .then((response) => JSON.stringify(response, null, 2))
-          .catch((err) => JSON.stringify(err, null, 2));
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       },
     },
 
@@ -212,8 +242,30 @@ module.exports = ({
       handler() {
         return this.broker.call('publish.getAllPublishedPages')
           .then((response) => JSON.stringify(response, null, 2))
-          .catch((err) => JSON.stringify(err, null, 2));
+          .catch((err) => JSON.stringify(err, null, 2))
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
       }
     },
+
+    test(ctx) {
+      const { slug } = ctx.params;
+      let webPage;
+
+      return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
+        .then((res) => {
+          webPage = res.data;
+
+          return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
+        })
+        .then((rows) => this.broker.call('builder.create', { webPage, rows }))
+        .then((html) => html)
+        .catch((err) => {
+          this.logger.error('ERROR: ', err);
+          return JSON.stringify(err, null, 2);
+        });
+    }
   },
 });

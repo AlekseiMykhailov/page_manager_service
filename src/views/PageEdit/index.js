@@ -66,6 +66,10 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: colors.yellow[900],
     }
   },
+  published: {
+    display: 'flex',
+    alignItems: 'center',
+  },
 }));
 
 function PageCreate() {
@@ -161,7 +165,7 @@ function PageCreate() {
     e.preventDefault();
 
     FETCH.putData(`${API_URL}/pages/${slug}`, pageData,)
-      .then((response) => handleResponse(response, null, 'Page was edited'));
+      .then((response) => handleResponse(response, getHomePageData, 'Page was edited'));
   };
 
   const resetPageData = () => {
@@ -317,7 +321,7 @@ function PageCreate() {
             <Typography variant="overline">Pages</Typography>
             <Typography gutterBottom variant="h3">Edit Page</Typography>
             {pageData && publishData && (
-              <Typography variant="body2">
+              <Typography variant="body2" className={classes.published}>
                 <Label color={colors.green[600]}>
                   <a
                     href={pageData.id === homePageId ? 'http://localhost:3011' : publishData.url}
@@ -328,7 +332,7 @@ function PageCreate() {
                     {pageData.id === homePageId ? 'Published as Home Page' : 'Published'}
                   </a>
                 </Label>
-                {moment(publishData.publishedAt).format('LLLL')}
+                {moment(publishData.publishedAt).format(' LLLL')}
               </Typography>
             )}
           </Grid>

@@ -1,12 +1,12 @@
 module.exports = (sequelize, DataTypes) => {
-  const PublishedPage = sequelize.define('published_page', {
+  const WebPage = sequelize.define('WebPage', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    webPageId: {
+    domain: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -15,17 +15,22 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
     },
-    publishedAt: {
-      type: DataTypes.DATE,
+    title: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
-    html: {
-      type: DataTypes.TEXT,
-      allowNull: false,
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   }, {
+    freezeTableName: true,
     paranoid: true,
   });
 
-  return PublishedPage;
+  WebPage.associate = function(models) {
+    // associations can be defined here
+  };
+
+  return WebPage;
 };

@@ -8,7 +8,9 @@ import {
   Card,
   CardContent,
   Checkbox,
+  Select,
   InputLabel,
+  MenuItem,
   TextField,
   Button,
 } from '@material-ui/core';
@@ -33,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
 function FormPageCreate({ className, ...rest }) {
   const classes = useStyles();
   const [pageSchema, setPagesSchema] = useState(null);
+  const [domains, setDomains] = useState([]);
   const [pageData, setPagesData] = useState(null);
   const [isCreated, setIsCreated] = useState(false);
   const dispatch = useDispatch();
@@ -57,9 +60,22 @@ function FormPageCreate({ className, ...rest }) {
       });
   }, [API_URL]);
 
+  const getDomains = useCallback(() => {
+    FETCH.getData(`${API_URL}/domains`)
+      .then((response) => {
+        if (response.ok) {
+          setDomains(response.domains);
+        }
+      });
+  }, [API_URL]);
+
   useEffect(() => {
     getPageSchema();
   }, [getPageSchema]);
+
+  useEffect(() => {
+    getDomains();
+  }, [getDomains]);
 
   const handleResponse = (
     response,
@@ -130,6 +146,27 @@ function FormPageCreate({ className, ...rest }) {
                     />
                     Set as home page
                   </InputLabel>
+                );
+              }
+
+              if (type === 'select') {
+                return (
+                  <Select
+                    fullWidth
+                    id={name}
+                    label={name}
+                    name={name}
+                    value={pageData[name]}
+                    variant="outlined"
+                    onChange={handleChange}
+                    key={name}
+                  >
+                    {domains.map((domain) => (
+                      <MenuItem value={domain.name} key={domain.name}>
+                        {domain.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 );
               }
 

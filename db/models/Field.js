@@ -1,27 +1,34 @@
 module.exports = (sequelize, DataTypes) => {
-  const WebPage = sequelize.define('web_page', {
+  const Field = sequelize.define('Field', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    slug: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    title: {
-      type: DataTypes.STRING,
+    rowId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    description: {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    value: {
       type: DataTypes.STRING,
       allowNull: true,
     },
   }, {
-    paranoid: true,
+    freezeTableName: true,
   });
 
-  return WebPage;
+  Field.associate = function(models) {
+    // associations can be defined here
+  };
+
+  return Field;
 };

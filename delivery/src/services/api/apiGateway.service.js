@@ -36,7 +36,7 @@ module.exports = {
       { // TODO: delete it after testing
         path: '/all',
         aliases: {
-          'GET /': 'dbPublishedPages.getAllPublishedPages',
+          'GET /': 'dbPublishedPage.getAllPublishedPages',
         },
         bodyParsers: {
           json: true,

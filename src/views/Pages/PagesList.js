@@ -80,7 +80,7 @@ function PagesList({ className, ...rest }) {
   const API_URL = process.env.REACT_APP_API_URL;
 
   const fetchPages = useCallback(() => {
-    let pageList;
+    let pageList = [];
 
     FETCH.getData(`${API_URL}/pages`)
       .then((response) => { pageList = response.pages; })

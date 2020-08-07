@@ -1,11 +1,11 @@
-const db = require('./models');
-const Rest = require('./mixins/rest');
+const db = require('../models');
+const Rest = require('../mixins/rest');
 
 module.exports = {
-  name: 'dbSettings',
+  name: 'dbDomainSettings',
   mixins: [Rest],
   settings: {
-    model: db.Setting,
+    model: db.DomainSettings,
   },
   actions: {
 
@@ -51,6 +51,14 @@ module.exports = {
         })
           .then((res) => ({ ok: true, webPageId: res.dataValues.homePageId }))
           .catch((err) => ({ ok: false, err }));
+      },
+    },
+
+    getDomains: {
+      handler() {
+        return this.settings.model.findAll({ raw: true })
+          .then((res) => res.map(({ id, domain }) => ({ id, name: domain })))
+          .then((domains) => ({ ok: true, domains }));
       },
     },
 

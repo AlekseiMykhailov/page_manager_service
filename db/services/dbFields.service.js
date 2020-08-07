@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
-const db = require('./models');
-const Rest = require('./mixins/rest');
+const db = require('../models');
+const Rest = require('../mixins/rest');
 
 module.exports = {
   name: 'dbFields',
@@ -27,7 +27,7 @@ module.exports = {
 
     updateField: {
       handler(ctx) {
-        const { id, value} = ctx.params;
+        const { id, value } = ctx.params;
 
         return this.settings.model.update({ value }, {
           where: { id }

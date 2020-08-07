@@ -3,8 +3,6 @@ module.exports = ({
   actions: {
     createRow: {
       handler(ctx) {
-        this.logger.info('CREATE ROW: ', ctx.params);
-
         const row = { ...ctx.params };
         return this.broker.call('dbRows.createRow', { row });
       },

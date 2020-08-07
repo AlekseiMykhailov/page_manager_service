@@ -1,8 +1,6 @@
 const Handlebars = require('handlebars');
 
-Handlebars.registerHelper('noRows', function (value) {
-  return !value;
-});
+Handlebars.registerHelper('noRows', (value) => !value);
 
 const layout = Handlebars.compile(`
 <!DOCTYPE html>
@@ -86,6 +84,10 @@ const layout = Handlebars.compile(`
   </head>
 
   <body>
+
+
+<img src="/images/photo-cover.png" />
+
     {{#if (noRows rows)}}
       <div class="temp">
         {{#if title}}<h1>{{ title }}</h1>{{/if}}

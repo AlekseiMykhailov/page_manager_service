@@ -1,30 +1,30 @@
 module.exports = (sequelize, DataTypes) => {
-  const Field = sequelize.define('field', {
+  const Row = sequelize.define('Row', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    rowId: {
+    schemaId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    name: {
-      type: DataTypes.STRING,
+    webPageId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    type: {
-      type: DataTypes.STRING,
+    order: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-    },
-    value: {
-      type: DataTypes.STRING,
-      allowNull: true,
     },
   }, {
-    paranoid: true,
+    freezeTableName: true,
   });
 
-  return Field;
+  Row.associate = function(models) {
+    // associations can be defined here
+  };
+
+  return Row;
 };

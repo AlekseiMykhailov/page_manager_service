@@ -43,9 +43,7 @@ function PageCreate() {
           Create New Page
         </Typography>
         <Divider className={classes.divider} />
-        <div className={classes.section}>
-          <FormPageCreate />
-        </div>
+        <FormPageCreate className={classes.section} />
       </Container>
     </Page>
   );

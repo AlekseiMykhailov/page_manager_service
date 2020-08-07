@@ -47,6 +47,7 @@ function PageDataForm({
         if (fieldName === 'title'
           || fieldName === 'description'
           || fieldName === 'slug'
+          || fieldName === 'domain'
         ) {
           return (
             <TextField
@@ -54,7 +55,7 @@ function PageDataForm({
               label={fieldName}
               margin="normal"
               name={fieldName}
-              disabled={fieldName === 'slug'}
+              disabled={fieldName === 'slug' || fieldName === 'domain'}
               variant="outlined"
               value={fieldValue}
               onChange={handleChange}
@@ -62,6 +63,7 @@ function PageDataForm({
             />
           );
         }
+
         if (fieldName === 'isHomePage') {
           return (
             <InputLabel htmlFor={fieldName} key={fieldName}>

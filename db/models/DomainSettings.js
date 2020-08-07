@@ -1,26 +1,26 @@
 module.exports = (sequelize, DataTypes) => {
-  const Row = sequelize.define('row', {
+  const DomainSettings = sequelize.define('DomainSettings', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    schemaId: {
-      type: DataTypes.INTEGER,
+    domain: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
-    webPageId: {
+    homePageId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    order: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
     },
   }, {
+    freezeTableName: true,
     paranoid: true,
   });
 
-  return Row;
+  DomainSettings.associate = function(models) {
+    // associations can be defined here
+  };
+
+  return DomainSettings;
 };
