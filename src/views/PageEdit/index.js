@@ -324,7 +324,7 @@ function PageCreate() {
               <Typography variant="body2" className={classes.published}>
                 <Label color={colors.green[600]}>
                   <a
-                    href={pageData.id === homePageId ? 'http://localhost:3011' : publishData.url}
+                    href={pageData.id === homePageId ? `http://${pageData.domain}` : publishData.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={classes.label}
@@ -358,7 +358,7 @@ function PageCreate() {
                   variant="contained"
                   className={clsx(classes.button, classes.previewButton)}
                   color="primary"
-                  href={`/preview/${slug}`}
+                  href={`${API_URL}/preview/${slug}`}
                   target="_blank"
                   startIcon={<VisibilityIcon />}
                 >

@@ -198,7 +198,7 @@ function PagesList({ className, ...rest }) {
               {Object.prototype.hasOwnProperty.call(page, 'published') && (
                 <Label color={colors.green[600]}>
                   <a
-                    href={page.id === homePageId ? 'http://localhost:3011' : page.published.url}
+                    href={page.id === homePageId ? `http://${page.domain}` : page.published.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={classes.label}
@@ -217,7 +217,7 @@ function PagesList({ className, ...rest }) {
               <Tooltip title="Preview">
                 <Link
                   component={RouterLink}
-                  to={`/preview/${page.slug}`}
+                  to={`${API_URL}/preview/${page.slug}`}
                   variant="h5"
                   color="textPrimary"
                   underline="none"

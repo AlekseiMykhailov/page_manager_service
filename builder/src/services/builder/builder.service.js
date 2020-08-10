@@ -16,62 +16,72 @@ module.exports = ({
         .then(({ schemas }) => { rowSchemas = schemas; })
         .then(() => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
         .then(({ fields }) => {
-          const cssDependencies = new Set();
-          const jsDependencies = new Set();
-          let rowsHtml;
-
-          if (rows) {
-            rowsHtml = [...rows].sort((a, b) => a.order - b.order)
-              .map(({ id, schemaId }) => {
-                const rowSchema = rowSchemas.find((schema) => schema.id === schemaId);
-                const rowFields = fields.filter((field) => field.rowId === id);
-                const rowFieldsMap = {};
-                const { meta, dependencies } = rowSchema;
-                const { templateHbs } = meta;
-                const rowCssDependencies = dependencies.filter((dependency) => dependency.endsWith('.css'));
-                const rowJsDependencies = dependencies.filter((dependency) => dependency.endsWith('.js'));
-
-                rowFields.forEach((field) => {
-                  rowFieldsMap[field.name] = field.value;
-                });
-
-                if (rowCssDependencies.length > 0) {
-                  cssDependencies.add(...rowCssDependencies);
-                }
-
-                if (rowJsDependencies.length > 0) {
-                  jsDependencies.add(...rowJsDependencies);
-                }
-
-                const rowTemplate = {
-                  bricks: () => rowBricks({
-                    title: rowFieldsMap.title,
-                    bricks: rowFields.filter((field) => field.name !== 'title'),
-                  }),
-
-                  withImage: () => rowWithImage({
-                    title: rowFieldsMap.title,
-                    backgroundImageURL: rowFieldsMap.backgroundImageURL,
-                    description: rowFieldsMap.description,
-                  }),
-
-                  default: () => '',
-                };
-                return (rowTemplate[templateHbs]() || rowTemplate.default());
-              })
-              .join('');
+          if (!rows) {
+            return layout({
+              slug,
+              title,
+              description,
+            });
           }
 
-          const assetsDomain = 'localhost:3010';
+          const cssDependencies = new Set();
+          const jsDependencies = new Set();
+
+          const rowsHtml = [...rows].sort((a, b) => a.order - b.order)
+            .map(({ id, schemaId }) => {
+              const rowSchema = rowSchemas.find((schema) => schema.id === schemaId);
+              const rowFields = fields.filter((field) => field.rowId === id);
+              const rowFieldsMap = {};
+              const { meta, dependencies } = rowSchema;
+              const { templateHbs } = meta;
+              const rowDependencies = {
+                css: dependencies.filter((dependency) => dependency.endsWith('.css')),
+                js: dependencies.filter((dependency) => dependency.endsWith('.js')),
+              };
+
+              rowFields.forEach((field) => {
+                rowFieldsMap[field.name] = field.value;
+              });
+
+              if (rowDependencies.css.length > 0) {
+                cssDependencies.add(...rowDependencies.css);
+              }
+
+              if (rowDependencies.js.length > 0) {
+                jsDependencies.add(...rowDependencies.js);
+              }
+
+              const rowTemplate = {
+                bricks: () => rowBricks({
+                  title: rowFieldsMap.title,
+                  bricks: rowFields.filter((field) => field.name !== 'title'),
+                }),
+
+                withImage: () => rowWithImage({
+                  title: rowFieldsMap.title,
+                  backgroundImageURL: rowFieldsMap.backgroundImageURL,
+                  description: rowFieldsMap.description,
+                }),
+
+                default: () => {
+                  this.logger.error(`ROW TEMPLATE "${templateHbs}" NOT FOUND`);
+                  return '';
+                },
+              };
+              return (rowTemplate[templateHbs]() || rowTemplate.default());
+            })
+            .join('');
+
+          const domainOfAssets = 'localhost:3010';
           const cssFiles = cssStyles({
-            cssDependencies: [...cssDependencies].map((cssFile) => `http://${assetsDomain}/css/${cssFile}`),
+            cssDependencies: [...cssDependencies].map((cssFile) => `http://${domainOfAssets}/css/${cssFile}`),
           });
           const jsFiles = jsScripts({
-            jsDependencies: [...jsDependencies].map((jsFile) => `http://${assetsDomain}/js/${jsFile}`),
+            jsDependencies: [...jsDependencies].map((jsFile) => `http://${domainOfAssets}/js/${jsFile}`),
           });
 
           const html = layout({
-            assetsDomain,
+            domainOfAssets,
             slug,
             cssFiles,
             jsFiles,
