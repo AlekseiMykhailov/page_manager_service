@@ -128,13 +128,24 @@ module.exports = ({
 
             return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
           })
-          .then((rows) => this.broker.call('builder.create', { webPage, rows }))
-          // TODO: decide what should return this method - html or JSON
+          .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
           // .then((html) => JSON.stringify({ ok: true, html }, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
           });
+      },
+    },
+
+    getPreviewWebPageHTML: {
+      params: {
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { slug } = ctx.params;
+
+        return this.broker.call('dbWebPages.previewWebPage', { slug })
+          .then((res) => res.html);
       },
     },
 
@@ -163,7 +174,7 @@ module.exports = ({
             webPage = res.data;
             return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
           })
-          .then((rows) => this.broker.call('builder.create', { webPage, rows }))
+          .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
           .then((html) => this.broker.call('publish.createPublishedPage', {
             id: webPage.id,
             slug,
@@ -192,7 +203,7 @@ module.exports = ({
             return webPage.id;
           })
           .then((webPageId) => this.broker.call('rows.getRowsForWebPage', { webPageId }))
-          .then((rows) => this.broker.call('builder.create', { webPage, rows }))
+          .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
           .then((html) => this.broker.call('dbPublishedPage.updatePublishedPage', {
             id: webPage.id,
             slug,
@@ -249,23 +260,5 @@ module.exports = ({
           });
       }
     },
-
-    test(ctx) {
-      const { slug } = ctx.params;
-      let webPage;
-
-      return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
-        .then((res) => {
-          webPage = res.data;
-
-          return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
-        })
-        .then((rows) => this.broker.call('builder.create', { webPage, rows }))
-        .then((html) => html)
-        .catch((err) => {
-          this.logger.error('ERROR: ', err);
-          return JSON.stringify(err, null, 2);
-        });
-    }
   },
 });

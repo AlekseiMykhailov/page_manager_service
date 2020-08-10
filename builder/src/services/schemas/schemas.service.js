@@ -44,11 +44,12 @@ const webPageSchema = {
   description: new FieldSchema('description', 'text'),
 };
 
-const mockRowsSchemas = [
+const rowsSchemas = [
   {
     id: '1',
     webPageId: 'number',
     order: 'number',
+    dependencies: ['withImage.css'],
     meta: {
       title: 'Row with image',
       templateHbs: 'withImage',
@@ -72,6 +73,7 @@ const mockRowsSchemas = [
     id: '2',
     webPageId: 'number',
     order: 'number',
+    dependencies: ['bricks.css'],
     meta: {
       title: 'Row with bricks',
       templateHbs: 'bricks',
@@ -109,21 +111,6 @@ const mockRowsSchemas = [
   },
 ];
 
-class RowFieldSchema {
-  constructor(name, type) {
-    this.name = name;
-    this.type = type;
-  }
-}
-
-class RowSchema {
-  constructor(title, templateHbs, fields) {
-    this.title = title;
-    this.templateHbs = templateHbs;
-    this.fields = fields;
-  }
-}
-
 class RowSchemasStore {
   constructor(rowSchemas) {
     this.schemas = rowSchemas;
@@ -138,7 +125,7 @@ class RowSchemasStore {
   }
 }
 
-const rowSchemasStore = new RowSchemasStore(mockRowsSchemas);
+const rowSchemasStore = new RowSchemasStore(rowsSchemas);
 
 module.exports = ({
   name: 'schemas',

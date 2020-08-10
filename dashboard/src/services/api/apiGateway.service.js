@@ -24,7 +24,8 @@ module.exports = {
       maxAge: 3600,
     },
     assets: {
-      folder: path.resolve(__dirname, '..', '..', '..', '..', 'build'),
+      // folder: path.resolve(__dirname, '..', '..', '..', '..', 'build'),
+      folder: path.resolve(__dirname, '..', '..', '..', '..', 'builder', 'templates', 'default', 'assets'),
       options: {},
     },
     routes: [
@@ -33,9 +34,8 @@ module.exports = {
         path: '/',
         aliases: {
           'GET /nav': 'dashboard.nav',
-          'GET /settings': 'domainSettings.getHomePageId',
+          'GET /homePage': 'domainSettings.getHomePageId',
           'GET /domains': 'domainSettings.getDomains',
-          'GET /rows': 'rows.getAllRows',
         },
         authorization: false,
         bodyParsers: {
@@ -119,9 +119,7 @@ module.exports = {
       {
         path: '/preview',
         aliases: {
-          'GET /': 'webPages.previewWebPageList',
           'GET /:slug': 'webPages.previewWebPage',
-          'GET /test/:slug': 'webPages.test', // TODO: remove this line
         },
         bodyParsers: {
           json: false,

@@ -1,0 +1,32 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  font-size: 1rem;
+  line-height: 2rem;
+  color: #222;
+  background-color: #f6f6fd;
+}
+
+h1 {
+  font-size: 50px;
+  line-height: 64px;
+}
+
+h2 {
+  font-size: 40px;
+  line-height: 52px;
+}
+
+.container {
+  width: 100%;
+  padding: 80px 0 120px;
+}

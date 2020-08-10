@@ -1,5 +1,6 @@
 const { ServiceBroker } = require('moleculer');
 const ApiService = require('moleculer-web');
+const path = require('path');
 
 const broker = new ServiceBroker();
 
@@ -20,6 +21,10 @@ module.exports = {
       allowedHeaders: ['Content-Type', 'Origin', 'User-Agent', 'method'],
       credentials: true,
       maxAge: 3600,
+    },
+    assets: {
+      folder: path.resolve(__dirname, '..', '..', '..', '..', 'builder', 'templates', 'default', 'assets'),
+      options: {},
     },
   },
 };

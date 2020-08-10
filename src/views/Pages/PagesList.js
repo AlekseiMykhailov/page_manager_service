@@ -109,7 +109,7 @@ function PagesList({ className, ...rest }) {
   }, [API_URL]);
 
   const getHomePageData = useCallback(() => {
-    FETCH.getData(`${API_URL}/settings`)
+    FETCH.getData(`${API_URL}/homePage`)
       .then((response) => {
         if (response.ok) {
           setHomePageId(response.webPageId);

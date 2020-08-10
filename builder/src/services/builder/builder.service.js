@@ -1,16 +1,14 @@
-const layout = require('../../../templates/default/layout');
-const list = require('../../../templates/default/list');
+const { layout } = require('../../../templates/default/layout');
+const { cssStyles } = require('../../../templates/default/cssStyles');
+const { jsScripts } = require('../../../templates/default/jsScripts');
 const { rowBricks, rowWithImage } = require('../../../templates/default/rows');
-const {
-  addForm, editForm, editRowForm, fieldSet, inputText, inputUrl, inputFile, select, buttonHtml,
-} = require('../../../templates/default/form');
 
 module.exports = ({
   name: 'builder',
   actions: {
-    create(ctx) {
+    createWebPageHTML(ctx) {
       const { webPage, rows } = ctx.params;
-      const { title, descr, slug } = webPage;
+      const { title, description, slug } = webPage;
       const rowIds = rows.map((row) => row.id);
       let rowSchemas;
 
@@ -18,6 +16,8 @@ module.exports = ({
         .then(({ schemas }) => { rowSchemas = schemas; })
         .then(() => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
         .then(({ fields }) => {
+          const cssDependencies = new Set();
+          const jsDependencies = new Set();
           let rowsHtml;
 
           if (rows) {
@@ -25,192 +25,63 @@ module.exports = ({
               .map(({ id, schemaId }) => {
                 const rowSchema = rowSchemas.find((schema) => schema.id === schemaId);
                 const rowFields = fields.filter((field) => field.rowId === id);
-                const { meta } = rowSchema;
+                const rowFieldsMap = {};
+                const { meta, dependencies } = rowSchema;
                 const { templateHbs } = meta;
+                const rowCssDependencies = dependencies.filter((dependency) => dependency.endsWith('.css'));
+                const rowJsDependencies = dependencies.filter((dependency) => dependency.endsWith('.js'));
 
-                switch (templateHbs) {
-                  case 'bricks':
-                    return rowBricks({
-                      title: rowFields.find((field) => field.name === 'title').value,
-                      bricks: rowFields.filter((field) => field.name !== 'title'),
-                    });
+                rowFields.forEach((field) => {
+                  rowFieldsMap[field.name] = field.value;
+                });
 
-                  case 'withImage':
-                    return rowWithImage({
-                      backgroundImageURL: rowFields.find((field) => field.name === 'backgroundImageURL').value,
-                      title: rowFields.find((field) => field.name === 'title').value,
-                      description: rowFields.find((field) => field.name === 'description').value,
-                    });
-
-                  default:
-                    return '';
+                if (rowCssDependencies.length > 0) {
+                  cssDependencies.add(...rowCssDependencies);
                 }
+
+                if (rowJsDependencies.length > 0) {
+                  jsDependencies.add(...rowJsDependencies);
+                }
+
+                const rowTemplate = {
+                  bricks: () => rowBricks({
+                    title: rowFieldsMap.title,
+                    bricks: rowFields.filter((field) => field.name !== 'title'),
+                  }),
+
+                  withImage: () => rowWithImage({
+                    title: rowFieldsMap.title,
+                    backgroundImageURL: rowFieldsMap.backgroundImageURL,
+                    description: rowFieldsMap.description,
+                  }),
+
+                  default: () => '',
+                };
+                return (rowTemplate[templateHbs]() || rowTemplate.default());
               })
               .join('');
           }
 
+          const assetsDomain = 'localhost:3010';
+          const cssFiles = cssStyles({
+            cssDependencies: [...cssDependencies].map((cssFile) => `http://${assetsDomain}/css/${cssFile}`),
+          });
+          const jsFiles = jsScripts({
+            jsDependencies: [...jsDependencies].map((jsFile) => `http://${assetsDomain}/js/${jsFile}`),
+          });
+
           const html = layout({
+            assetsDomain,
             slug,
+            cssFiles,
+            jsFiles,
             title,
-            descr,
-            canBeEdited: true,
-            canBePublished: true,
+            description,
             rows: rowsHtml,
           });
 
           return html;
         });
-    },
-
-    createList(ctx) {
-      const { items, title } = ctx.params;
-      const listHtml = list({ items });
-      const html = layout({
-        title,
-        body: listHtml,
-      });
-
-      return html;
-    },
-
-    createAddPageForm(ctx) {
-      const { actionURL, fields, fieldTypes } = ctx.params;
-      const createField = (field) => {
-        if (field.type === fieldTypes.text) {
-          return inputText({ ...field });
-        }
-        if (field.type === fieldTypes.url) {
-          return inputUrl({ ...field });
-        }
-        if (field.type === fieldTypes.file) {
-          return inputFile({ ...field });
-        }
-        if (field.type === fieldTypes.select) {
-          return select({ ...field });
-        }
-      };
-
-      const formHtml = addForm({
-        actionURL,
-        fields: fields && Object.values(fields).map((field) => createField(field)).join(''),
-        button: buttonHtml({ text: 'Submit', type: 'submit' })
-      });
-
-      const html = layout({
-        title: 'Create Web Page',
-        body: formHtml,
-      });
-
-      return html;
-    },
-
-    createFormOld(ctx) {
-      // TODO: delete this after make new method
-      const { config, fieldTypes } = ctx.params;
-      const createField = (field, fieldSetName) => {
-        if (field.type === fieldTypes.text) {
-          return inputText({ ...field, fieldSetName });
-        }
-        if (field.type === fieldTypes.url) {
-          return inputUrl({ ...field, fieldSetName });
-        }
-        if (field.type === fieldTypes.file) {
-          return inputFile({ ...field, fieldSetName });
-        }
-        if (field.type === fieldTypes.select) {
-          return select({ ...field, fieldSetName });
-        }
-      };
-
-      const rowsFieldSets = config.rows.rowsConfig.rows.map((row) => {
-        const fields = row.fields && Object.values(row.fields).map((field) => (
-          createField(field, row.fieldSetName))).join('');
-        const blocks = row.blocks && row.blocks.map((block) => (
-          fieldSet({
-            title: block.name,
-            fieldSetName: block.fieldSetName,
-            fields: Object.values(block.fields).map((field) => createField(field, block.fieldSetName)).join(''),
-          })
-        )).join('');
-        // TODO: change the output from all types of block to select and add one of a selected type
-
-        return fieldSet({
-          title: row.name,
-          fieldSetName: row.fieldSetName,
-          button: buttonHtml({ text: '+', className: 'button--round', type: 'button' }),
-          fields,
-          blocks,
-        });
-      }).join('');
-
-      const formHtml = addForm({
-        fields: config.fields && Object.values(config.fields).map((field) => createField(field)).join(''),
-        fieldSet: rowsFieldSets,
-        button: buttonHtml({ text: 'Submit', type: 'submit' })
-      });
-
-      this.logger.info('CTX PARAMS CREATE FORM:  ', ctx.params);
-
-      const html = layout({
-        title: config.name,
-        body: formHtml,
-      });
-
-      return html;
-    },
-
-    createFormPageEdit(ctx) {
-      const { webPage, rows, fieldTypes } = ctx.params;
-      const {
-        id, slug, title, description
-      } = webPage;
-
-      const createField = (field) => {
-        if (field.type === fieldTypes.text) {
-          return inputText({ ...field });
-        }
-        if (field.type === fieldTypes.url) {
-          return inputUrl({ ...field });
-        }
-        if (field.type === fieldTypes.file) {
-          return inputFile({ ...field });
-        }
-        if (field.type === fieldTypes.select) {
-          return select({ ...field });
-        }
-      };
-
-      const rowsHtml = rows.sort((a, b) => a.order - b.order)
-        .map((row) => {
-          const {
-            meta, order, id, fields
-          } = row;
-
-          return editRowForm({
-            id,
-            webPageSlug: slug,
-            rowTitle: meta.title,
-            order,
-            fields: [...fields].map((field) => createField(field)).join(''),
-          });
-        })
-        .join('');
-
-      const formHtml = editForm({
-        id,
-        slug,
-        title,
-        description,
-        rowsHtml,
-      });
-
-      const html = layout({
-        title: `Edit Page: ${webPage.title}`,
-        canBePublished: true,
-        body: formHtml,
-      });
-
-      return html;
     },
   }
 });

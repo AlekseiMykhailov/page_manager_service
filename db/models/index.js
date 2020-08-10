@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-const config = require('../config/database.json');
+const config = require('../config/config.json');
 
 const WebPage = require('./WebPage');
 const DomainSettings = require('./DomainSettings');
