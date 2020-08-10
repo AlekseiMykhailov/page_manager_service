@@ -54,8 +54,12 @@ function RowEditContainer({
   handleDelete,
 }) {
   const { id, fields, schemaId } = row;
+  const fieldMap = {};
+  const schema = schemas.find((rowSchema) => rowSchema.id === schemaId);
   const API_URL = process.env.REACT_APP_API_URL;
   const classes = useStyles();
+
+  fields.forEach((field) => { fieldMap[field.name] = field.value; });
 
   return (
     <form
@@ -79,10 +83,7 @@ function RowEditContainer({
             gutterBottom
             variant="h4"
           >
-            {
-              (schemas.length > 0)
-              && schemas.find((rowSchema) => rowSchema.id === schemaId).meta.title
-            }
+            {(schemas.length > 0) && schema.meta.title}
           </Typography>
         </Grid>
         <Grid item>
@@ -110,7 +111,7 @@ function RowEditContainer({
           )}
         </Grid>
       </Grid>
-      {fields && fields.map(({ name, type, value }) => (
+      {schemas && schema.fields.map(({ name, type }) => (
         <TextField
           fullWidth
           id={`${id}-${name}`}
@@ -120,7 +121,7 @@ function RowEditContainer({
           name={name}
           type={type}
           variant="outlined"
-          value={value}
+          value={fieldMap[name]}
           onChange={handleInputChange}
           key={name}
         />
