@@ -83,7 +83,7 @@ function RowEditContainer({
             gutterBottom
             variant="h4"
           >
-            {(schemas.length > 0) && schema.meta.title}
+            {schema && schema.meta.title}
           </Typography>
         </Grid>
         <Grid item>
@@ -111,7 +111,7 @@ function RowEditContainer({
           )}
         </Grid>
       </Grid>
-      {schemas && schema.fields.map(({ name, type }) => (
+      {schema && schema.fields.map(({ name, type }) => (
         <TextField
           fullWidth
           id={`${id}-${name}`}

@@ -16,7 +16,7 @@ module.exports = ({
         .then(({ schemas }) => { rowSchemas = schemas; })
         .then(() => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
         .then(({ fields }) => {
-          if (!rows) {
+          if (!fields) {
             return layout({ slug, title, description });
           }
 
@@ -29,7 +29,7 @@ module.exports = ({
               const rowFields = fields.filter((field) => (
                 field.rowId === id && Boolean(field.value.trim())
               ));
-              const rowFieldsMap = fields.reduce((fieldsMap, field) => ({
+              const rowFieldsMap = rowFields.reduce((fieldsMap, field) => ({
                 ...fieldsMap,
                 [field.name]: field.value,
               }), {});
