@@ -88,14 +88,18 @@ module.exports = {
       handler(ctx) {
         const { slug } = ctx.params;
 
-        return this.settings.model.findOne({
-          where: {
-            slug,
-          },
-        })
+        return this.settings.model.findOne({ where: { slug } })
+          .then((res) => {
+            if (!res) {
+              throw new Error(`Page with slug "${slug}" not published.`);
+            }
+
+            return res;
+          })
           .then((res) => ({ ok: true, data: { ...res.dataValues, url: `${PUBLISHED_SERVER}/${slug}` } }))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
+
             return { ok: false, error: err };
           });
       },

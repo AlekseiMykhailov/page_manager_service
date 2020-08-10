@@ -46,9 +46,9 @@ module.exports = {
           where: { slug }
         })
           .then(() => ({ ok: true }))
-          .catch((err) => {
-            this.logger.error('ERROR: ', err);
-            return JSON.stringify(err, null, 2);
+          .catch((error) => {
+            this.logger.error('ERROR: ', error);
+            return { ok: false, error };
           });
       },
     },
@@ -66,13 +66,11 @@ module.exports = {
               return { ok: false, error: 'Published Page could not be deleted' };
             }
 
-            return this.settings.model.destroy({
-              where: { slug }
-            })
+            return this.settings.model.destroy({ where: { slug } })
               .then(() => ({ ok: true }))
-              .catch((err) => {
-                this.logger.error('ERROR: ', err);
-                return JSON.stringify(err, null, 2);
+              .catch((error) => {
+                this.logger.error('ERROR: ', error);
+                return { ok: false, error };
               });
           });
       },
@@ -84,16 +82,18 @@ module.exports = {
       },
       handler(ctx) {
         const { slug } = ctx.params;
-        return this.settings.model.findOne({
-          where: { slug },
-        }).then(({ dataValues }) => {
-          const {
-            id, domain, title, description
-          } = dataValues;
-          return {
-            id, domain, slug, title, description
-          };
-        }).then((data) => ({ ok: true, data }));
+
+        return this.settings.model.findOne({ where: { slug } })
+          .then(({ dataValues }) => {
+            const {
+              id, domain, title, description
+            } = dataValues;
+            return {
+              id, domain, slug, title, description
+            };
+          })
+          .then((data) => ({ ok: true, data }))
+          .catch((error) => ({ ok: false, error }));
       },
     },
 
@@ -104,11 +104,11 @@ module.exports = {
       handler(ctx) {
         const { id } = ctx.params;
 
-        return this.settings.model.findOne({
-          where: { id },
-        })
+        return this.settings.model.findOne({ where: { id } })
           .then(({ dataValues }) => {
-            const { domain, slug, title, description } = dataValues;
+            const {
+              domain, slug, title, description
+            } = dataValues;
             return {
               id, domain, slug, title, description
             };
@@ -121,13 +121,11 @@ module.exports = {
     getAllWebPages: {
       handler() {
         return this.settings.model.findAll({ raw: true })
-          .then(
-            (pages) => (pages.map(({
-              id, domain, slug, title
-            }) => ({
-              id, domain, slug, title
-            })))
-          )
+          .then((pages) => (pages.map(({
+            id, domain, slug, title
+          }) => ({
+            id, domain, slug, title
+          }))))
           .then((pages) => ({ ok: true, pages }))
           .catch((error) => ({ ok: false, error }));
       },
