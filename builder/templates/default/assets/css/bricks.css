@@ -32,10 +32,6 @@
   font-weight: 400;
 }
 
-.brick-simple {}
-.brick-simple__title {}
-.brick-simple__content {}
-
 @media screen and (max-width: 1024px) {
   .bricks__list {
     grid-template-columns: 1fr;

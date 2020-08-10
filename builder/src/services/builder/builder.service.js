@@ -17,11 +17,7 @@ module.exports = ({
         .then(() => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
         .then(({ fields }) => {
           if (!rows) {
-            return layout({
-              slug,
-              title,
-              description,
-            });
+            return layout({ slug, title, description });
           }
 
           const cssDependencies = new Set();
@@ -30,18 +26,19 @@ module.exports = ({
           const rowsHtml = [...rows].sort((a, b) => a.order - b.order)
             .map(({ id, schemaId }) => {
               const rowSchema = rowSchemas.find((schema) => schema.id === schemaId);
-              const rowFields = fields.filter((field) => field.rowId === id);
-              const rowFieldsMap = {};
+              const rowFields = fields.filter((field) => (
+                field.rowId === id && Boolean(field.value.trim())
+              ));
+              const rowFieldsMap = fields.reduce((fieldsMap, field) => ({
+                ...fieldsMap,
+                [field.name]: field.value,
+              }), {});
               const { meta, dependencies } = rowSchema;
               const { templateHbs } = meta;
               const rowDependencies = {
                 css: dependencies.filter((dependency) => dependency.endsWith('.css')),
                 js: dependencies.filter((dependency) => dependency.endsWith('.js')),
               };
-
-              rowFields.forEach((field) => {
-                rowFieldsMap[field.name] = field.value;
-              });
 
               if (rowDependencies.css.length > 0) {
                 cssDependencies.add(...rowDependencies.css);
@@ -54,7 +51,7 @@ module.exports = ({
               const rowTemplate = {
                 bricks: () => rowBricks({
                   title: rowFieldsMap.title,
-                  bricks: rowFields.filter((field) => field.name !== 'title'),
+                  bricks: rowFields.filter((field) => field.name.startsWith('edge')),
                 }),
 
                 withImage: () => rowWithImage({
@@ -68,16 +65,21 @@ module.exports = ({
                   return '';
                 },
               };
+
               return (rowTemplate[templateHbs]() || rowTemplate.default());
             })
             .join('');
 
           const domainOfAssets = 'localhost:3010';
           const cssFiles = cssStyles({
-            cssDependencies: [...cssDependencies].map((cssFile) => `http://${domainOfAssets}/css/${cssFile}`),
+            cssDependencies: [...cssDependencies].map((cssFile) => (
+              `http://${domainOfAssets}/css/${cssFile}`
+            )),
           });
           const jsFiles = jsScripts({
-            jsDependencies: [...jsDependencies].map((jsFile) => `http://${domainOfAssets}/js/${jsFile}`),
+            jsDependencies: [...jsDependencies].map((jsFile) => (
+              `http://${domainOfAssets}/js/${jsFile}`
+            )),
           });
 
           const html = layout({
