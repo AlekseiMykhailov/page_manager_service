@@ -60,6 +60,7 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 'auto',
     marginLeft: theme.spacing(2),
     padding: 0,
+    color: colors.grey[900],
 
     '&:hover': {
       color: colors.blue[900],
@@ -215,17 +216,14 @@ function PagesList({ className, ...rest }) {
               )}
 
               <Tooltip title="Preview">
-                <Link
-                  component={RouterLink}
-                  to={`${API_URL}/preview/${page.slug}`}
-                  variant="h5"
-                  color="textPrimary"
-                  underline="none"
-                  className={classes.button}
+                <a
+                  href={`${API_URL}/preview/${page.slug}`}
                   target="_blank"
+                  rel="noopener noreferrer"
+                  className={classes.button}
                 >
                   <VisibilityIcon />
-                </Link>
+                </a>
               </Tooltip>
               <Tooltip title="Edit">
                 <Link
