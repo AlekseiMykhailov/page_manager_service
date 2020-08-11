@@ -3,9 +3,11 @@
 const { v4 } = require('uuid');
 
 class FieldSchema {
-  constructor(name, type) {
+  constructor(name, label, type, order) {
     this.name = name;
+    this.label = label;
     this.type = type;
+    this.order = order;
   }
 }
 
@@ -37,11 +39,11 @@ class Row {
 }
 
 const webPageSchema = {
-  domain: new FieldSchema('domain', 'select'),
-  slug: new FieldSchema('slug', 'text'),
-  isHomePage: new FieldSchema('isHomePage', 'checkbox'),
-  title: new FieldSchema('title', 'text'),
-  description: new FieldSchema('description', 'text'),
+  domain: new FieldSchema('domain', 'Domain', 'select', 10),
+  slug: new FieldSchema('slug', 'Slug', 'text', 20),
+  isHomePage: new FieldSchema('isHomePage', 'It`s Home Page', 'checkbox', 30),
+  title: new FieldSchema('title', 'Title', 'text', 40),
+  description: new FieldSchema('description', 'Description', 'text', 50),
 };
 
 const rowsSchemas = [
@@ -57,15 +59,21 @@ const rowsSchemas = [
     fields: [
       {
         name: 'title',
+        label: 'Title',
         type: 'text',
+        order: 1,
       },
       {
         name: 'description',
+        label: 'Description',
         type: 'text',
+        order: 2,
       },
       {
         name: 'backgroundImageURL',
+        label: 'Background Image URL',
         type: 'url',
+        order: 3,
       },
     ],
   },
@@ -81,31 +89,16 @@ const rowsSchemas = [
     fields: [
       {
         name: 'title',
+        label: 'Title',
         type: 'text',
+        order: 1,
       },
       {
-        name: 'edge-1',
+        name: 'brick',
+        label: 'Brick',
         type: 'text',
-      },
-      {
-        name: 'edge-2',
-        type: 'text',
-      },
-      {
-        name: 'edge-3',
-        type: 'text',
-      },
-      {
-        name: 'edge-4',
-        type: 'text',
-      },
-      {
-        name: 'edge-5',
-        type: 'text',
-      },
-      {
-        name: 'edge-6',
-        type: 'text',
+        order: 10,
+        clonable: true,
       },
     ],
   },

@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   Checkbox,
+  FormControl,
   Select,
   InputLabel,
   MenuItem,
@@ -20,16 +21,9 @@ import { setStatusMessage, removeStatusMessage } from 'src/actions/messageAction
 
 const useStyles = makeStyles((theme) => ({
   root: {},
-  policy: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  policyCheckbox: {
-    marginLeft: '-14px'
-  },
   submitButton: {
     marginTop: theme.spacing(2)
-  }
+  },
 }));
 
 function FormPageCreate({ className, ...rest }) {
@@ -131,59 +125,67 @@ function FormPageCreate({ className, ...rest }) {
       <CardContent>
         {pageSchema && pageData && (
           <form autoComplete="off" onSubmit={createWebPage}>
-            {Object.values(pageSchema).map(({ name, type }) => {
-              if (type === 'checkbox') {
-                return (
-                  <InputLabel htmlFor={name} key={name}>
-                    <Checkbox
-                      id={name}
-                      label={name}
-                      margin="normal"
-                      name={name}
-                      variant="outlined"
-                      checked={pageData[name]}
-                      onChange={handleChange}
-                    />
-                    Set as home page
-                  </InputLabel>
-                );
-              }
+            {Object.values(pageSchema)
+              .sort((a, b) => a.order - b.order)
+              .map(({ name, label, type }) => {
+                if (type === 'checkbox') {
+                  return (
+                    <InputLabel htmlFor={name} key={name}>
+                      <Checkbox
+                        id={name}
+                        label={label}
+                        margin="normal"
+                        name={name}
+                        variant="outlined"
+                        checked={pageData[name]}
+                        onChange={handleChange}
+                      />
+                      Set as home page
+                    </InputLabel>
+                  );
+                }
 
-              if (type === 'select') {
+                if (type === 'select') {
+                  return (
+                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
+                      <InputLabel id={`${name}-label`}>
+                        {label}
+                      </InputLabel>
+                      <Select
+                        fullWidth
+                        id={name}
+                        label={label}
+                        name={name}
+                        value={pageData[name]}
+                        variant="outlined"
+                        onChange={handleChange}
+                        key={name}
+                      >
+
+                        {domains.map((domain) => (
+                          <MenuItem value={domain.name} key={domain.name}>
+                            {domain.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  );
+                }
+
                 return (
-                  <Select
+                  <TextField
                     fullWidth
-                    id={name}
-                    label={name}
+                    label={label}
+                    margin="normal"
                     name={name}
+                    type={type}
+                    onChange={handleChange}
                     value={pageData[name]}
                     variant="outlined"
-                    onChange={handleChange}
                     key={name}
-                  >
-                    {domains.map((domain) => (
-                      <MenuItem value={domain.name} key={domain.name}>
-                        {domain.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  />
                 );
-              }
-
-              return (
-                <TextField
-                  fullWidth
-                  label={name}
-                  margin="normal"
-                  name={name}
-                  type={type}
-                  onChange={handleChange}
-                  value={pageData[name]}
-                  variant="outlined"
-                  key={name}
-                />
-              );
-            })}
+              })}
             <Button
               className={classes.submitButton}
               color="secondary"

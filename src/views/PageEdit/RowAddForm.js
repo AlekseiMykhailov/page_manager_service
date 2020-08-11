@@ -8,6 +8,7 @@ import {
   Button,
   Divider,
   InputLabel,
+  Fab,
   Grid,
   FormControl,
   MenuItem,
@@ -19,10 +20,18 @@ import {
 import * as FETCH from 'src/utils/fetch';
 import * as CONST from 'src/utils/const';
 import { setStatusMessage, removeStatusMessage } from 'src/actions/messageActions';
+import AddIcon from '@material-ui/icons/Add';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    '& > *': {
+      margin: theme.spacing(1),
+    },
+  },
   divider: {
     backgroundColor: colors.grey[300],
     marginTop: theme.spacing(3),
@@ -37,6 +46,9 @@ const useStyles = makeStyles((theme) => ({
   },
   buttonGroup: {
     margin: '2rem 0',
+  },
+  fab: {
+    alignSelf: 'flex-end',
   },
 }));
 
@@ -113,6 +125,24 @@ function RowAddForm({
     setSelectedRowSchema(selectedSchema);
   };
 
+  const addField = () => {
+    const clonableField = selectedRowSchema.fields.find((field) => field.clonable);
+    const sortedFields = selectedRowSchema.fields.sort((a, b) => a.order - b.order);
+    const lastOrder = sortedFields[sortedFields.length - 1].order;
+    const newField = {
+      ...clonableField,
+      name: `${clonableField.name}-${lastOrder + 1}`,
+      order: lastOrder + 1,
+      value: '',
+    };
+    const updatedRowSchema = {
+      ...selectedRowSchema,
+      fields: [...selectedRowSchema.fields, newField],
+    };
+
+    setSelectedRowSchema(updatedRowSchema);
+  };
+
   return (
     <>
       <Divider className={classes.divider} />
@@ -181,11 +211,11 @@ function RowAddForm({
           type="hidden"
           value={newRowOrder}
         />
-        {selectedRowSchema.fields.map(({ name, type, value }) => (
+        {selectedRowSchema.fields.map(({ name, label, type, value }) => (
           <TextField
             fullWidth
             id={name}
-            label={name}
+            label={label}
             margin="normal"
             name={name}
             type={type}
@@ -195,6 +225,16 @@ function RowAddForm({
             key={name}
           />
         ))}
+        {selectedRowSchema.fields.some((field) => field.clonable) && (
+          <Fab
+            color="primary"
+            aria-label="add"
+            className={classes.fab}
+            onClick={addField}
+          >
+            <AddIcon />
+          </Fab>
+        )}
         <Grid
           container
           direction="row"

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 const db = require('../models');
 const Rest = require('../mixins/rest');
 
@@ -19,10 +20,10 @@ module.exports = {
 
         return this.settings.model.create({ schemaId, webPageId, order })
           .then((res) => (res.dataValues.id))
-          .then((rowId) => {
-            fields.forEach((field) => {
+          .then(async (rowId) => {
+            for await (const field of fields) {
               this.broker.call('dbFields.createField', { field: { ...field, rowId } });
-            });
+            }
 
             return rowId;
           })

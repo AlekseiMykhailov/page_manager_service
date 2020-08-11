@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import clsx from 'clsx';
 import {
   ButtonGroup,
   Button,
   Divider,
+  Fab,
   Grid,
   TextField,
   Typography,
@@ -14,6 +16,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import AddIcon from '@material-ui/icons/Add';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,7 +42,10 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       backgroundColor: colors.red[900]
     }
-  }
+  },
+  fab: {
+    alignSelf: 'flex-end',
+  },
 }));
 
 function RowEditContainer({
@@ -52,42 +58,49 @@ function RowEditContainer({
   handleInputChange,
   handleChangeOrder,
   handleDelete,
+  handleAddField,
 }) {
   const { id, fields, schemaId } = row;
-  const fieldMap = {};
+  const sortedFields = fields.sort((a, b) => a.order - b.order);
+  const fieldsMap = sortedFields.reduce((map, field) => ({
+    ...map,
+    [field.name]: field.value,
+  }), {});
   const schema = schemas.find((rowSchema) => rowSchema.id === schemaId);
   const API_URL = process.env.REACT_APP_API_URL;
   const classes = useStyles();
 
-  fields.forEach((field) => { fieldMap[field.name] = field.value; });
+  console.log(fieldsMap)
+  console.log(fields)
 
   return (
-    <form
-      id={id}
-      action={`${API_URL}/rows/${id}`}
-      data-row-id={id}
-      noValidate
-      autoComplete="off"
-      className={className}
-      onSubmit={handleSubmit}
-    >
+    <>
       <Divider className={classes.divider} />
-      <Grid
-        container
-        direction="row"
-        justify="space-between"
-        alignItems="center"
+      <form
+        id={id}
+        action={`${API_URL}/rows/${id}`}
+        data-row-id={id}
+        noValidate
+        autoComplete="off"
+        className={clsx(classes.root, className)}
+        onSubmit={handleSubmit}
       >
-        <Grid item>
-          <Typography
-            gutterBottom
-            variant="h4"
-          >
-            {schema && schema.meta.title}
-          </Typography>
-        </Grid>
-        <Grid item>
-          {(maxIndex > 0) && (
+        <Grid
+          container
+          direction="row"
+          justify="space-between"
+          alignItems="center"
+        >
+          <Grid item>
+            <Typography
+              gutterBottom
+              variant="h4"
+            >
+              {schema && schema.meta.title}
+            </Typography>
+          </Grid>
+          <Grid item>
+            {(maxIndex > 0) && (
             <div className={classes.root}>
               <ButtonGroup size="small" aria-label="small outlined button group">
                 <Button
@@ -108,57 +121,69 @@ function RowEditContainer({
                 </Button>
               </ButtonGroup>
             </div>
-          )}
+            )}
+          </Grid>
         </Grid>
-      </Grid>
-      {schema && schema.fields.map(({ name, type }) => (
-        <TextField
-          fullWidth
-          id={`${id}-${name}`}
-          inputProps={{ 'data-row-id': id }}
-          label={name}
-          margin="normal"
-          name={name}
-          type={type}
-          variant="outlined"
-          value={fieldMap[name]}
-          onChange={handleInputChange}
-          key={name}
-        />
-      ))}
-      <Grid
-        container
-        direction="row"
-        justify="flex-end"
-        alignItems="center"
-      >
-        <ButtonGroup
-          variant="contained"
-          className={classes.buttonGroup}
-          size="small"
-          color="primary"
-          aria-label="contained primary button group"
-        >
-          <Button
-            variant="contained"
-            className={classes.deleteButton}
+        {sortedFields.map(({ name, type, label }) => (
+          <TextField
+            fullWidth
+            id={`${id}-${name}`}
+            inputProps={{ 'data-row-id': id }}
+            label={label}
+            margin="normal"
+            name={name}
+            type={type}
+            variant="outlined"
+            value={fieldsMap[name]}
+            onChange={handleInputChange}
+            key={name}
+          />
+        ))}
+        {schema && schema.fields.some((field) => field.clonable) && (
+          <Fab
             data-row-id={id}
-            startIcon={<DeleteIcon />}
-            onClick={handleDelete}
-          >
-            Delete Row
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            startIcon={<SaveAltIcon />}
             color="primary"
+            aria-label="add"
+            className={classes.fab}
+            onClick={handleAddField}
           >
-            Save Row
-          </Button>
-        </ButtonGroup>
-      </Grid>
-    </form>
+            <AddIcon />
+          </Fab>
+        )}
+        <Grid
+          container
+          direction="row"
+          justify="flex-end"
+          alignItems="center"
+        >
+          <ButtonGroup
+            variant="contained"
+            className={classes.buttonGroup}
+            size="small"
+            color="primary"
+            aria-label="contained primary button group"
+          >
+            <Button
+              variant="contained"
+              className={classes.deleteButton}
+              data-row-id={id}
+              startIcon={<DeleteIcon />}
+              onClick={handleDelete}
+            >
+              Delete Row
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              startIcon={<SaveAltIcon />}
+              color="primary"
+            >
+              Save Row
+            </Button>
+          </ButtonGroup>
+        </Grid>
+      </form>
+    </>
   );
 }
 
@@ -180,6 +205,7 @@ RowEditContainer.propTypes = {
   handleInputChange: PropTypes.func.isRequired,
   handleChangeOrder: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
+  handleAddField: PropTypes.func.isRequired,
 };
 
 export default RowEditContainer;

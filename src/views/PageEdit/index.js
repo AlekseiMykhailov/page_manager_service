@@ -94,7 +94,7 @@ function PageCreate() {
       });
   }, [API_URL, slug]);
 
-  const getHomePageData = useCallback(() => {
+  const getHomePageId = useCallback(() => {
     FETCH.getData(`${API_URL}/homePage`)
       .then((response) => {
         if (response.ok) {
@@ -127,9 +127,9 @@ function PageCreate() {
   useEffect(() => {
     getPageData();
     getPublishData();
-    getHomePageData();
+    getHomePageId();
     getHomeRowSchemas();
-  }, [getPageData, getPublishData, getHomePageData, getHomeRowSchemas]);
+  }, [getPageData, getPublishData, getHomePageId, getHomeRowSchemas]);
 
   const handleResponse = (
     response,
@@ -165,7 +165,7 @@ function PageCreate() {
     e.preventDefault();
 
     FETCH.putData(`${API_URL}/pages/${slug}`, pageData,)
-      .then((response) => handleResponse(response, getHomePageData, 'Page was edited'));
+      .then((response) => handleResponse(response, getHomePageId, 'Page was edited'));
   };
 
   const resetPageData = () => {
@@ -179,7 +179,13 @@ function PageCreate() {
 
   const saveRowData = (rowData) => {
     FETCH.putData(`${API_URL}/rows/${rowData.id}`, rowData)
-      .then((response) => handleResponse(response, null, 'Row was edited'));
+      .then((response) => {
+        handleResponse(response, null, 'Row was edited');
+
+        if (response.ok) {
+          getPageData();
+        }
+      });
   };
 
   const saveRowOrder = (rowId, order) => {
@@ -279,6 +285,33 @@ function PageCreate() {
     if (changingRows.rowA && changingRows.rowB) {
       changeRowsOrder(changingRows);
     }
+  };
+
+  const addField = (e) => {
+    const { rowId } = e.currentTarget.dataset;
+    const rowData = rowsData.find((row) => row.id === +rowId);
+    const sortedFields = rowData.fields.sort((a, b) => a.order - b.order);
+    const lastOrder = sortedFields[sortedFields.length - 1].order;
+    const rowSchema = rowsSchemas.find((schema) => schema.id === rowData.schemaId);
+    const clonableField = rowSchema.fields.find((field) => field.clonable);
+    const newField = {
+      ...clonableField,
+      name: `${clonableField.name}-${lastOrder + 1}`,
+      order: lastOrder + 1,
+      value: '',
+    };
+    const newRowsData = rowsData.map((row) => {
+      if (row.id !== +rowId) {
+        return row;
+      }
+
+      return {
+        ...row,
+        fields: [...row.fields, newField],
+      };
+    });
+
+    setRowsData(newRowsData);
   };
 
   const deleteRow = (e) => {
@@ -411,6 +444,7 @@ function PageCreate() {
                 handleInputChange={changeRowInput}
                 handleDelete={deleteRow}
                 handleChangeOrder={handleRowsOrder}
+                handleAddField={addField}
                 key={row.id}
               />
             ))}

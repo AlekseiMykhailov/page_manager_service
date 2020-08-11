@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 module.exports = ({
   name: 'rows',
   actions: {
@@ -8,18 +9,21 @@ module.exports = ({
       },
     },
 
-    updateRow: {
+    updateRowFields: {
       params: {
         rowId: 'string',
-        order: 'number',
       },
-      handler(ctx) {
-        const { fields } = ctx.params;
+      async handler(ctx) {
+        const { rowId, fields } = ctx.params;
 
-        fields.forEach((field) => {
+        for await (const field of fields) {
           const { id, value } = field;
-          this.broker.call('dbFields.updateField', { id, value });
-        });
+          if (id) {
+            this.broker.call('dbFields.updateField', { id, value });
+          } else {
+            this.broker.call('dbFields.createField', { field: { ...field, rowId: +rowId } });
+          }
+        }
 
         return JSON.stringify({ ok: true });
       },

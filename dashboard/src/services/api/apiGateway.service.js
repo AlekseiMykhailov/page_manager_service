@@ -83,7 +83,7 @@ module.exports = {
         path: '/rows',
         aliases: {
           'POST /': 'rows.createRow',
-          'PUT /:rowId': 'rows.updateRow',
+          'PUT /:rowId': 'rows.updateRowFields',
           'PUT /order/:rowId': 'rows.updateRowOrder',
           'DELETE /:id': 'rows.deleteRow',
         },
