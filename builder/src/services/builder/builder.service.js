@@ -1,7 +1,4 @@
-const { layout } = require('../../../templates/default/layout');
-const { cssStyles } = require('../../../templates/default/cssStyles');
-const { jsScripts } = require('../../../templates/default/jsScripts');
-const { rowBricks, rowWithImage } = require('../../../templates/default/rows');
+const template = require('../../../templates/default');
 
 module.exports = ({
   name: 'builder',
@@ -17,7 +14,7 @@ module.exports = ({
         .then(() => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
         .then(({ fields }) => {
           if (!fields) {
-            return layout({ slug, title, description });
+            return template.layout({ slug, title, description });
           }
 
           const cssDependencies = new Set();
@@ -49,12 +46,12 @@ module.exports = ({
               }
 
               const rowTemplate = {
-                bricks: () => rowBricks({
+                bricks: () => template.rowBricks({
                   title: rowFieldsMap.title,
                   bricks: rowFields.filter((field) => field.name.startsWith('edge')),
                 }),
 
-                withImage: () => rowWithImage({
+                withImage: () => template.rowWithImage({
                   title: rowFieldsMap.title,
                   backgroundImageURL: rowFieldsMap.backgroundImageURL,
                   description: rowFieldsMap.description,
@@ -71,22 +68,18 @@ module.exports = ({
             .join('');
 
           const domainOfAssets = 'localhost:3010';
-          const cssFiles = cssStyles({
-            cssDependencies: [...cssDependencies].map((cssFile) => (
-              `http://${domainOfAssets}/css/${cssFile}`
-            )),
-          });
-          const jsFiles = jsScripts({
-            jsDependencies: [...jsDependencies].map((jsFile) => (
-              `http://${domainOfAssets}/js/${jsFile}`
-            )),
+          const transformToUrls = (domain, type, dependencies) => ({
+            dependencies: [...dependencies].map((file) => (`http://${domain}/${type}/${file}`))
           });
 
-          const html = layout({
+          const cssCode = template.cssStyles(transformToUrls(domainOfAssets, 'css', cssDependencies));
+          const jsCode = template.jsScripts(transformToUrls(domainOfAssets, 'js', jsDependencies));
+
+          const html = template.layout({
             domainOfAssets,
             slug,
-            cssFiles,
-            jsFiles,
+            cssCode,
+            jsCode,
             title,
             description,
             rows: rowsHtml,

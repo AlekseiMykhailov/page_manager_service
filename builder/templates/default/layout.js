@@ -12,8 +12,8 @@ const layout = Handlebars.compile(`
     <meta name="description" content="{{ description }}">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="http://{{ domainOfAssets }}/css/index.css">
-    {{#if cssFiles}}{{{ cssFiles }}}{{/if}}
-    {{#if jsFiles}}{{{ jsFiles }}}{{/if}}
+    {{#if cssCode}}{{{ cssCode }}}{{/if}}
+    {{#if jsCode}}{{{ jsCode }}}{{/if}}
   </head>
 
   <body>

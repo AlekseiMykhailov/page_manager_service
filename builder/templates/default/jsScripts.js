@@ -1,7 +1,7 @@
 const Handlebars = require('handlebars');
 
 const jsScripts = Handlebars.compile(`
-  {{#each jsDependencies}}
+  {{#each dependencies}}
     <script src="{{ this }}" defer></script>
   {{/each}}
 `);
