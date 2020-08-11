@@ -147,7 +147,12 @@ function FormPageCreate({ className, ...rest }) {
 
                 if (type === 'select') {
                   return (
-                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
+                    <FormControl
+                      variant="outlined"
+                      className={classes.formControl}
+                      fullWidth
+                      key={name}
+                    >
                       <InputLabel id={`${name}-label`}>
                         {label}
                       </InputLabel>
@@ -159,7 +164,6 @@ function FormPageCreate({ className, ...rest }) {
                         value={pageData[name]}
                         variant="outlined"
                         onChange={handleChange}
-                        key={name}
                       >
 
                         {domains.map((domain) => (

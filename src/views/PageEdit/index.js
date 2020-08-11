@@ -72,11 +72,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function PageCreate() {
+function PageEdit() {
   const dispatch = useDispatch();
   const classes = useStyles();
   const { slug } = useParams();
-  const [pageData, setPagesData] = useState(null);
+  const [pageSchema, setPageSchema] = useState(null);
+  const [pageData, setPageData] = useState(null);
   const [rowsSchemas, setRowSchemas] = useState([]);
   const [rowsData, setRowsData] = useState([]);
   const [publishData, setPublishData] = useState(null);
@@ -88,7 +89,7 @@ function PageCreate() {
     FETCH.getData(`${API_URL}/pages/${slug}`)
       .then((response) => {
         if (response.ok) {
-          setPagesData(response.webPage);
+          setPageData(response.webPage);
           setRowsData(response.rows);
         }
       });
@@ -103,7 +104,16 @@ function PageCreate() {
       });
   }, [API_URL]);
 
-  const getHomeRowSchemas = useCallback(() => {
+  const getPageSchema = useCallback(() => {
+    FETCH.getData(`${API_URL}/pages/schema`)
+      .then((response) => {
+        if (response.ok) {
+          setPageSchema(response.schema);
+        }
+      });
+  }, [API_URL]);
+
+  const getRowSchemas = useCallback(() => {
     FETCH.getData(`${API_URL}/schemas/rows`)
       .then((response) => {
         if (response.ok) {
@@ -125,11 +135,12 @@ function PageCreate() {
   }, [API_URL, slug]);
 
   useEffect(() => {
+    getPageSchema();
     getPageData();
     getPublishData();
     getHomePageId();
-    getHomeRowSchemas();
-  }, [getPageData, getPublishData, getHomePageId, getHomeRowSchemas]);
+    getRowSchemas();
+  }, [getPageData, getPublishData, getHomePageId, getRowSchemas, getPageSchema]);
 
   const handleResponse = (
     response,
@@ -155,9 +166,9 @@ function PageCreate() {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
-      setPagesData({ ...pageData, [name]: !pageData[name] });
+      setPageData({ ...pageData, [name]: !pageData[name] });
     } else {
-      setPagesData({ ...pageData, [name]: value });
+      setPageData({ ...pageData, [name]: value });
     }
   };
 
@@ -180,7 +191,7 @@ function PageCreate() {
   const saveRowData = (rowData) => {
     FETCH.putData(`${API_URL}/rows/${rowData.id}`, rowData)
       .then((response) => {
-        handleResponse(response, null, 'Row was edited');
+        handleResponse(response, getPageData, 'Row was edited');
 
         if (response.ok) {
           getPageData();
@@ -425,6 +436,7 @@ function PageCreate() {
 
             {pageData && (
               <PageDataForm
+                pageSchema={pageSchema}
                 pageData={pageData}
                 className={classes.section}
                 handleSubmit={savePageData}
@@ -466,4 +478,4 @@ function PageCreate() {
   );
 }
 
-export default PageCreate;
+export default PageEdit;

@@ -22,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function PageDataForm({
+  pageSchema,
   pageData,
   className,
   handleSubmit,
@@ -43,46 +44,42 @@ function PageDataForm({
       <Typography gutterBottom variant="h3">
         {pageData.title}
       </Typography>
-      {Object.entries(pageData).map(([fieldName, fieldValue]) => {
-        if (fieldName === 'title'
-          || fieldName === 'description'
-          || fieldName === 'slug'
-          || fieldName === 'domain'
-        ) {
-          return (
-            <TextField
-              fullWidth
-              label={fieldName}
-              margin="normal"
-              name={fieldName}
-              disabled={fieldName === 'slug' || fieldName === 'domain'}
-              variant="outlined"
-              value={fieldValue}
-              onChange={handleChange}
-              key={fieldName}
-            />
-          );
-        }
+      {
+        Object.values(pageSchema)
+          .sort((a, b) => a.order - b.order)
+          .map(({ name, label, type }) => {
+            if (type === 'checkbox') {
+              return (
+                <InputLabel htmlFor={name} key={name}>
+                  <Checkbox
+                    id={name}
+                    label={label}
+                    margin="normal"
+                    name={name}
+                    variant="outlined"
+                    checked={pageData[name]}
+                    onChange={handleChange}
+                  />
+                  Set as home page
+                </InputLabel>
+              );
+            }
 
-        if (fieldName === 'isHomePage') {
-          return (
-            <InputLabel htmlFor={fieldName} key={fieldName}>
-              <Checkbox
-                id={fieldName}
-                label={fieldName}
+            return (
+              <TextField
+                fullWidth
+                label={label}
                 margin="normal"
-                name={fieldName}
+                name={name}
+                disabled={name === 'slug' || name === 'domain'}
                 variant="outlined"
-                checked={fieldValue}
+                value={pageData[name]}
                 onChange={handleChange}
+                key={name}
               />
-              Set as home page
-            </InputLabel>
-          );
-        }
-
-        return '';
-      })}
+            );
+          })
+      }
       <Grid
         container
         direction="row"
@@ -125,6 +122,7 @@ PageDataForm.defaultProps = {
 };
 
 PageDataForm.propTypes = {
+  pageSchema: PropTypes.object,
   pageData: PropTypes.shape({
     title: PropTypes.string.isRequired,
   }).isRequired,

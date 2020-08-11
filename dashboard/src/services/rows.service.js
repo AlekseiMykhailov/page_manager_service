@@ -17,14 +17,19 @@ module.exports = ({
         const { rowId, fields } = ctx.params;
 
         for await (const field of fields) {
+          this.logger.info('@@@: ', field);
+
           const { id, value } = field;
-          if (id) {
+          if (id && !value) {
+            this.broker.call('dbFields.deleteField', { id });
+          } else if (id) {
             this.broker.call('dbFields.updateField', { id, value });
           } else {
             this.broker.call('dbFields.createField', { field: { ...field, rowId: +rowId } });
           }
         }
 
+        this.logger.info('-------------before return-------------');
         return JSON.stringify({ ok: true });
       },
     },

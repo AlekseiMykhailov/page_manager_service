@@ -70,9 +70,6 @@ function RowEditContainer({
   const API_URL = process.env.REACT_APP_API_URL;
   const classes = useStyles();
 
-  console.log(fieldsMap)
-  console.log(fields)
-
   return (
     <>
       <Divider className={classes.divider} />

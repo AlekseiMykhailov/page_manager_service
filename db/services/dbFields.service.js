@@ -50,6 +50,18 @@ module.exports = {
       },
     },
 
+    deleteField: {
+      handler(ctx) {
+        const { id } = ctx.params;
+
+        return this.settings.model.destroy({
+          where: { id },
+        })
+          .then(() => ({ ok: true }))
+          .catch((error) => ({ ok: false, error }));
+      },
+    },
+
     getFieldsByRowId: {
       handler(ctx) {
         const { rowIds } = ctx.params;
