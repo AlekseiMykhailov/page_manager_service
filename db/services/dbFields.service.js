@@ -10,55 +10,29 @@ module.exports = {
   },
   actions: {
 
-    createField: {
-      params: {},
+    createFields: {
       handler(ctx) {
-        const { field } = ctx.params;
-        if (!field.value) {
-          return { ok: true };
-        }
+        const { fields } = ctx.params;
 
-        return this.settings.model.create(field)
-          .then((res) => ({ ok: true, id: res.dataValues.id }))
-          .catch((err) => {
-            this.logger.error('ERROR FIELD CREATE: ', err);
-
-            return { ok: false, err };
+        return this.settings.model.bulkCreate(fields, { updateOnDuplicate: ['value', 'updatedAt'] })
+          .then(() => ({ ok: true }))
+          .catch((error) => {
+            this.logger.error('ERROR FIELDS UPDATE: ', error);
+            return { ok: false, error };
           });
       },
     },
 
-    updateField: {
+    deleteFields: {
       handler(ctx) {
-        const { id, value } = ctx.params;
+        const { fieldIds } = ctx.params;
 
-        if (!id && !value) {
-          return { ok: true };
-        }
-
-        if (!value) {
-          return this.settings.model.destroy({ where: { id } })
-            .then(() => ({ ok: true }))
-            .catch((error) => ({ ok: false, error }));
-        }
-
-        return this.settings.model.update({ value }, {
-          where: { id }
-        })
+        return this.settings.model.destroy({ where: { id: fieldIds } })
           .then(() => ({ ok: true }))
-          .catch((error) => ({ ok: false, error }));
-      },
-    },
-
-    deleteField: {
-      handler(ctx) {
-        const { id } = ctx.params;
-
-        return this.settings.model.destroy({
-          where: { id },
-        })
-          .then(() => ({ ok: true }))
-          .catch((error) => ({ ok: false, error }));
+          .catch((error) => {
+            this.logger.error('ERROR FIELDS DELETE: ', error);
+            return { ok: false, error };
+          });
       },
     },
 
@@ -79,12 +53,8 @@ module.exports = {
             id, rowId, type, order, name, label, value
           })))
           .then((fields) => ({ ok: true, fields }))
-          .catch((err) => ({ ok: false, err }));
+          .catch((error) => ({ ok: false, error }));
       },
-    },
-
-    getAllFields() {
-      return this.settings.model.findAll({ raw: true });
     },
   },
 };

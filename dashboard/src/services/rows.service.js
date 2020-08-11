@@ -13,24 +13,24 @@ module.exports = ({
       params: {
         rowId: 'string',
       },
-      async handler(ctx) {
+      handler(ctx) {
         const { rowId, fields } = ctx.params;
+        const preparedFields = fields
+          .filter((field) => field.value.trim())
+          .map((field) => ({ ...field, rowId: +rowId }));
 
-        for await (const field of fields) {
-          this.logger.info('@@@: ', field);
+        const fieldsForDelete = fields
+          .filter((field) => field.id && !field.value.trim())
+          .map((field) => field.id);
 
-          const { id, value } = field;
-          if (id && !value) {
-            this.broker.call('dbFields.deleteField', { id });
-          } else if (id) {
-            this.broker.call('dbFields.updateField', { id, value });
-          } else {
-            this.broker.call('dbFields.createField', { field: { ...field, rowId: +rowId } });
-          }
-        }
+        return this.broker.call('dbFields.deleteFields', { fieldIds: fieldsForDelete })
+          .then(() => this.broker.call('dbFields.createFields', { fields: preparedFields }))
+          .then(() => JSON.stringify({ ok: true }))
+          .catch((error) => {
+            this.logger.error('ERROR ROW WITH FIELDS UPDATE: ', error);
 
-        this.logger.info('-------------before return-------------');
-        return JSON.stringify({ ok: true });
+            return { ok: false, error };
+          });
       },
     },
 

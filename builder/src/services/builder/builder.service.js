@@ -48,7 +48,7 @@ module.exports = ({
               const rowTemplate = {
                 bricks: () => template.rowBricks({
                   title: rowFieldsMap.title,
-                  bricks: rowFields.filter((field) => field.name.startsWith('edge')),
+                  bricks: rowFields.filter((field) => field.name.startsWith('brick')),
                 }),
 
                 withImage: () => template.rowWithImage({

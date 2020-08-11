@@ -17,18 +17,23 @@ module.exports = {
         const {
           schemaId, webPageId, order, fields
         } = row;
+        let rowId;
 
         return this.settings.model.create({ schemaId, webPageId, order })
-          .then((res) => (res.dataValues.id))
-          .then(async (rowId) => {
-            for await (const field of fields) {
-              this.broker.call('dbFields.createField', { field: { ...field, rowId } });
-            }
+          .then((res) => {
+            rowId = res.dataValues.id;
+            const preparedFields = fields
+              .filter((field) => field.value.trim())
+              .map((field) => ({ ...field, rowId }));
 
-            return rowId;
+            return this.broker.call('dbFields.createFields', { fields: preparedFields });
           })
-          .then((rowId) => ({ ok: true, rowId }))
-          .catch((err) => ({ ok: false, err }));
+          .then(() => ({ ok: true, rowId }))
+          .catch((error) => {
+            this.logger.error('ERROR ROW WITH FIELDS CREATE: ', error);
+
+            return { ok: false, error };
+          });
       },
     },
 
@@ -66,10 +71,6 @@ module.exports = {
           }
         });
       }
-    },
-
-    getAllRows() {
-      return this.settings.model.findAll({ raw: true });
     },
   },
 };
