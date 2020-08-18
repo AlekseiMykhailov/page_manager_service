@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import clsx from 'clsx';
 import {
   ButtonGroup,
   Button,
@@ -19,7 +18,8 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import AddIcon from '@material-ui/icons/Add';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
+  root: {},
+  form: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   divider: {
-    backgroundColor: colors.grey[300],
+    height: '4px',
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(3),
   },
@@ -37,10 +37,11 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(4),
   },
   deleteButton: {
-    color: theme.palette.common.white,
-    backgroundColor: colors.red[600],
+    color: colors.red[600],
+    borderColor: colors.red[600],
     '&:hover': {
-      backgroundColor: colors.red[900]
+      color: theme.palette.common.white,
+      backgroundColor: colors.red[600]
     }
   },
   fab: {
@@ -52,7 +53,6 @@ function RowEditContainer({
   row,
   index,
   maxIndex,
-  className,
   schemas,
   handleSubmit,
   handleInputChange,
@@ -79,7 +79,7 @@ function RowEditContainer({
         data-row-id={id}
         noValidate
         autoComplete="off"
-        className={clsx(classes.root, className)}
+        className={classes.form}
         onSubmit={handleSubmit}
       >
         <Grid
@@ -154,20 +154,18 @@ function RowEditContainer({
           alignItems="center"
         >
           <ButtonGroup
-            variant="contained"
             className={classes.buttonGroup}
             size="small"
-            color="primary"
             aria-label="contained primary button group"
           >
             <Button
-              variant="contained"
+              variant="outlined"
               className={classes.deleteButton}
               data-row-id={id}
               startIcon={<DeleteIcon />}
               onClick={handleDelete}
             >
-              Delete Row
+              Delete Section
             </Button>
             <Button
               type="submit"
@@ -175,7 +173,7 @@ function RowEditContainer({
               startIcon={<SaveAltIcon />}
               color="primary"
             >
-              Save Row
+              Save Section
             </Button>
           </ButtonGroup>
         </Grid>
@@ -183,10 +181,6 @@ function RowEditContainer({
     </>
   );
 }
-
-RowEditContainer.defaultProps = {
-  className: '',
-};
 
 RowEditContainer.propTypes = {
   row: PropTypes.shape({
@@ -196,7 +190,6 @@ RowEditContainer.propTypes = {
   }),
   index: PropTypes.number.isRequired,
   maxIndex: PropTypes.number.isRequired,
-  className: PropTypes.string,
   schemas: PropTypes.array.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   handleInputChange: PropTypes.func.isRequired,

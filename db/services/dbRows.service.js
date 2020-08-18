@@ -22,9 +22,7 @@ module.exports = {
         return this.settings.model.create({ schemaId, webPageId, order })
           .then((res) => {
             rowId = res.dataValues.id;
-            const preparedFields = fields
-              .filter((field) => field.value.trim())
-              .map((field) => ({ ...field, rowId }));
+            const preparedFields = fields.map((field) => ({ ...field, rowId }));
 
             return this.broker.call('dbFields.createFields', { fields: preparedFields });
           })

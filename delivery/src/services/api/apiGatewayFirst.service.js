@@ -6,10 +6,10 @@ const broker = new ServiceBroker();
 broker.createService(ApiService);
 
 module.exports = {
-  name: 'apiGateway',
+  name: 'first',
   mixins: [ApiService],
   settings: {
-    port: process.env.DELIVERY_PORT || 3011,
+    port: 5001,
     cors: {
       origin: ['*'],
       methods: ['GET'],
@@ -21,8 +21,18 @@ module.exports = {
       {
         path: '/',
         aliases: {
-          'GET /': 'publish.getPublishedHomePageHTML',
-          'GET /:slug': 'publish.getPublishedPageHTML',
+          'GET /': function (req, res) {
+            const domain = req.headers.host;
+            return this.broker.call('publish.getPublishedPageHTML', { domain })
+              .then((html) => res.end(html))
+              .catch((error) => { this.logger.info('ERROR: ', error); });
+          },
+          'GET /:slug': function (req, res) {
+            const { slug } = req.$params;
+            const domain = req.headers.host;
+            return this.broker.call('publish.getPublishedPageHTML', { domain, slug })
+              .then((html) => res.end(html));
+          },
         },
         bodyParsers: {
           json: true,

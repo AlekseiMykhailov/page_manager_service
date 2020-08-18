@@ -4,16 +4,20 @@ module.exports = ({
 
     createPublishedPage: {
       params: {
-        id: 'number',
+        webPageId: 'number',
+        domainId: 'number',
+        domain: 'string',
         slug: 'string',
         html: 'string',
       },
       handler(ctx) {
-        const { id, slug, html } = ctx.params;
+        const {
+          webPageId, domainId, domain, slug, html
+        } = ctx.params;
 
-        this.logger.info('CREATE PUBLISHED PAGE: ', id, slug);
-
-        return this.broker.call('dbPublishedPage.createPublishedPage', { id, slug, html })
+        return this.broker.call('dbPublishedPage.createPublishedPage', {
+          webPageId, domainId, domain, slug, html
+        })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
@@ -23,16 +27,20 @@ module.exports = ({
 
     updatePublishedPage: {
       params: {
-        id: 'number',
+        webPageId: 'number',
+        domainId: 'number', 
+        domain: 'string',
         slug: 'string',
         html: 'string',
       },
       handler(ctx) {
-        const { id, slug, html } = ctx.params;
+        const {
+          webPageId, domainId, domain, slug, html
+        } = ctx.params;
 
-        this.logger.info('UPDATE PUBLISHED PAGE: ', ctx.params);
-
-        return this.broker.call('dbPublishedPage.updatePublishedPage', { id, slug, html })
+        return this.broker.call('dbPublishedPage.updatePublishedPage', {
+          webPageId, domainId, domain, slug, html
+        })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
@@ -42,12 +50,12 @@ module.exports = ({
 
     destroyPublishedPage: {
       params: {
-        slug: 'string',
+        webPageId: 'number',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { webPageId } = ctx.params;
 
-        return this.broker.call('dbPublishedPage.destroyPublishedPage', { slug })
+        return this.broker.call('dbPublishedPage.destroyPublishedPage', { webPageId })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
@@ -55,42 +63,52 @@ module.exports = ({
       }
     },
 
-    getPublishedPage: {
+    getPublishedPageByWebPageId: {
       params: {
-        slug: 'string',
+        webPageId: 'number',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { webPageId } = ctx.params;
 
-        return this.broker.call('dbPublishedPage.getPublishedPageBySlug', { slug })
+        return this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
           });
       },
+    },
+
+    getPageHTML: {
+      handler(ctx) {
+        const { domain, slug } = ctx.params;
+
+        if (slug) {
+          return this.broker.call('publish.getPublishedPageHTML', { domain, slug });
+        }
+
+        return this.broker.call('publish.getPublishedHomePageHTML', { domain });
+      }
     },
 
     getPublishedPageHTML: {
       params: {
-        slug: 'string',
+        domain: 'string',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { domain, slug } = ctx.params;
 
-        return this.broker.call('dbPublishedPage.getPublishedPageBySlug', { slug })
-          .then((res) => ((res.ok) ? res.data.html : res))
-          .catch((err) => {
-            this.logger.error('ERROR: ', err);
-            return { ok: false, error: err };
-          });
-      },
-    },
+        if (slug) {
+          return this.broker.call('dbPublishedPage.getPublishedPageBySlug', { domain, slug })
+            .then((res) => ((res.ok) ? res.data.html : res))
+            .catch((err) => {
+              this.logger.error('ERROR: ', err);
+              return { ok: false, error: err };
+            });
+        }
 
-    getPublishedHomePageHTML: {
-      handler() {
-        return this.broker.call('dbDomainSettings.getHomePageId', { domain: 'localhost:3011' })
-          .then((res) => {
-            const { webPageId } = res;
+        return this.broker.call('dbDomainSettings.getDomainSettings', { domain })
+          .then((domainSettings) => {
+            const { webPageId } = domainSettings;
             return this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId });
           })
           .then((res) => ((res.ok) ? res.data.html : res))
@@ -113,12 +131,12 @@ module.exports = ({
 
     isPublished: {
       params: {
-        slug: 'string',
+        webPageId: 'number',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { webPageId } = ctx.params;
 
-        return this.broker.call('dbPublishedPage.getPublishedPageBySlug', { slug })
+        return this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId })
           .then((res) => ({ ok: res.ok }))
           .catch((err) => {
             this.logger.error('ERROR: ', err);

@@ -9,10 +9,21 @@ module.exports = {
       },
       domain: {
         type: Sequelize.STRING,
+        unique: true,
+        allowNull: false,
+      },
+      name: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
       homePageId: {
         type: Sequelize.INTEGER,
+        references: {
+          model: {
+            tableName: 'webpage',
+          },
+          key: 'id',
+        },
       },
       createdAt: {
         type: Sequelize.DATE,

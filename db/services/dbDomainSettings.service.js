@@ -37,7 +37,20 @@ module.exports = {
       },
     },
 
-    getHomePageId: {
+    setDomainSettings: {
+      params: {},
+      handler(ctx) {
+        const { id, homePageId } = ctx.params;
+
+        return this.settings.model.update({ homePageId }, {
+          where: { id },
+        })
+          .then(() => ({ ok: true }))
+          .catch((error) => ({ ok: false, error }));
+      }
+    },
+
+    getDomainSettings: {
       params: {
         domain: 'string',
       },
@@ -45,27 +58,24 @@ module.exports = {
         const { domain } = ctx.params;
 
         return this.settings.model.findOne({
-          where: {
-            domain,
-          },
+          where: { domain },
         })
           .then((res) => ({ ok: true, webPageId: res.dataValues.homePageId }))
-          .catch((err) => ({ ok: false, err }));
+          .catch((error) => ({ ok: false, error }));
       },
     },
 
     getDomains: {
       handler() {
         return this.settings.model.findAll({ raw: true })
-          .then((res) => res.map(({ id, domain }) => ({ id, name: domain })))
-          .then((domains) => ({ ok: true, domains }));
+          .then((res) => res.map(({
+            id, domain, name, homePageId
+          }) => ({
+            id, domain, name, homePageId
+          })))
+          .then((domains) => ({ ok: true, domains }))
+          .catch((error) => ({ ok: false, error }));
       },
-    },
-
-    getAllSettings: {
-      handler() {
-        return this.settings.model.findAll({ raw: true });
-      }
     },
   },
 };

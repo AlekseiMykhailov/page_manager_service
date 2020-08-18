@@ -10,8 +10,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    name: {
+      type: DataTypes.STRING,
+    },
     homePageId: {
       type: DataTypes.INTEGER,
+      references: {
+        model: {
+          tableName: 'webpage',
+        },
+        key: 'id',
+      },
     },
   }, {
     freezeTableName: true,

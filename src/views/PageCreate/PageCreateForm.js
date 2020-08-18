@@ -7,7 +7,6 @@ import { makeStyles } from '@material-ui/styles';
 import {
   Card,
   CardContent,
-  Checkbox,
   FormControl,
   Select,
   InputLabel,
@@ -32,6 +31,7 @@ function FormPageCreate({ className, ...rest }) {
   const [domains, setDomains] = useState([]);
   const [pageData, setPagesData] = useState(null);
   const [isCreated, setIsCreated] = useState(false);
+  const selectedDomain = domains.find((domain) => domain.domain === pageData.domain);
   const dispatch = useDispatch();
 
   const API_URL = process.env.REACT_APP_API_URL;
@@ -108,11 +108,23 @@ function FormPageCreate({ className, ...rest }) {
       return;
     }
 
+    const currentDomain = domains.find((domain) => domain.domain === pageData.domain);
+
     FETCH.postData(
       `${API_URL}/pages`,
-      pageData,
+      {
+        ...pageData,
+        domainId: currentDomain.id,
+      },
     ).then((response) => {
-      handleResponse(response, setIsCreated(true), 'New page was created');
+      if (response.ok) {
+        setIsCreated(true);
+        setPagesData({
+          ...pageData,
+          id: response.id,
+        });
+      }
+      handleResponse(response, null, 'New page was created', response.error);
     });
   };
 
@@ -121,30 +133,15 @@ function FormPageCreate({ className, ...rest }) {
       {...rest}
       className={clsx(classes.root, className)}
     >
-      {isCreated && <Redirect to={`/pages/${pageData.slug}`} />}
+      {isCreated && pageData.id && (
+        <Redirect to={`/pages/${selectedDomain.id}/${pageData.id}`} />
+      )}
       <CardContent>
         {pageSchema && pageData && (
           <form autoComplete="off" onSubmit={createWebPage}>
             {Object.values(pageSchema)
               .sort((a, b) => a.order - b.order)
               .map(({ name, label, type }) => {
-                if (type === 'checkbox') {
-                  return (
-                    <InputLabel htmlFor={name} key={name}>
-                      <Checkbox
-                        id={name}
-                        label={label}
-                        margin="normal"
-                        name={name}
-                        variant="outlined"
-                        checked={pageData[name]}
-                        onChange={handleChange}
-                      />
-                      Set as home page
-                    </InputLabel>
-                  );
-                }
-
                 if (type === 'select') {
                   return (
                     <FormControl
@@ -167,8 +164,8 @@ function FormPageCreate({ className, ...rest }) {
                       >
 
                         {domains.map((domain) => (
-                          <MenuItem value={domain.name} key={domain.name}>
-                            {domain.name}
+                          <MenuItem value={domain.domain} key={domain.id}>
+                            {`${domain.name} (${domain.domain})`}
                           </MenuItem>
                         ))}
                       </Select>
@@ -192,11 +189,12 @@ function FormPageCreate({ className, ...rest }) {
               })}
             <Button
               className={classes.submitButton}
-              color="secondary"
+              color="primary"
               fullWidth
               size="large"
               type="submit"
               variant="contained"
+              disabled={!pageData.domain || !pageData.slug || !pageData.title}
             >
               Create Page
             </Button>

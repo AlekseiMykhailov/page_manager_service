@@ -1,8 +1,6 @@
 const db = require('../models');
 const Rest = require('../mixins/rest');
 
-const PUBLISHED_SERVER = 'http://localhost:3011';
-
 module.exports = {
   name: 'dbPublishedPage',
   mixins: [Rest],
@@ -13,22 +11,28 @@ module.exports = {
 
     createPublishedPage: {
       params: {
-        id: 'number',
+        webPageId: 'number',
+        domainId: 'number', 
+        domain: 'string',
         slug: 'string',
         html: 'string',
       },
       handler(ctx) {
-        const { id, slug, html } = ctx.params;
+        const {
+          webPageId, domainId, domain, slug, html
+        } = ctx.params;
         const publishedAt = Date.now();
         const publishingPage = {
-          webPageId: id,
+          webPageId,
+          domainId,
+          domain,
           slug,
           publishedAt,
           html,
         };
 
         return this.settings.model.create(publishingPage)
-          .then(() => ({ ok: true, data: { url: `${PUBLISHED_SERVER}/${slug}`, publishedAt } }))
+          .then(() => ({ ok: true }))
           .catch((err) => {
             this.logger.error('ERROR CREATE PUBLISH PAGE: ', err);
 
@@ -39,19 +43,17 @@ module.exports = {
 
     updatePublishedPage: {
       params: {
+        webPageId: 'number',
         slug: 'string',
         html: 'string',
       },
       handler(ctx) {
-        const { slug, html } = ctx.params;
-        const publishedAt = Date.now();
+        const { webPageId, slug, html } = ctx.params;
 
-        return this.settings.model.update({ publishedAt, html }, {
-          where: {
-            slug,
-          }
+        return this.settings.model.update({ slug, html }, {
+          where: { webPageId }
         })
-          .then(() => ({ ok: true, data: { url: `${PUBLISHED_SERVER}/${slug}`, publishedAt } }))
+          .then(() => ({ ok: true }))
           .catch((err) => {
             this.logger.error('ERROR UPDATE PUBLISH PAGE: ', err);
 
@@ -62,15 +64,13 @@ module.exports = {
 
     destroyPublishedPage: {
       params: {
-        slug: 'string',
+        webPageId: 'number',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { webPageId } = ctx.params;
 
         return this.settings.model.destroy({
-          where: {
-            slug,
-          }
+          where: { webPageId }
         })
           .then(() => ({ ok: true }))
           .catch((err) => {
@@ -83,20 +83,20 @@ module.exports = {
 
     getPublishedPageBySlug: {
       params: {
+        domain: 'string',
         slug: 'string',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { domain, slug } = ctx.params;
 
-        return this.settings.model.findOne({ where: { slug } })
+        return this.settings.model.findOne({ where: { domain, slug } })
           .then((res) => {
             if (!res) {
-              throw new Error(`Page with slug "${slug}" not published.`);
+              return { ok: false };
             }
 
-            return res;
+            return { ok: true, data: res.dataValues };
           })
-          .then((res) => ({ ok: true, data: { ...res.dataValues, url: `${PUBLISHED_SERVER}/${slug}` } }))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
 
@@ -113,17 +113,9 @@ module.exports = {
         const { webPageId } = ctx.params;
 
         return this.settings.model.findOne({
-          where: {
-            webPageId,
-          },
+          where: { webPageId },
         })
-          .then((res) => ({
-            ok: true,
-            data: {
-              ...res.dataValues,
-              url: `${PUBLISHED_SERVER}/${res.dataValues.slug}`,
-            }
-          }))
+          .then((res) => ({ ok: true, data: res.dataValues}))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
@@ -136,12 +128,13 @@ module.exports = {
         return this.settings.model.findAll({ raw: true })
           .then(
             (pages) => (pages.map(({
-              id, webPageId, slug, publishedAt
+              id, webPageId, domainId, domain, slug, publishedAt
             }) => ({
               id,
               webPageId,
+              domainId,
+              domain,
               slug,
-              url: `${PUBLISHED_SERVER}/${slug}`,
               publishedAt,
             })))
           )

@@ -7,59 +7,45 @@ module.exports = ({
         domain: 'string',
         slug: 'string',
         title: 'string',
-        isHomePage: 'boolean',
         description: 'string',
       },
       handler(ctx) {
         const {
-          domain, slug, isHomePage, title, description
+          domainId, domain, slug, title, description
         } = ctx.params;
 
         return this.broker.call('dbWebPages.createWebPage', {
-          domain, slug, title, description
+          domainId: +domainId, domain, slug, title, description
         })
-          .then(({ id }) => {
-            if (isHomePage) {
-              return this.broker.call('dbDomainSettings.setHomePageId', {
-                domain: 'localhost:3011',
-                homePageId: id
-              }).then(() => ({ ok: true, id }));
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error(res.error);
+            } else {
+              return res;
             }
-
-            return { ok: true, id };
           })
-          .catch((err) => {
-            this.logger.error('ERROR: ', err);
-            return JSON.stringify(err, null, 2);
+          .then(({ id }) => ({ ok: true, id }))
+          .catch((error) => {
+            this.logger.error('ERROR webPages.createWebPage: ', error);
+            return JSON.stringify(error, null, 2);
           });
       },
     },
 
     updateWebPage: {
       params: {
-        title: 'string',
         slug: 'string',
+        title: 'string',
         isHomePage: 'boolean',
         description: 'string',
       },
       handler(ctx) {
         const {
-          id, slug, isHomePage, title, description
+          id, slug, title, description
         } = ctx.params;
 
-        if (isHomePage) {
-          return this.broker.call('dbDomainSettings.setHomePageId', { domain: 'localhost:3011', homePageId: id })
-            .then(() => this.broker.call('dbWebPages.updateWebPage', {
-              slug, title, description
-            }))
-            .catch((err) => {
-              this.logger.error('ERROR: ', err);
-              return JSON.stringify(err, null, 2);
-            });
-        }
-
         return this.broker.call('dbWebPages.updateWebPage', {
-          slug, title, description
+          id, slug, title, description
         })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
@@ -70,28 +56,19 @@ module.exports = ({
 
     deleteWebPage: {
       params: {
-        slug: 'string',
+        id: 'string',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { id } = ctx.params;
 
-        return this.broker.call('dbWebPages.deleteWebPage', { slug })
+        return this.broker.call('publish.isPublished', { webPageId: +id })
+          .then((res) => {
+            if (res.ok) {
+              return { ok: false, error: 'Published Page could not be deleted' };
+            }
+            return this.broker.call('dbWebPages.deleteWebPage', { id: +id });
+          })
           .then((res) => JSON.stringify(res, null, 2))
-          .catch((err) => {
-            this.logger.error('ERROR: ', err);
-            return JSON.stringify(err, null, 2);
-          });
-      },
-    },
-
-    getWebPageBySlug: {
-      params: {
-        slug: 'string',
-      },
-      handler(ctx) {
-        const { slug } = ctx.params;
-
-        return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
@@ -116,20 +93,19 @@ module.exports = ({
 
     previewWebPage: {
       params: {
-        slug: 'string',
+        pageId: 'string',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { pageId } = ctx.params;
         let webPage;
 
-        return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
+        return this.broker.call('dbWebPages.getWebPageById', { id: +pageId })
           .then((res) => {
             webPage = res.data;
 
             return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
           })
           .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
-          // .then((html) => JSON.stringify({ ok: true, html }, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
@@ -163,21 +139,21 @@ module.exports = ({
 
     publishWebPage: {
       params: {
-        slug: 'string',
+        webPageId: 'string',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const webPageId = Number(ctx.params.webPageId);
         let webPage;
 
-        return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
+        return this.broker.call('dbWebPages.getWebPageById', { id: webPageId })
           .then((res) => {
             webPage = res.data;
-            return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
+            return this.broker.call('rows.getRowsForWebPage', { webPageId });
           })
           .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
           .then((html) => this.broker.call('publish.createPublishedPage', {
-            id: webPage.id,
-            slug,
+            ...webPage,
+            webPageId,
             html,
           }))
           .then((response) => JSON.stringify(response, null, 2))
@@ -189,24 +165,18 @@ module.exports = ({
     },
 
     updatePublishedWebPage: {
-      params: {
-        slug: 'string',
-      },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { webPageId } = ctx.params;
         let webPage;
 
-        return this.broker.call('dbWebPages.getWebPageBySlug', { slug })
-          .then((res) => {
-            webPage = res.data;
-
-            return webPage.id;
-          })
-          .then((webPageId) => this.broker.call('rows.getRowsForWebPage', { webPageId }))
+        return this.broker.call('dbWebPages.getWebPageById', { id: +webPageId })
+          .then((res) => { webPage = res.data; })
+          .then(() => this.broker.call('rows.getRowsForWebPage', { webPageId: +webPageId }))
           .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
           .then((html) => this.broker.call('dbPublishedPage.updatePublishedPage', {
-            id: webPage.id,
-            slug,
+            webPageId: webPage.id,
+            domain: webPage.domain,
+            slug: webPage.slug,
             html,
           }))
           .then((response) => JSON.stringify(response, null, 2))
@@ -219,12 +189,12 @@ module.exports = ({
 
     unPublishWebPage: {
       params: {
-        slug: 'string',
+        id: 'string',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { id } = ctx.params;
 
-        return this.broker.call('publish.destroyPublishedPage', { slug })
+        return this.broker.call('publish.destroyPublishedPage', { webPageId: +id })
           .then((response) => JSON.stringify(response, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
@@ -235,12 +205,12 @@ module.exports = ({
 
     getPublishedPageData: {
       params: {
-        slug: 'string',
+        id: 'string',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { id } = ctx.params;
 
-        return this.broker.call('publish.getPublishedPage', { slug })
+        return this.broker.call('publish.getPublishedPageByWebPageId', { webPageId: +id })
           .then((response) => JSON.stringify(response, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
@@ -253,7 +223,6 @@ module.exports = ({
       handler() {
         return this.broker.call('publish.getAllPublishedPages')
           .then((response) => JSON.stringify(response, null, 2))
-          .catch((err) => JSON.stringify(err, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);

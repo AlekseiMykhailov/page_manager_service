@@ -24,7 +24,6 @@ module.exports = {
       maxAge: 3600,
     },
     assets: {
-      // folder: path.resolve(__dirname, '..', '..', '..', '..', 'build'),
       folder: path.resolve(__dirname, '..', '..', '..', '..', 'builder', 'templates', 'default', 'assets'),
       options: {},
     },
@@ -34,8 +33,9 @@ module.exports = {
         path: '/',
         aliases: {
           'GET /nav': 'dashboard.nav',
-          'GET /homePage': 'domainSettings.getHomePageId',
+          'GET /domains/:domain': 'domainSettings.getDomainSettings',
           'GET /domains': 'domainSettings.getDomains',
+          'PUT /domains': 'domainSettings.setDomainSettings',
         },
         authorization: false,
         bodyParsers: {
@@ -53,11 +53,11 @@ module.exports = {
         path: '/pages',
         aliases: {
           'GET /': 'dashboard.listWebPages',
-          'GET /:slug': 'dashboard.editWebPage',
+          'GET /:id': 'dashboard.editWebPage',
           'GET /schema': 'schemas.getWebPageSchema',
           'POST /': 'webPages.createWebPage',
-          'PUT /:slug': 'webPages.updateWebPage',
-          'DELETE /:slug': 'webPages.deleteWebPage',
+          'PUT /:id': 'webPages.updateWebPage',
+          'DELETE /:id': 'webPages.deleteWebPage',
         },
         authorization: false,
         bodyParsers: {
@@ -119,7 +119,7 @@ module.exports = {
       {
         path: '/preview',
         aliases: {
-          'GET /:slug': 'webPages.previewWebPage',
+          'GET /:pageId': 'webPages.previewWebPage',
         },
         bodyParsers: {
           json: false,
@@ -137,7 +137,7 @@ module.exports = {
         aliases: {
           'POST /': 'webPages.publishWebPage',
           'PUT /': 'webPages.updatePublishedWebPage',
-          'DELETE /:slug': 'webPages.unPublishWebPage',
+          'DELETE /:id': 'webPages.unPublishWebPage',
         },
         authorization: false,
         bodyParsers: {
@@ -154,7 +154,7 @@ module.exports = {
         path: '/published',
         aliases: {
           'GET /': 'webPages.getAllPublishedPagesData',
-          'GET /:slug': 'webPages.getPublishedPageData',
+          'GET /:id': 'webPages.getPublishedPageData',
         },
         authorization: false,
         bodyParsers: {

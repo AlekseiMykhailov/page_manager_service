@@ -27,7 +27,6 @@ function PageDataForm({
   className,
   handleSubmit,
   handleChange,
-  handleReset,
 }) {
   const { slug } = useParams();
   const classes = useStyles();
@@ -71,7 +70,7 @@ function PageDataForm({
                 label={label}
                 margin="normal"
                 name={name}
-                disabled={name === 'slug' || name === 'domain'}
+                disabled={name === 'domain'}
                 variant="outlined"
                 value={pageData[name]}
                 onChange={handleChange}
@@ -94,20 +93,13 @@ function PageDataForm({
             className={classes.buttonGroup}
           >
             <Button
-              className={classes.resetButton}
-              variant="contained"
-              onClick={handleReset}
-            >
-              Reset
-            </Button>
-            <Button
               className={classes.submitButton}
               color="primary"
               type="submit"
               variant="contained"
               startIcon={<SaveAltIcon />}
             >
-              Save changes
+              Save Page Meta
             </Button>
           </ButtonGroup>
         </Grid>
@@ -129,7 +121,6 @@ PageDataForm.propTypes = {
   className: PropTypes.string,
   handleSubmit: PropTypes.func.isRequired,
   handleChange: PropTypes.func.isRequired,
-  handleReset: PropTypes.func.isRequired,
 };
 
 export default PageDataForm;

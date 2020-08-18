@@ -13,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
     webPageId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: {
+          tableName: 'webpage',
+        },
+        key: 'id',
+      },
     },
     order: {
       type: DataTypes.INTEGER,

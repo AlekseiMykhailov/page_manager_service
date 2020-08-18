@@ -9,6 +9,20 @@ module.exports = {
     webPageId: {
       type: Sequelize.INTEGER,
       allowNull: false,
+      references: {
+        model: {
+          tableName: 'webpage',
+        },
+        key: 'id',
+      },
+    },
+    domainId: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
+    domain: {
+      type: Sequelize.STRING,
+      allowNull: false,
     },
     slug: {
       type: Sequelize.STRING,

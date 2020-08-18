@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
     rowId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: {
+          tableName: 'row',
+        },
+        key: 'id',
+      },
     },
     name: {
       type: DataTypes.STRING,
@@ -32,9 +38,15 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     freezeTableName: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['rowId', 'name'],
+      }
+    ]
   });
 
-  Field.associate = function(models) {
+  Field.associate = function (models) {
     // associations can be defined here
   };
 

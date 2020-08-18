@@ -15,7 +15,6 @@ import {
   Select,
   TextField,
   Typography,
-  colors
 } from '@material-ui/core';
 import * as FETCH from 'src/utils/fetch';
 import * as CONST from 'src/utils/const';
@@ -24,7 +23,11 @@ import AddIcon from '@material-ui/icons/Add';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
+  root: {},
+  heading: {
+    textTransform: 'capitalize',
+  },
+  form: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -33,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   divider: {
-    backgroundColor: colors.grey[300],
+    height: '4px',
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(3),
   },
@@ -41,19 +44,19 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     minWidth: 200,
   },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
   buttonGroup: {
     margin: '2rem 0',
   },
   fab: {
     alignSelf: 'flex-end',
   },
+  hidden: {
+    position: 'absolute',
+  },
 }));
 
 function RowAddForm({
-  pageId, className, schemas, newRowOrder, getPageData
+  pageId, schemas, newRowOrder, getPageData
 }) {
   const [selectedRowSchemaId, setSelectedRowSchemaId] = useState('');
   const [selectedRowSchema, setSelectedRowSchema] = useState();
@@ -82,7 +85,7 @@ function RowAddForm({
         setSelectedRowSchemaId('');
         setSelectedRowSchema('');
         getPageData(slug);
-        handleStatusMessage(CONST.SUCCESS, 'Row was added');
+        handleStatusMessage(CONST.SUCCESS, 'Section was added');
       } else {
         handleStatusMessage(CONST.ERROR, 'Something went wrong...');
       }
@@ -156,21 +159,22 @@ function RowAddForm({
           <Typography
             gutterBottom
             variant="h4"
+            className={classes.heading}
           >
             {selectedRowSchemaId
               ? `Add New ${(schemas.length > 0) && schemas.find((rowSchema) => rowSchema.id === selectedRowSchemaId).meta.title}`
-              : 'Add New Row'}
+              : 'Add New Section'}
           </Typography>
         </Grid>
         <Grid item>
           <FormControl variant="outlined" className={classes.formControl}>
-            <InputLabel id="new-row-schema-label">Row Schema</InputLabel>
+            <InputLabel id="new-row-schema-label">Section Type</InputLabel>
             <Select
               labelId="new-row-schema-label"
               id="new-row-schema"
               value={selectedRowSchemaId}
               onChange={handleSelectRowSchema}
-              label="Row Schema"
+              label="Section Schema"
               fullWidth
             >
               {schemas.map((schema) => (
@@ -190,27 +194,29 @@ function RowAddForm({
         noValidate
         autoComplete="off"
         onSubmit={handleSubmit}
-        className={className}
+        className={classes.form}
         key="new-row"
       >
-        <TextField
-          id="new-row-webPageId"
-          name="webPageId"
-          type="hidden"
-          value={pageId}
-        />
-        <TextField
-          id="new-row-schemaId"
-          name="order"
-          type="hidden"
-          value={selectedRowSchemaId}
-        />
-        <TextField
-          id="new-row-order"
-          name="order"
-          type="hidden"
-          value={newRowOrder}
-        />
+        <div className={classes.hidden}>
+          <TextField
+            id="new-row-webPageId"
+            name="webPageId"
+            type="hidden"
+            value={pageId}
+          />
+          <TextField
+            id="new-row-schemaId"
+            name="order"
+            type="hidden"
+            value={selectedRowSchemaId}
+          />
+          <TextField
+            id="new-row-order"
+            name="order"
+            type="hidden"
+            value={newRowOrder}
+          />
+        </div>
         {selectedRowSchema.fields.map(({ name, label, type, value }) => (
           <TextField
             fullWidth
@@ -256,7 +262,7 @@ function RowAddForm({
                 color="primary"
                 startIcon={<SaveAltIcon />}
               >
-                Save Row
+                Save Section
               </Button>
             </ButtonGroup>
           </Grid>
@@ -267,13 +273,8 @@ function RowAddForm({
   );
 }
 
-RowAddForm.defaultProps = {
-  className: '',
-};
-
 RowAddForm.propTypes = {
   pageId: PropTypes.number.isRequired,
-  className: PropTypes.string,
   schemas: PropTypes.array.isRequired,
   newRowOrder: PropTypes.number.isRequired,
   getPageData: PropTypes.func,

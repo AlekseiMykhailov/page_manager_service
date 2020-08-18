@@ -6,6 +6,10 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       allowNull: false,
     },
+    domainId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     domain: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -26,9 +30,15 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     freezeTableName: true,
     paranoid: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['domain', 'slug'],
+      }
+    ]
   });
 
-  WebPage.associate = function(models) {
+  WebPage.associate = function (models) {
     // associations can be defined here
   };
 

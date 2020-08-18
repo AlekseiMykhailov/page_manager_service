@@ -14,6 +14,12 @@ module.exports = {
       webPageId: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'webpage',
+          },
+          key: 'id',
+        },
       },
       order: {
         type: Sequelize.INTEGER,

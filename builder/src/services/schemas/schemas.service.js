@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable max-classes-per-file */
 const { v4 } = require('uuid');
 
@@ -29,20 +28,34 @@ class RowMeta {
 }
 
 class Row {
-  constructor(id, webPageId, order, schema, rowFields) {
+  constructor(id, webPageId, order, schema, dependencies, fields) {
     this.id = id;
     this.webPageId = webPageId;
     this.order = order;
-    this.meta = { ...schema };
-    this.fields = [...rowFields];
+    this.meta = schema;
+    this.dependencies = dependencies;
+    this.fields = fields;
+  }
+}
+
+class RowSchemasStore {
+  constructor(rowSchemas) {
+    this.schemas = rowSchemas;
+  }
+
+  add(schema) {
+    this.schemas = [...this.schemas, schema];
+  }
+
+  getList() {
+    return this.schemas;
   }
 }
 
 const webPageSchema = {
-  domain: new FieldSchema('domain', 'Domain', 'select', 10),
-  slug: new FieldSchema('slug', 'Slug', 'text', 20),
-  isHomePage: new FieldSchema('isHomePage', 'It`s Home Page', 'checkbox', 30),
-  title: new FieldSchema('title', 'Title', 'text', 40),
+  title: new FieldSchema('title', 'Title', 'text', 10),
+  domain: new FieldSchema('domain', 'Domain', 'select', 20),
+  slug: new FieldSchema('slug', 'Slug', 'text', 30),
   description: new FieldSchema('description', 'Description', 'text', 50),
 };
 
@@ -53,7 +66,7 @@ const rowsSchemas = [
     order: 'number',
     dependencies: ['withImage.css'],
     meta: {
-      title: 'Row with image',
+      title: 'Header Section',
       templateHbs: 'withImage',
     },
     fields: [
@@ -83,7 +96,7 @@ const rowsSchemas = [
     order: 'number',
     dependencies: ['bricks.css'],
     meta: {
-      title: 'Row with bricks',
+      title: 'How it Works',
       templateHbs: 'bricks',
     },
     fields: [
@@ -95,7 +108,7 @@ const rowsSchemas = [
       },
       {
         name: 'brick',
-        label: 'Brick',
+        label: 'Block',
         type: 'text',
         order: 10,
         clonable: true,
@@ -103,20 +116,6 @@ const rowsSchemas = [
     ],
   },
 ];
-
-class RowSchemasStore {
-  constructor(rowSchemas) {
-    this.schemas = rowSchemas;
-  }
-
-  add(schema) {
-    this.schemas = [...this.schemas, schema];
-  }
-
-  getList() {
-    return this.schemas;
-  }
-}
 
 const rowSchemasStore = new RowSchemasStore(rowsSchemas);
 
@@ -158,13 +157,13 @@ module.exports = ({
       },
       handler(ctx) {
         const {
-          meta, webPageId, order, fields
+          meta, webPageId, order, dependencies, fields
         } = ctx.params;
         const { title, templateHbs } = meta;
         const rowMeta = new RowMeta(title, templateHbs);
         const id = v4();
 
-        return new Row(id, webPageId, +order, rowMeta, fields);
+        return new Row(id, webPageId, +order, rowMeta, dependencies, fields);
       },
     },
   },

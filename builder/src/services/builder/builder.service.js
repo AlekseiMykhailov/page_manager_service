@@ -1,5 +1,7 @@
 const template = require('../../../templates/default');
 
+const domainOfAssets = 'localhost:3010';
+
 module.exports = ({
   name: 'builder',
   actions: {
@@ -67,7 +69,6 @@ module.exports = ({
             })
             .join('');
 
-          const domainOfAssets = 'localhost:3010';
           const transformToUrls = (domain, type, dependencies) => ({
             dependencies: [...dependencies].map((file) => (`http://${domain}/${type}/${file}`))
           });

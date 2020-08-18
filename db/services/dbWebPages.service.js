@@ -18,10 +18,10 @@ module.exports = {
       },
       handler(ctx) {
         const {
-          domain, slug, title, description
+          domainId, domain, slug, title, description
         } = ctx.params;
         const webPage = {
-          domain, slug, title, description
+          domainId, domain, slug, title, description
         };
 
         return this.settings.model.create(webPage)
@@ -34,20 +34,17 @@ module.exports = {
     },
 
     updateWebPage: {
-      params: {
-        slug: 'string',
-        title: 'string',
-        description: 'string',
-      },
       handler(ctx) {
-        const { slug, title, description } = ctx.params;
+        const {
+          id, slug, title, description
+        } = ctx.params;
 
-        return this.settings.model.update({ title, description }, {
-          where: { slug }
+        return this.settings.model.update({ slug, title, description }, {
+          where: { id }
         })
           .then(() => ({ ok: true }))
           .catch((error) => {
-            this.logger.error('ERROR: ', error);
+            this.logger.error('ERROR UPDATE PAGE: ', error);
             return { ok: false, error };
           });
       },
@@ -55,47 +52,40 @@ module.exports = {
 
     deleteWebPage: {
       params: {
-        slug: 'string',
+        id: 'number',
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { id } = ctx.params;
 
-        return this.broker.call('publish.isPublished', { slug })
-          .then((res) => {
-            if (res.ok) {
-              return { ok: false, error: 'Published Page could not be deleted' };
-            }
-
-            return this.settings.model.destroy({ where: { slug } })
-              .then(() => ({ ok: true }))
-              .catch((error) => {
-                this.logger.error('ERROR: ', error);
-                return { ok: false, error };
-              });
+        return this.settings.model.destroy({ where: { id: +id } })
+          .then(() => ({ ok: true }))
+          .catch((error) => {
+            this.logger.error('ERROR DELETE PAGE: ', error);
+            return { ok: false, error };
           });
       },
     },
 
-    getWebPageBySlug: {
-      params: {
-        slug: 'string',
-      },
-      handler(ctx) {
-        const { slug } = ctx.params;
+    // getWebPageBySlug: {
+    //   params: {
+    //     slug: 'string',
+    //   },
+    //   handler(ctx) {
+    //     const { slug } = ctx.params;
 
-        return this.settings.model.findOne({ where: { slug } })
-          .then(({ dataValues }) => {
-            const {
-              id, domain, title, description
-            } = dataValues;
-            return {
-              id, domain, slug, title, description
-            };
-          })
-          .then((data) => ({ ok: true, data }))
-          .catch((error) => ({ ok: false, error }));
-      },
-    },
+    //     return this.settings.model.findOne({ where: { slug } })
+    //       .then(({ dataValues }) => {
+    //         const {
+    //           id, domainId, domain, title, description
+    //         } = dataValues;
+    //         return {
+    //           id, domainId, domain, slug, title, description
+    //         };
+    //       })
+    //       .then((data) => ({ ok: true, data }))
+    //       .catch((error) => ({ ok: false, error }));
+    //   },
+    // },
 
     getWebPageById: {
       params: {
@@ -107,10 +97,10 @@ module.exports = {
         return this.settings.model.findOne({ where: { id } })
           .then(({ dataValues }) => {
             const {
-              domain, slug, title, description
+              domainId, domain, slug, title, description, updatedAt
             } = dataValues;
             return {
-              id, domain, slug, title, description
+              id, domainId, domain, slug, title, description, updatedAt
             };
           })
           .then((data) => ({ ok: true, data }))
@@ -122,9 +112,9 @@ module.exports = {
       handler() {
         return this.settings.model.findAll({ raw: true })
           .then((pages) => (pages.map(({
-            id, domain, slug, title
+            id, domainId, domain, slug, title, description, updatedAt
           }) => ({
-            id, domain, slug, title
+            id, domainId, domain, slug, title, description, updatedAt
           }))))
           .then((pages) => ({ ok: true, pages }))
           .catch((error) => ({ ok: false, error }));

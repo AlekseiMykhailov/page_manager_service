@@ -29,6 +29,20 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        schemaId: '1',
+        webPageId: 3,
+        order: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        schemaId: '2',
+        webPageId: 3,
+        order: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ], {});
   },
 

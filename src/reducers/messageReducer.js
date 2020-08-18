@@ -7,26 +7,25 @@ const initialState = {
 
 const messageReducer = (state = initialState, action) => {
   switch (action.type) {
-  case actionTypes.SET_STATUS_MESSAGE: {
-    return {
-      ...state,
-      status: action.status,
-      text: action.text,
-    };
-  }
+    case actionTypes.SET_STATUS_MESSAGE: {
+      return {
+        ...state,
+        status: action.status,
+        text: action.text,
+      };
+    }
 
-  case actionTypes.REMOVE_STATUS_MESSAGE: {
-    return {
-      ...state,
-      status: '',
-      text: '',
-    };
-  }
+    case actionTypes.REMOVE_STATUS_MESSAGE: {
+      return {
+        ...state,
+        status: '',
+        text: '',
+      };
+    }
 
-  default: {
-    return state;
-  }
-
+    default: {
+      return state;
+    }
   }
 };
 

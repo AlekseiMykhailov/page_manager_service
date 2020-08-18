@@ -23,16 +23,16 @@ module.exports = ({
 
     editWebPage: {
       params: {
-        slug: { type: 'string' },
+        id: { type: 'string' },
       },
       handler(ctx) {
-        const { slug } = ctx.params;
+        const { id } = ctx.params;
         const response = {};
 
-        return this.broker.call('webPages.getWebPageBySlug', { slug })
+        return this.broker.call('webPages.getWebPageById', { id: +id })
           .then((webPage) => { response.webPage = webPage.data; })
-          .then(() => this.broker.call('dbDomainSettings.getHomePageId', { domain: response.webPage.domain }))
-          .then((res) => { response.webPage.isHomePage = (response.webPage.id === res.webPageId); })
+          .then(() => this.broker.call('dbDomainSettings.getDomainSettings', { domain: response.webPage.domain }))
+          .then((domainSettings) => { response.webPage.isHomePage = (response.webPage.id === domainSettings.homePageId); })
           .then(() => this.broker.call('rows.getRowsForWebPage', { webPageId: response.webPage.id }))
           .then((rows) => {
             response.rows = rows;
