@@ -1,20 +1,19 @@
 import React, {
   useState, useEffect, useCallback, useMemo
 } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import * as CONST from 'src/utils/const';
 import * as FETCH from 'src/utils/fetch';
-import { removeStatusMessage, setStatusMessage } from 'src/actions/messageActions';
+import { useDebounce, useStatusMessage } from 'src/hooks';
 
 import { makeStyles } from '@material-ui/styles';
 import Page from 'src/components/Page';
 import {
   Container,
 } from '@material-ui/core';
-import Header from 'src/views/Header';
-import Controls from './Controls';
-import PagesList from './PagesList';
+import PageHeader from 'src/components/PageHeader';
+import PagesControls from '../../components/WebPage/PagesControls';
+import PagesList from '../../components/WebPage/PagesList';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,12 +24,14 @@ const useStyles = makeStyles((theme) => ({
 
 function Pages() {
   const classes = useStyles();
-  const dispatch = useDispatch();
+  const [setStatusMessage] = useStatusMessage();
   const API_URL = process.env.REACT_APP_API_URL;
   const { domainId } = useParams();
   const [actualDomain, setActualDomain] = useState();
   const [pages, setPages] = useState([]);
   const [pagesOrder, setPagesOrder] = useState(CONST.sortTypes[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const sortedPages = useMemo(() => {
     const sort = {
@@ -50,6 +51,20 @@ function Pages() {
     }
     return sortedPages;
   }, [sortedPages, actualDomain]);
+
+  const searchedPages = useMemo(() => {
+    if (debouncedSearchQuery === '') {
+      return filteredPages;
+    }
+
+    return filteredPages.filter((page) => {
+      const inSlug = page.slug.includes(debouncedSearchQuery);
+      const inTitle = page.title.toLowerCase().includes(debouncedSearchQuery);
+      const inDescription = page.description.toLowerCase().includes(debouncedSearchQuery);
+
+      return (inSlug || inTitle || inDescription);
+    });
+  }, [filteredPages, debouncedSearchQuery]);
 
   const fetchPages = useCallback(() => {
     let pageList = [];
@@ -94,38 +109,24 @@ function Pages() {
     fetchDomains();
   }, [fetchDomains]);
 
-  const handleResponse = (
-    response,
-    successAction,
-    successMessage,
-    errorMessage = 'Something went wrong...',
-  ) => {
-    if (response.ok) {
-      dispatch(setStatusMessage(CONST.SUCCESS, successMessage));
-      if (successAction) {
-        successAction();
-      }
-    } else {
-      dispatch(setStatusMessage(CONST.ERROR, errorMessage));
-    }
-
-    setTimeout(() => {
-      dispatch(removeStatusMessage());
-    }, CONST.TIME_VISIBILITY_MESSAGES);
-  };
-
   const deleteWepPage = (e) => {
     const { pageId } = e.currentTarget.dataset;
 
     FETCH.deleteData(`${API_URL}/pages/${pageId}`)
-      .then((response) => handleResponse(response, fetchPages, 'Page was deleted', response.err));
+      .then((response) => setStatusMessage(response, fetchPages, 'Page was deleted', response.err));
   };
 
-  const handleSetSortType = (e) => {
+  const handleSortType = (e) => {
     const { value } = e.target;
     const selectedSortType = CONST.sortTypes.find((sortType) => sortType.type === value);
 
     setPagesOrder(selectedSortType);
+  };
+
+  const handleSearchQuery = (e) => {
+    const { value } = e.target;
+
+    setSearchQuery(value.toLowerCase() || '');
   };
 
   return (
@@ -135,26 +136,27 @@ function Pages() {
     >
       <Container maxWidth="lg">
         {actualDomain && (
-          <Header
+          <PageHeader
             name="pages"
             title={actualDomain.name}
             subtitle={actualDomain.domain}
           />
         )}
-        {filteredPages.length > 0 && (
-          <>
-            <Controls
-              sortTypes={CONST.sortTypes}
-              pagesOrder={pagesOrder}
-              setPagesOrder={handleSetSortType}
-            />
-            <PagesList
-              className={classes.pages}
-              pages={filteredPages}
-              domain={actualDomain}
-              deleteWepPage={deleteWepPage}
-            />
-          </>
+        {filteredPages && (
+          <PagesControls
+            sortTypes={CONST.sortTypes}
+            pagesOrder={pagesOrder}
+            handleSortType={handleSortType}
+            handleSearchQuery={handleSearchQuery}
+          />
+        )}
+        {searchedPages.length > 0 && (
+          <PagesList
+            className={classes.pages}
+            pages={searchedPages}
+            domain={actualDomain}
+            deleteWepPage={deleteWepPage}
+          />
         )}
       </Container>
     </Page>

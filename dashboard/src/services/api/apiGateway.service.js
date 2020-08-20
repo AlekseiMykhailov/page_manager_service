@@ -28,14 +28,13 @@ module.exports = {
       options: {},
     },
     routes: [
-      // COMMON
+      // DOMAINS SETTINGS
       {
-        path: '/',
+        path: '/domains',
         aliases: {
-          'GET /nav': 'dashboard.nav',
-          'GET /domains/:domain': 'domainSettings.getDomainSettings',
-          'GET /domains': 'domainSettings.getDomains',
-          'PUT /domains': 'domainSettings.setDomainSettings',
+          'GET /:domain': 'domainSettings.getDomainSettings',
+          'GET /': 'domainSettings.getDomains',
+          'PUT /': 'domainSettings.setDomainSettings',
         },
         authorization: false,
         bodyParsers: {
@@ -54,8 +53,8 @@ module.exports = {
         aliases: {
           'GET /': 'dashboard.listWebPages',
           'GET /:id': 'dashboard.editWebPage',
-          'GET /schema': 'schemas.getWebPageSchema',
           'POST /': 'webPages.createWebPage',
+          'POST /clone': 'webPages.cloneWebPage',
           'PUT /:id': 'webPages.updateWebPage',
           'DELETE /:id': 'webPages.deleteWebPage',
         },
@@ -103,6 +102,7 @@ module.exports = {
         path: '/schemas',
         aliases: {
           'GET /rows': 'schemas.getRowSchemas',
+          'GET /pages': 'schemas.getWebPageSchema',
         },
         authorization: false,
         bodyParsers: {

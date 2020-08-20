@@ -9,7 +9,6 @@ import {
   TextField,
   Checkbox,
   InputLabel,
-  Typography,
 } from '@material-ui/core';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
@@ -21,10 +20,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function PageDataForm({
+function PageEditForm({
+  className,
   pageSchema,
   pageData,
-  className,
   handleSubmit,
   handleChange,
 }) {
@@ -40,45 +39,40 @@ function PageDataForm({
       action={`${API_URL}/pages/${slug}`}
       onSubmit={handleSubmit}
     >
-      <Typography gutterBottom variant="h3">
-        {pageData.title}
-      </Typography>
-      {
-        Object.values(pageSchema)
-          .sort((a, b) => a.order - b.order)
-          .map(({ name, label, type }) => {
-            if (type === 'checkbox') {
-              return (
-                <InputLabel htmlFor={name} key={name}>
-                  <Checkbox
-                    id={name}
-                    label={label}
-                    margin="normal"
-                    name={name}
-                    variant="outlined"
-                    checked={pageData[name]}
-                    onChange={handleChange}
-                  />
-                  Set as home page
-                </InputLabel>
-              );
-            }
-
+      {Object.values(pageSchema)
+        .sort((a, b) => a.order - b.order)
+        .map(({ name, label, type }) => {
+          if (type === 'checkbox') {
             return (
-              <TextField
-                fullWidth
-                label={label}
-                margin="normal"
-                name={name}
-                disabled={name === 'domain'}
-                variant="outlined"
-                value={pageData[name]}
-                onChange={handleChange}
-                key={name}
-              />
+              <InputLabel htmlFor={name} key={name}>
+                <Checkbox
+                  id={name}
+                  label={label}
+                  margin="normal"
+                  name={name}
+                  variant="outlined"
+                  checked={pageData[name]}
+                  onChange={handleChange}
+                />
+                Set as home page
+              </InputLabel>
             );
-          })
-      }
+          }
+
+          return (
+            <TextField
+              fullWidth
+              label={label}
+              margin="normal"
+              name={name}
+              disabled={name === 'domain'}
+              variant="outlined"
+              value={pageData[name]}
+              onChange={handleChange}
+              key={name}
+            />
+          );
+        })}
       <Grid
         container
         direction="row"
@@ -109,11 +103,11 @@ function PageDataForm({
   );
 }
 
-PageDataForm.defaultProps = {
+PageEditForm.defaultProps = {
   className: '',
 };
 
-PageDataForm.propTypes = {
+PageEditForm.propTypes = {
   pageSchema: PropTypes.object,
   pageData: PropTypes.shape({
     title: PropTypes.string.isRequired,
@@ -123,4 +117,4 @@ PageDataForm.propTypes = {
   handleChange: PropTypes.func.isRequired,
 };
 
-export default PageDataForm;
+export default PageEditForm;

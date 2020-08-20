@@ -9,18 +9,23 @@ import {
   MenuItem,
   Select,
 } from '@material-ui/core';
+import Search from 'src/components/Search';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     marginBottom: theme.spacing(1),
   },
+  item: {
+    marginLeft: theme.spacing(1),
+  },
 }));
 
-function Controls({
+function PagesControls({
   className,
   sortTypes,
   pagesOrder,
-  setPagesOrder,
+  handleSortType,
+  handleSearchQuery,
 }) {
   const classes = useStyles();
 
@@ -31,14 +36,17 @@ function Controls({
       direction="row"
       justify="flex-end"
     >
-      <Grid item xs={3}>
+      <Grid item xs={3} className={classes.item}>
+        <Search handleChange={handleSearchQuery} />
+      </Grid>
+      <Grid item xs={3} className={classes.item}>
         <FormControl variant="outlined" fullWidth>
           <InputLabel id="new-row-schema-label">Sort Type</InputLabel>
           <Select
             labelId="new-row-schema-label"
             id="new-row-schema"
             value={pagesOrder.type}
-            onChange={setPagesOrder}
+            onChange={handleSortType}
             label="Section Schema"
             fullWidth
           >
@@ -54,11 +62,12 @@ function Controls({
   );
 }
 
-Controls.propTypes = {
+PagesControls.propTypes = {
   className: PropTypes.string,
   sortTypes: PropTypes.array,
   pagesOrder: PropTypes.object,
-  setPagesOrder: PropTypes.func,
+  handleSortType: PropTypes.func,
+  handleSearchQuery: PropTypes.func,
 };
 
-export default Controls;
+export default PagesControls;

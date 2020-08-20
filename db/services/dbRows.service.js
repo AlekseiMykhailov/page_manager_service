@@ -35,6 +35,20 @@ module.exports = {
       },
     },
 
+    bulkCreateRows: {
+      handler(ctx) {
+        const { rows } = ctx.params;
+
+        return this.settings.model.bulkCreate(rows)
+          .then((response) => response.map((item) => ({ ...item.dataValues })))
+          .catch((error) => {
+            this.logger.error('ERROR BULK CREATE ROWS: ', error);
+
+            return { ok: false, error };
+          });
+      },
+    },
+
     updateRow: {
       handler(ctx) {
         const { rowId, order } = ctx.params;

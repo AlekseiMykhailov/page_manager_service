@@ -12,11 +12,11 @@ export default [
         icon: PageviewIcon,
         items: [
           {
-            title: 'JobEasy Courses',
+            title: 'JobEasy',
             href: '/pages/1'
           },
           {
-            title: 'JobEasy for Business',
+            title: 'Careerist',
             href: '/pages/2'
           }
         ]
@@ -32,11 +32,11 @@ export default [
         icon: SettingsApplicationsIcon,
         items: [
           {
-            title: 'JobEasy Courses',
+            title: 'JobEasy',
             href: '/domains-settings/1'
           },
           {
-            title: 'JobEasy for Business',
+            title: 'Careerist',
             href: '/domains-settings/2'
           },
         ],

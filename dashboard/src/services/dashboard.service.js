@@ -1,8 +1,8 @@
-const nav = [
-  { id: '1', path: '/', title: 'Dashboard' },
-  { id: '2', path: '/pages', title: 'Pages' },
-  { id: '3', path: '/create-page', title: 'Create Web Page' },
-];
+// const nav = [
+//   { id: '1', path: '/', title: 'Dashboard' },
+//   { id: '2', path: '/pages', title: 'Pages' },
+//   { id: '3', path: '/create-page', title: 'Create Web Page' },
+// ];
 
 module.exports = ({
   name: 'dashboard',

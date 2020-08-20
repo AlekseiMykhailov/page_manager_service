@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useStatusMessage } from 'src/hooks';
+
 import { makeStyles } from '@material-ui/core/styles';
 import {
   ButtonGroup,
@@ -17,8 +17,6 @@ import {
   Typography,
 } from '@material-ui/core';
 import * as FETCH from 'src/utils/fetch';
-import * as CONST from 'src/utils/const';
-import { setStatusMessage, removeStatusMessage } from 'src/actions/messageActions';
 import AddIcon from '@material-ui/icons/Add';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
@@ -60,19 +58,10 @@ function RowAddForm({
 }) {
   const [selectedRowSchemaId, setSelectedRowSchemaId] = useState('');
   const [selectedRowSchema, setSelectedRowSchema] = useState();
+  const [setStatusMessage] = useStatusMessage();
 
-  const dispatch = useDispatch();
-  const { slug } = useParams();
   const classes = useStyles();
   const API_URL = process.env.REACT_APP_API_URL;
-
-  const handleStatusMessage = (status, text) => {
-    dispatch(setStatusMessage(status, text));
-
-    setTimeout(() => {
-      dispatch(removeStatusMessage());
-    }, CONST.TIME_VISIBILITY_MESSAGES);
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -84,11 +73,10 @@ function RowAddForm({
       if (response.ok) {
         setSelectedRowSchemaId('');
         setSelectedRowSchema('');
-        getPageData(slug);
-        handleStatusMessage(CONST.SUCCESS, 'Section was added');
-      } else {
-        handleStatusMessage(CONST.ERROR, 'Something went wrong...');
+        getPageData();
       }
+
+      setStatusMessage(response, null, 'Section was added');
     });
   };
 

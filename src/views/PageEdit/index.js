@@ -1,31 +1,21 @@
 import React, {
   useState, useCallback, useEffect, useMemo
 } from 'react';
-import clsx from 'clsx';
-import { useDispatch } from 'react-redux';
 import { Redirect, useParams } from 'react-router-dom';
-import moment from 'moment';
+import { useStatusMessage } from 'src/hooks';
 import {
-  Button,
-  ButtonGroup,
   Card,
   CardContent,
   Container,
   Divider,
-  Grid,
-  Typography,
   colors,
 } from '@material-ui/core';
-import PublishIcon from '@material-ui/icons/Publish';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/styles';
-import { removeStatusMessage, setStatusMessage } from 'src/actions/messageActions';
 import Page from 'src/components/Page';
-import Label from 'src/components/Label';
-import * as CONST from 'src/utils/const';
 import * as FETCH from 'src/utils/fetch';
-import PageDataForm from './PageDataForm';
+import PageEditForm from 'src/components/WebPage/PageEditForm';
+import PageEditHeader from './PageEditHeader';
+import PageEditButtons from './PageEditButtons';
 import RowEditForm from './RowEditForm';
 import RowAddForm from './RowAddForm';
 
@@ -39,47 +29,11 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(3),
   },
-  label: {
-    color: theme.palette.common.white,
-  },
-  buttons: {
-    marginTop: theme.spacing(3),
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    paddingRight: theme.spacing(3),
-    paddingLeft: theme.spacing(3),
-    color: theme.palette.common.white,
-  },
-  deleteButton: {
-    color: colors.red[600],
-    borderColor: colors.red[600],
-    '&:hover': {
-      color: theme.palette.common.white,
-      backgroundColor: colors.red[600]
-    }
-  },
-  publishButton: {
-    backgroundColor: colors.green[600],
-    '&:hover': {
-      backgroundColor: colors.green[900],
-    }
-  },
-  unPublishButton: {
-    backgroundColor: colors.yellow[600],
-    '&:hover': {
-      backgroundColor: colors.yellow[900],
-    }
-  },
-  published: {
-    display: 'flex',
-    alignItems: 'center',
-  },
 }));
 
 function PageEdit() {
-  const dispatch = useDispatch();
   const classes = useStyles();
+  const [setStatusMessage] = useStatusMessage();
   const { domainId, webPageId } = useParams();
   const [pageSchema, setPageSchema] = useState(null);
   const [pageData, setPageData] = useState(null);
@@ -90,6 +44,7 @@ function PageEdit() {
   const [isDeleted, setIsDeleted] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
 
+  // TODO: combine into one fetch
   const getPageData = useCallback(() => {
     FETCH.getData(`${API_URL}/pages/${webPageId}`)
       .then((response) => {
@@ -108,7 +63,7 @@ function PageEdit() {
   }, [API_URL, webPageId]);
 
   const getPageSchema = useCallback(() => {
-    FETCH.getData(`${API_URL}/pages/schema`)
+    FETCH.getData(`${API_URL}/schemas/pages`)
       .then((response) => {
         if (response.ok) {
           setPageSchema(response.schema);
@@ -143,26 +98,6 @@ function PageEdit() {
     getPublishData();
   }, [getPageData, getPublishData, getRowSchemas, getPageSchema]);
 
-  const handleResponse = (
-    response,
-    successAction,
-    successMessage,
-    errorMessage = 'Something went wrong...',
-  ) => {
-    if (response.ok) {
-      dispatch(setStatusMessage(CONST.SUCCESS, successMessage));
-      if (successAction) {
-        successAction();
-      }
-    } else {
-      dispatch(setStatusMessage(CONST.ERROR, errorMessage));
-    }
-
-    setTimeout(() => {
-      dispatch(removeStatusMessage());
-    }, CONST.TIME_VISIBILITY_MESSAGES);
-  };
-
   const handlePageDataInputChange = (e) => {
     const { name, value, type } = e.target;
 
@@ -181,18 +116,18 @@ function PageEdit() {
     e.preventDefault();
 
     FETCH.putData(`${API_URL}/pages/${webPageId}`, pageData,)
-      .then((response) => handleResponse(response, getPageData, 'Page was edited'));
+      .then((response) => setStatusMessage(response, getPageData, 'Page was edited'));
   };
 
   const deleteWepPage = () => {
     FETCH.deleteData(`${API_URL}/pages/${pageData.id}`)
-      .then((response) => handleResponse(response, setIsDeleted(true), 'Page was deleted', response.error));
+      .then((response) => setStatusMessage(response, setIsDeleted(true), 'Page was archived'));
   };
 
   const saveRowData = (rowData) => {
     FETCH.putData(`${API_URL}/rows/${rowData.id}`, rowData)
       .then((response) => {
-        handleResponse(response, getPageData, 'Row was edited');
+        setStatusMessage(response, getPageData, 'Row was edited');
 
         if (response.ok) {
           getPageData();
@@ -204,7 +139,7 @@ function PageEdit() {
   const saveRowOrder = (rowId, order) => {
     FETCH.putData(`${API_URL}/rows/order/${rowId}`, { rowId, order })
       .then((response) => {
-        handleResponse(response, null, 'Row order was changed');
+        setStatusMessage(response, null, 'Row order was changed');
 
         if (response.ok) {
           savePageData();
@@ -338,7 +273,7 @@ function PageEdit() {
 
     FETCH.deleteData(`${API_URL}/rows/${rowId}`)
       .then((response) => {
-        handleResponse(response, getPageData, 'Row was deleted');
+        setStatusMessage(response, getPageData, 'Row was deleted');
 
         if (response.ok) {
           savePageData();
@@ -354,7 +289,7 @@ function PageEdit() {
 
     publishMethod(`${API_URL}/publish`, { webPageId })
       .then((response) => {
-        handleResponse(response, getPublishData, publishMessage);
+        setStatusMessage(response, getPublishData, publishMessage);
 
         if (response.ok) {
           savePageData();
@@ -365,7 +300,7 @@ function PageEdit() {
   const handleUnPublish = () => {
     FETCH.deleteData(`${API_URL}/publish/${webPageId}`)
       .then((response) => {
-        handleResponse(response, getPublishData, 'Page was unpublished');
+        setStatusMessage(response, getPublishData, 'Page was unpublished');
 
         if (response.ok) {
           savePageData();
@@ -384,112 +319,31 @@ function PageEdit() {
     >
       {isDeleted && (<Redirect to={`/pages/${domainId}`} />)}
       <Container maxWidth="lg">
-        <Grid
-          container
-          direction="column"
-          alignItems="flex-start"
-        >
-          <Grid item>
-            <Typography variant="overline">Pages</Typography>
-            <Typography gutterBottom variant="h3">Edit Page</Typography>
-          </Grid>
-          <Grid item>
-            {pageData && publishData && (
-              <Grid container direction="column">
-                <Grid item>
-                  <Typography variant="body2" className={classes.published}>
-                    <Label color={colors.green[600]}>
-                      <a
-                        href={pageData.id === homePageId
-                          ? `http://${pageData.domain}`
-                          : `http://${pageData.domain}/${pageData.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={classes.label}
-                      >
-                        {pageData.id === homePageId ? 'Published as Home Page' : 'Published'}
-                      </a>
-                    </Label>
-                  </Typography>
-                </Grid>
-                <Grid item>
-                  <Typography variant="body2">
-                    {`Published At: ${moment(publishData.updatedAt).format(' LLLL')}`}
-                  </Typography>
-                </Grid>
-                {publishData.updatedAt !== pageData.updatedAt && (
-                  <Grid item>
-                    <Typography variant="body2">
-                      {`Updated At: ${moment(pageData.updatedAt).format(' LLLL')}`}
-                    </Typography>
-                  </Grid>
-                )}
-              </Grid>
-            )}
-          </Grid>
-        </Grid>
         {pageData && (
-          <Grid
-            container
-            direction="row"
-            justify="flex-end"
-            alignItems="center"
-          >
-            <Grid item>
-              <ButtonGroup
-                variant="contained"
-                size="small"
-                aria-label="large outlined button group"
-                className={classes.buttons}
-              >
-                <Button
-                  variant="outlined"
-                  disabled={Boolean(publishData)}
-                  className={clsx(classes.button, classes.deleteButton)}
-                  onClick={deleteWepPage}
-                  startIcon={<DeleteIcon />}
-                >
-                  Archive
-                </Button>
-                <Button
-                  variant="contained"
-                  className={clsx(classes.button, classes.previewButton)}
-                  color="primary"
-                  href={`${API_URL}/preview/${pageData.id}`}
-                  target="_blank"
-                  startIcon={<VisibilityIcon />}
-                >
-                  Preview
-                </Button>
-                {publishData && (
-                  <Button
-                    variant="contained"
-                    className={clsx(classes.button, classes.unPublishButton)}
-                    onClick={handleUnPublish}
-                    startIcon={<DeleteIcon />}
-                  >
-                    UnPublish
-                  </Button>
-                )}
-                <Button
-                  variant="contained"
-                  // disabled={publishData.updatedAt === pageData.updatedAt}
-                  className={clsx(classes.button, classes.publishButton)}
-                  onClick={handlePublish}
-                  startIcon={<PublishIcon />}
-                >
-                  {publishData ? 'Publish Update' : 'Publish'}
-                </Button>
-              </ButtonGroup>
-            </Grid>
-          </Grid>
+          <PageEditHeader
+            name="Edit Page"
+            title={pageData.title}
+            homePageId={homePageId}
+            pageData={pageData}
+            publishData={publishData}
+          />
+        )}
+        {pageData && (
+          <PageEditButtons
+            pageId={pageData.id}
+            homePageId={homePageId}
+            isPublished={Boolean(publishData)}
+            handleDelete={deleteWepPage}
+            handlePublish={handlePublish}
+            handleUnPublish={handleUnPublish}
+          />
         )}
         <Divider className={classes.divider} />
         <Card>
           <CardContent>
 
             {pageData && (
-              <PageDataForm
+              <PageEditForm
                 pageSchema={pageSchema}
                 pageData={pageData}
                 className={classes.section}

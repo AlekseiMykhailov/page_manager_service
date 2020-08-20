@@ -2,17 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
-import { Paper, Button, Input } from '@material-ui/core';
+import { Paper, Input } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
+    height: '100%',
   },
   search: {
     flexGrow: 1,
-    height: 42,
+    height: 52,
     padding: theme.spacing(0, 2),
     display: 'flex',
     alignItems: 'center'
@@ -30,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function Search({ onSearch, className, ...rest }) {
+function Search({ handleChange, className, ...rest }) {
   const classes = useStyles();
 
   return (
@@ -47,23 +48,18 @@ function Search({ onSearch, className, ...rest }) {
           className={classes.searchInput}
           disableUnderline
           placeholder="Search"
+          onChange={handleChange}
+          variant="outlined"
+          size="small"
         />
       </Paper>
-      <Button
-        className={classes.searchButton}
-        onClick={onSearch}
-        size="large"
-        variant="contained"
-      >
-        Search
-      </Button>
     </div>
   );
 }
 
 Search.propTypes = {
   className: PropTypes.string,
-  onSearch: PropTypes.func
+  handleChange: PropTypes.func
 };
 
 export default Search;

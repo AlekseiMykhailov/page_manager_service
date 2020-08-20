@@ -23,6 +23,20 @@ module.exports = {
       },
     },
 
+    bulkCreateFields: {
+      handler(ctx) {
+        const { fields } = ctx.params;
+
+        return this.settings.model.bulkCreate(fields)
+          .then((response) => response.map((item) => ({ ...item.dataValues })))
+          .catch((error) => {
+            this.logger.error('ERROR BULK CREATE FIELDS: ', error);
+
+            return { ok: false, error };
+          });
+      },
+    },
+
     deleteFields: {
       handler(ctx) {
         const { fieldIds } = ctx.params;

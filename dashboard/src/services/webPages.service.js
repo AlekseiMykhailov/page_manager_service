@@ -1,3 +1,5 @@
+const { v4 } = require('uuid');
+
 module.exports = ({
   name: 'webPages',
   actions: {
@@ -75,6 +77,22 @@ module.exports = ({
           });
       },
     },
+
+    // getWebPageByURL: {
+    //   params: {
+    //     domain: 'string',
+    //     slug: 'string',
+    //   },
+    //   handler(ctx) {
+    //     const { domain, slug } = ctx.params;
+
+    //     return this.broker.call('dbWebPages.getWebPageByURL', { domain, slug })
+    //       .catch((err) => {
+    //         this.logger.error('ERROR: ', err);
+    //         return JSON.stringify(err, null, 2);
+    //       });
+    //   },
+    // },
 
     getWebPageById: {
       params: {
@@ -223,6 +241,79 @@ module.exports = ({
       handler() {
         return this.broker.call('publish.getAllPublishedPages')
           .then((response) => JSON.stringify(response, null, 2))
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
+      }
+    },
+
+    cloneWebPage: {
+      handler(ctx) {
+        const cloningWebPageId = +ctx.params.webPageId;
+        const toDomainId = +ctx.params.domainId;
+        const toDomain = ctx.params.domain;
+        const cloneData = {};
+
+        return this.broker.call('dbWebPages.getWebPageById', { id: cloningWebPageId })
+          .then((response) => {
+            const {
+              title, slug, description, domainId
+            } = response.data;
+            cloneData.webPage = {
+              title: (domainId === toDomainId) ? `${title}-copy` : title,
+              description,
+              slug: (domainId === toDomainId) ? `${slug}-copy` : slug,
+              domainId: toDomainId,
+              domain: toDomain,
+            };
+          })
+          .then(() => this.broker.call('dbWebPages.checkWebPageBySlug', {
+            domain: cloneData.webPage.domain,
+            slug: cloneData.webPage.slug,
+          }))
+          .then((res) => {
+            if (res.ok) {
+              cloneData.webPage.slug += `-${v4()}`;
+            }
+          })
+          .then(() => this.broker.call('webPages.createWebPage', cloneData.webPage))
+          .then((response) => {
+            cloneData.webPageId = response.id;
+          })
+          .then(() => this.broker.call('rows.getRowsForWebPage', { webPageId: cloningWebPageId }))
+          .then((rows) => {
+            cloneData.rows = rows.map(({ id, order, schemaId }) => ({
+              donorRowId: id,
+              order,
+              schemaId,
+              webPageId: cloneData.webPageId,
+            }));
+          })
+          .then(() => cloneData.rows.map(({ order, schemaId, webPageId }) => (
+            { order, schemaId, webPageId }
+          )))
+          .then((rows) => this.broker.call('dbRows.bulkCreateRows', { rows }))
+          .then((createdRows) => {
+            cloneData.rows = cloneData.rows.map((row) => ({
+              ...row,
+              id: createdRows.find(({ order }) => order === row.order).id,
+            }));
+          })
+          .then(() => cloneData.rows.map((row) => row.donorRowId))
+          .then((rowIds) => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
+          .then(({ fields }) => fields.map(({
+            rowId, name, label, type, order, value
+          }) => ({
+            rowId: cloneData.rows.find((row) => row.donorRowId === rowId).id,
+            name,
+            label,
+            type,
+            order,
+            value,
+          })))
+          .then((fields) => this.broker.call('dbFields.bulkCreateFields', { fields }))
+          .then(() => JSON.stringify({ ok: true, id: cloneData.webPageId }, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);

@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import * as FETCH from 'src/utils/fetch';
-import * as CONST from 'src/utils/const';
-import { removeStatusMessage, setStatusMessage } from 'src/actions/messageActions';
+import { useStatusMessage } from 'src/hooks';
 
 import { makeStyles } from '@material-ui/styles';
 import {
@@ -11,8 +9,8 @@ import {
   colors,
 } from '@material-ui/core';
 import Page from 'src/components/Page';
-import Header from 'src/views/Header';
-import FormDomainSettings from './FormDomainSettings';
+import PageHeader from 'src/components/PageHeader';
+import FormDomainSettings from '../../components/FormDomainSettings';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,32 +26,12 @@ const useStyles = makeStyles((theme) => ({
 
 function DomainsSettings() {
   const classes = useStyles();
-  const dispatch = useDispatch();
+  const [setStatusMessage] = useStatusMessage();
   const API_URL = process.env.REACT_APP_API_URL;
   const { domainId } = useParams();
   const [currentDomain, setCurrentDomain] = useState();
   const [domainFieldsData, setDomainFieldsData] = useState({});
   const fields = Object.values(domainFieldsData);
-
-  const handleResponse = (
-    response,
-    successAction,
-    successMessage,
-    errorMessage = 'Something went wrong...',
-  ) => {
-    if (response.ok) {
-      dispatch(setStatusMessage(CONST.SUCCESS, successMessage));
-      if (successAction) {
-        successAction();
-      }
-    } else {
-      dispatch(setStatusMessage(CONST.ERROR, errorMessage));
-    }
-
-    setTimeout(() => {
-      dispatch(removeStatusMessage());
-    }, CONST.TIME_VISIBILITY_MESSAGES);
-  };
 
   const fetchData = useCallback(() => {
     let pagesList = [];
@@ -121,17 +99,17 @@ function DomainsSettings() {
       domainSettings[name] = value;
     });
     FETCH.putData(`${API_URL}/domains`, domainSettings,)
-      .then((response) => handleResponse(response, fetchData, 'Domain settings was changed'));
+      .then((response) => setStatusMessage(response, fetchData, 'Domain settings was changed'));
   };
 
   return (
     <Page
       className={classes.root}
-      title="Create New Page"
+      title="Domain Settings"
     >
       <Container maxWidth="lg">
         {currentDomain && (
-          <Header
+          <PageHeader
             name="Settings"
             title={`Domain: ${currentDomain.domain}`}
             subtitle={currentDomain.name}

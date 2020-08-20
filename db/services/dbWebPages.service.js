@@ -66,26 +66,31 @@ module.exports = {
       },
     },
 
-    // getWebPageBySlug: {
-    //   params: {
-    //     slug: 'string',
-    //   },
-    //   handler(ctx) {
-    //     const { slug } = ctx.params;
+    checkWebPageBySlug: {
+      params: {
+        domain: 'string',
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { domain, slug } = ctx.params;
 
-    //     return this.settings.model.findOne({ where: { slug } })
-    //       .then(({ dataValues }) => {
-    //         const {
-    //           id, domainId, domain, title, description
-    //         } = dataValues;
-    //         return {
-    //           id, domainId, domain, slug, title, description
-    //         };
-    //       })
-    //       .then((data) => ({ ok: true, data }))
-    //       .catch((error) => ({ ok: false, error }));
-    //   },
-    // },
+        return this.settings.model.findOne({
+          where: {
+            domain,
+            slug,
+          }
+        })
+          .then((response) => {
+            if (response) {
+              return { ok: true };
+            }
+
+            return { ok: false };
+          })
+          .then((data) => ({ ok: true, data }))
+          .catch((error) => ({ ok: false, error }));
+      },
+    },
 
     getWebPageById: {
       params: {

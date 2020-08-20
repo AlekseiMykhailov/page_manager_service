@@ -20,8 +20,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Header({
-  className, name, title, subtitle, link
+function PageHeader({
+  children, className, name, title, subtitle, link
 }) {
   const classes = useStyles();
 
@@ -49,12 +49,14 @@ function Header({
           {subtitle}
         </Typography>
       )}
+      {children}
       <Divider className={classes.divider} />
     </Box>
   );
 }
 
-Header.propTypes = {
+PageHeader.propTypes = {
+  children: PropTypes.element,
   className: PropTypes.string,
   name: PropTypes.string,
   title: PropTypes.string,
@@ -62,4 +64,4 @@ Header.propTypes = {
   link: PropTypes.string,
 };
 
-export default Header;
+export default PageHeader;
