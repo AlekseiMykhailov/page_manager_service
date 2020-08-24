@@ -1,53 +1,53 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('Field', {
+  up: (queryInterface, DataTypes) => queryInterface.createTable('Field', {
     id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
     },
-    rowId: {
-      type: Sequelize.INTEGER,
+    sectionId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: {
-          tableName: 'row',
+          tableName: 'section',
         },
         key: 'id',
       },
     },
     name: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     label: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     type: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     order: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     value: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     createdAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     updatedAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
   }).then(() => queryInterface.addIndex(
     'Field',
-    ['rowId', 'name'],
+    ['sectionId', 'name'],
     { unique: true },
   )),
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('Field')
+  down: (queryInterface, DataTypes) => queryInterface.dropTable('Field')
 };

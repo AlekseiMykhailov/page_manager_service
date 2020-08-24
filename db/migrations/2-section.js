@@ -1,39 +1,39 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Row', {
+  up: (queryInterface, DataTypes) => {
+    return queryInterface.createTable('Section', {
       id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
       },
       schemaId: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       webPageId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
           model: {
-            tableName: 'webpage',
+            tableName: 'webPage',
           },
           key: 'id',
         },
       },
       order: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       createdAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
       },
       updatedAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
       },
     }, {});
   },
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('Row')
+  down: (queryInterface, DataTypes) => queryInterface.dropTable('Section')
 };

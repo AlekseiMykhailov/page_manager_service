@@ -50,21 +50,21 @@ module.exports = {
       },
     },
 
-    getFieldsByRowId: {
+    getFieldsBySectionId: {
       handler(ctx) {
-        const { rowIds } = ctx.params;
+        const { sectionIds } = ctx.params;
 
         return this.settings.model.findAll({
           where: {
-            rowId: {
-              [Op.or]: rowIds,
+            sectionId: {
+              [Op.or]: sectionIds,
             },
           },
         })
           .then((res) => res.map(({
-            id, rowId, type, order, name, label, value
+            id, sectionId, type, order, name, label, value
           }) => ({
-            id, rowId, type, order, name, label, value
+            id, sectionId, type, order, name, label, value
           })))
           .then((fields) => ({ ok: true, fields }))
           .catch((error) => ({ ok: false, error }));

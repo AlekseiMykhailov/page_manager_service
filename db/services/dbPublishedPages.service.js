@@ -12,7 +12,7 @@ module.exports = {
     createPublishedPage: {
       params: {
         webPageId: 'number',
-        domainId: 'number', 
+        domainId: 'number',
         domain: 'string',
         slug: 'string',
         html: 'string',
@@ -115,7 +115,12 @@ module.exports = {
         return this.settings.model.findOne({
           where: { webPageId },
         })
-          .then((res) => ({ ok: true, data: res.dataValues}))
+          .then((res) => {
+            if (res) {
+              return { ok: true, data: res.dataValues };
+            }
+            return { ok: false };
+          })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };

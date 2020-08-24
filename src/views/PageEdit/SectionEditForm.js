@@ -49,8 +49,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function RowEditContainer({
-  row,
+function SectionEditForm({
+  section,
   index,
   maxIndex,
   schemas,
@@ -60,13 +60,13 @@ function RowEditContainer({
   handleDelete,
   handleAddField,
 }) {
-  const { id, fields, schemaId } = row;
+  const { id, fields, schemaId } = section;
   const sortedFields = fields.sort((a, b) => a.order - b.order);
   const fieldsMap = sortedFields.reduce((map, field) => ({
     ...map,
     [field.name]: field.value,
   }), {});
-  const schema = schemas.find((rowSchema) => rowSchema.id === schemaId);
+  const schema = schemas.find((sectionSchema) => sectionSchema.id === schemaId);
   const API_URL = process.env.REACT_APP_API_URL;
   const classes = useStyles();
 
@@ -75,8 +75,8 @@ function RowEditContainer({
       <Divider className={classes.divider} />
       <form
         id={id}
-        action={`${API_URL}/rows/${id}`}
-        data-row-id={id}
+        action={`${API_URL}/sections/${id}`}
+        data-section-id={id}
         noValidate
         autoComplete="off"
         className={classes.form}
@@ -101,7 +101,7 @@ function RowEditContainer({
             <div className={classes.root}>
               <ButtonGroup size="small" aria-label="small outlined button group">
                 <Button
-                  data-row-id={id}
+                  data-section-id={id}
                   data-direction="up"
                   disabled={index === 0}
                   onClick={handleChangeOrder}
@@ -109,7 +109,7 @@ function RowEditContainer({
                   <ArrowUpwardIcon />
                 </Button>
                 <Button
-                  data-row-id={id}
+                  data-section-id={id}
                   data-direction="down"
                   disabled={index === maxIndex}
                   onClick={handleChangeOrder}
@@ -125,7 +125,7 @@ function RowEditContainer({
           <TextField
             fullWidth
             id={`${id}-${name}`}
-            inputProps={{ 'data-row-id': id }}
+            inputProps={{ 'data-section-id': id }}
             label={label}
             margin="normal"
             name={name}
@@ -138,7 +138,7 @@ function RowEditContainer({
         ))}
         {schema && schema.fields.some((field) => field.clonable) && (
           <Fab
-            data-row-id={id}
+            data-section-id={id}
             color="primary"
             aria-label="add"
             className={classes.fab}
@@ -161,7 +161,7 @@ function RowEditContainer({
             <Button
               variant="outlined"
               className={classes.deleteButton}
-              data-row-id={id}
+              data-section-id={id}
               startIcon={<DeleteIcon />}
               onClick={handleDelete}
             >
@@ -182,8 +182,8 @@ function RowEditContainer({
   );
 }
 
-RowEditContainer.propTypes = {
-  row: PropTypes.shape({
+SectionEditForm.propTypes = {
+  section: PropTypes.shape({
     id: PropTypes.number.isRequired,
     schemaId: PropTypes.string.isRequired,
     fields: PropTypes.array,
@@ -198,4 +198,4 @@ RowEditContainer.propTypes = {
   handleAddField: PropTypes.func.isRequired,
 };
 
-export default RowEditContainer;
+export default SectionEditForm;

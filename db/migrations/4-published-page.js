@@ -1,13 +1,13 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('PublishedPage', {
+  up: (queryInterface, DataTypes) => queryInterface.createTable('PublishedPage', {
     id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
     },
     webPageId: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: {
@@ -17,37 +17,37 @@ module.exports = {
       },
     },
     domainId: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     domain: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     slug: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     html: {
-      type: Sequelize.TEXT,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     publishedAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     createdAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     updatedAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     deletedAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: true,
     },
   }),
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('PublishedPage')
+  down: (queryInterface, DataTypes) => queryInterface.dropTable('PublishedPage')
 };

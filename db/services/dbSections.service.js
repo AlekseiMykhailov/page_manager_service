@@ -3,65 +3,66 @@ const db = require('../models');
 const Rest = require('../mixins/rest');
 
 module.exports = {
-  name: 'dbRows',
+  name: 'dbSections',
   mixins: [Rest],
   settings: {
-    model: db.Row,
+    model: db.Section,
   },
   actions: {
 
-    createRow: {
+    createSection: {
       params: {},
       handler(ctx) {
-        const { row } = ctx.params;
+        const { section } = ctx.params;
         const {
           schemaId, webPageId, order, fields
-        } = row;
-        let rowId;
+        } = section;
+        let sectionId;
 
         return this.settings.model.create({ schemaId, webPageId, order })
           .then((res) => {
-            rowId = res.dataValues.id;
-            const preparedFields = fields.map((field) => ({ ...field, rowId }));
+            sectionId = res.dataValues.id;
+            const preparedFields = fields.map((field) => ({ ...field, sectionId }));
 
             return this.broker.call('dbFields.createFields', { fields: preparedFields });
           })
-          .then(() => ({ ok: true, rowId }))
+          .then(() => ({ ok: true, sectionId }))
           .catch((error) => {
-            this.logger.error('ERROR ROW WITH FIELDS CREATE: ', error);
-
+            this.logger.error('ERROR SECTION CREATE: ', error);
             return { ok: false, error };
           });
       },
     },
 
-    bulkCreateRows: {
+    bulkCreateSection: {
       handler(ctx) {
-        const { rows } = ctx.params;
+        const { sections } = ctx.params;
 
-        return this.settings.model.bulkCreate(rows)
+        return this.settings.model.bulkCreate(sections)
           .then((response) => response.map((item) => ({ ...item.dataValues })))
           .catch((error) => {
-            this.logger.error('ERROR BULK CREATE ROWS: ', error);
-
+            this.logger.error('ERROR BULK CREATE SECTIONS: ', error);
             return { ok: false, error };
           });
       },
     },
 
-    updateRow: {
+    updateSection: {
       handler(ctx) {
-        const { rowId, order } = ctx.params;
+        const { sectionId, order } = ctx.params;
 
         return this.settings.model.update({ order }, {
-          where: { id: rowId }
+          where: { id: sectionId }
         })
           .then(() => ({ ok: true }))
-          .catch((error) => ({ ok: false, error }));
+          .catch((error) => {
+            this.logger.error('ERROR UPDATE SECTIONS: ', error);
+            return { ok: false, error };
+          });
       },
     },
 
-    deleteRow: {
+    deleteSection: {
       handler(ctx) {
         const { id } = ctx.params;
 
@@ -69,11 +70,14 @@ module.exports = {
           where: { id },
         })
           .then(() => ({ ok: true }))
-          .catch((error) => ({ ok: false, error }));
+          .catch((error) => {
+            this.logger.error('ERROR DELETE CREATE SECTIONS: ', error);
+            return { ok: false, error };
+          });
       },
     },
 
-    getRowsByWebPageId: {
+    getSectionsByWebPageId: {
       handler(ctx) {
         const { webPageId } = ctx.params;
 
@@ -81,7 +85,11 @@ module.exports = {
           where: {
             webPageId,
           }
-        });
+        })
+          .catch((error) => {
+            this.logger.error('ERROR getSectionsByWebPageId: ', error);
+            return { ok: false, error };
+          });
       }
     },
   },

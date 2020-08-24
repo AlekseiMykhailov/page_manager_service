@@ -16,15 +16,15 @@ module.exports = ({
           domainId, domain, slug, title, description
         } = ctx.params;
 
-        return this.broker.call('dbWebPages.createWebPage', {
-          domainId: +domainId, domain, slug, title, description
-        })
-          .then((res) => {
-            if (!res.ok) {
-              throw new Error(res.error);
-            } else {
-              return res;
+        return this.broker.call('dbRedirects.checkSlug', { domainId, slug })
+          .then((response) => {
+            if (response.ok) {
+              return { ok: false };
             }
+
+            return this.broker.call('dbWebPages.createWebPage', {
+              domainId: +domainId, domain, slug, title, description
+            });
           })
           .then(({ id }) => ({ ok: true, id }))
           .catch((error) => {
@@ -38,17 +38,35 @@ module.exports = ({
       params: {
         slug: 'string',
         title: 'string',
-        isHomePage: 'boolean',
         description: 'string',
       },
       handler(ctx) {
         const {
-          id, slug, title, description
+          domainId, id, slug, title, description
         } = ctx.params;
 
-        return this.broker.call('dbWebPages.updateWebPage', {
-          id, slug, title, description
-        })
+        return this.broker.call('dbRedirects.checkSlug', { domainId, slug })
+          .then((response) => {
+            if (response.ok) {
+              throw new Error({ ok: false });
+            }
+
+            return { ok: true };
+          })
+          .then(async () => {
+            const { data } = await this.broker.call('dbWebPages.getWebPageById', { id: +id });
+            const oldSlug = data.slug;
+            if (slug !== oldSlug) {
+              return this.broker.call('dbRedirects.addWebPageRedirect', {
+                domainId,
+                webPageId: +id,
+                slug: oldSlug,
+              });
+            }
+          })
+          .then(() => this.broker.call('dbWebPages.updateWebPage', {
+            id, slug, title, description
+          }))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
@@ -78,22 +96,6 @@ module.exports = ({
       },
     },
 
-    // getWebPageByURL: {
-    //   params: {
-    //     domain: 'string',
-    //     slug: 'string',
-    //   },
-    //   handler(ctx) {
-    //     const { domain, slug } = ctx.params;
-
-    //     return this.broker.call('dbWebPages.getWebPageByURL', { domain, slug })
-    //       .catch((err) => {
-    //         this.logger.error('ERROR: ', err);
-    //         return JSON.stringify(err, null, 2);
-    //       });
-    //   },
-    // },
-
     getWebPageById: {
       params: {
         id: 'number',
@@ -121,9 +123,9 @@ module.exports = ({
           .then((res) => {
             webPage = res.data;
 
-            return this.broker.call('rows.getRowsForWebPage', { webPageId: webPage.id });
+            return this.broker.call('sections.getSectionsForWebPage', { webPageId: webPage.id });
           })
-          .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
+          .then((sections) => this.broker.call('builder.createWebPageHTML', { webPage, sections }))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
@@ -146,8 +148,7 @@ module.exports = ({
     getListWebPages: {
       handler() {
         return this.broker.call('dbWebPages.getAllWebPages')
-          .then((res) => res.pages)
-          .then((pages) => ({ ok: true, pages }))
+          .then(({ pages }) => JSON.stringify({ ok: true, pages }, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
@@ -166,9 +167,9 @@ module.exports = ({
         return this.broker.call('dbWebPages.getWebPageById', { id: webPageId })
           .then((res) => {
             webPage = res.data;
-            return this.broker.call('rows.getRowsForWebPage', { webPageId });
+            return this.broker.call('sections.getSectionsForWebPage', { webPageId });
           })
-          .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
+          .then((sections) => this.broker.call('builder.createWebPageHTML', { webPage, sections }))
           .then((html) => this.broker.call('publish.createPublishedPage', {
             ...webPage,
             webPageId,
@@ -189,8 +190,8 @@ module.exports = ({
 
         return this.broker.call('dbWebPages.getWebPageById', { id: +webPageId })
           .then((res) => { webPage = res.data; })
-          .then(() => this.broker.call('rows.getRowsForWebPage', { webPageId: +webPageId }))
-          .then((rows) => this.broker.call('builder.createWebPageHTML', { webPage, rows }))
+          .then(() => this.broker.call('sections.getSectionsForWebPage', { webPageId: +webPageId }))
+          .then((sections) => this.broker.call('builder.createWebPageHTML', { webPage, sections }))
           .then((html) => this.broker.call('dbPublishedPage.updatePublishedPage', {
             webPageId: webPage.id,
             domain: webPage.domain,
@@ -221,7 +222,7 @@ module.exports = ({
       },
     },
 
-    getPublishedPageData: {
+    getPublishedWebPage: {
       params: {
         id: 'string',
       },
@@ -237,7 +238,7 @@ module.exports = ({
       },
     },
 
-    getAllPublishedPagesData: {
+    listPublishedWebPages: {
       handler() {
         return this.broker.call('publish.getAllPublishedPages')
           .then((response) => JSON.stringify(response, null, 2))
@@ -245,7 +246,40 @@ module.exports = ({
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
           });
-      }
+      },
+    },
+
+    editWebPage: {
+      params: {
+        id: { type: 'string' },
+      },
+      handler(ctx) {
+        const { id } = ctx.params;
+        const response = {};
+
+        return this.broker.call('webPages.getWebPageById', { id: +id })
+          .then((webPage) => { response.webPage = webPage.data; })
+          .then(() => this.broker.call('dbDomainSettings.getDomainData', { domainId: response.webPage.domainId }))
+          .then((domain) => { response.domain = domain.domainData; })
+          .then(() => this.broker.call('sections.getSectionsForWebPage', { webPageId: response.webPage.id }))
+          .then((sections) => {
+            response.sections = sections;
+            return sections.map((section) => section.id);
+          })
+          .then((sectionIds) => this.broker.call('dbFields.getFieldsBySectionId', { sectionIds }))
+          .then(({ fields }) => response.sections.map((section) => ({
+            ...section,
+            fields: fields.filter((field) => field.sectionId === section.id),
+          })))
+          .then((sections) => { response.sections = sections; })
+          .then(() => this.broker.call('dbRedirects.getWebPageRedirects', { webPageId: response.webPage.id }))
+          .then(({ redirects }) => { response.redirects = redirects; })
+          .then(() => JSON.stringify({ ok: true, ...response }, null, 2))
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
+      },
     },
 
     cloneWebPage: {
@@ -260,12 +294,14 @@ module.exports = ({
             const {
               title, slug, description, domainId
             } = response.data;
+            const toSameDomain = domainId === toDomainId;
+
             cloneData.webPage = {
-              title: (domainId === toDomainId) ? `${title}-copy` : title,
-              description,
-              slug: (domainId === toDomainId) ? `${slug}-copy` : slug,
+              title: (toSameDomain) ? `${title}-copy` : title,
+              slug: (toSameDomain) ? `${slug}-copy` : slug,
               domainId: toDomainId,
               domain: toDomain,
+              description,
             };
           })
           .then(() => this.broker.call('dbWebPages.checkWebPageBySlug', {
@@ -281,31 +317,31 @@ module.exports = ({
           .then((response) => {
             cloneData.webPageId = response.id;
           })
-          .then(() => this.broker.call('rows.getRowsForWebPage', { webPageId: cloningWebPageId }))
-          .then((rows) => {
-            cloneData.rows = rows.map(({ id, order, schemaId }) => ({
-              donorRowId: id,
+          .then(() => this.broker.call('sections.getSectionsForWebPage', { webPageId: cloningWebPageId }))
+          .then((sections) => {
+            cloneData.sections = sections.map(({ id, order, schemaId }) => ({
+              donorSectionId: id,
               order,
               schemaId,
               webPageId: cloneData.webPageId,
             }));
           })
-          .then(() => cloneData.rows.map(({ order, schemaId, webPageId }) => (
+          .then(() => cloneData.sections.map(({ order, schemaId, webPageId }) => (
             { order, schemaId, webPageId }
           )))
-          .then((rows) => this.broker.call('dbRows.bulkCreateRows', { rows }))
-          .then((createdRows) => {
-            cloneData.rows = cloneData.rows.map((row) => ({
-              ...row,
-              id: createdRows.find(({ order }) => order === row.order).id,
+          .then((sections) => this.broker.call('dbSections.bulkCreateSection', { sections }))
+          .then((createdSections) => {
+            cloneData.sections = cloneData.sections.map((section) => ({
+              ...section,
+              id: createdSections.find(({ order }) => order === section.order).id,
             }));
           })
-          .then(() => cloneData.rows.map((row) => row.donorRowId))
-          .then((rowIds) => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
+          .then(() => cloneData.sections.map((section) => section.donorSectionId))
+          .then((sectionIds) => this.broker.call('dbFields.getFieldsBySectionId', { sectionIds }))
           .then(({ fields }) => fields.map(({
-            rowId, name, label, type, order, value
+            sectionId, name, label, type, order, value
           }) => ({
-            rowId: cloneData.rows.find((row) => row.donorRowId === rowId).id,
+            sectionId: cloneData.sections.find((section) => section.donorSectionId === sectionId).id,
             name,
             label,
             type,
@@ -319,6 +355,39 @@ module.exports = ({
             return JSON.stringify(err, null, 2);
           });
       }
+    },
+
+    addWebPageRedirect: {
+      handler(ctx) {
+        const { redirectData } = ctx.params;
+        const { domainId, slug } = redirectData;
+
+        return this.broker.call('dbWebPages.checkSlug', { domainId, slug })
+          .then((response) => {
+            if (response.ok) {
+              return { ok: false };
+            }
+            return this.broker.call('dbRedirects.addWebPageRedirect', redirectData);
+          })
+          .then((response) => JSON.stringify(response, null, 2))
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
+      },
+    },
+
+    deleteWebPageRedirect: {
+      handler(ctx) {
+        const { redirectId } = ctx.params;
+
+        return this.broker.call('dbRedirects.deleteWebPageRedirect', { id: +redirectId })
+          .then((response) => JSON.stringify(response, null, 2))
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return JSON.stringify(err, null, 2);
+          });
+      },
     },
   },
 });

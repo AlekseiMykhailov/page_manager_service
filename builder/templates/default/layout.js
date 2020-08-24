@@ -1,6 +1,6 @@
 const Handlebars = require('handlebars');
 
-Handlebars.registerHelper('noRows', (value) => !value);
+Handlebars.registerHelper('noSections', (value) => !value);
 
 const layout = Handlebars.compile(`
 <!DOCTYPE html>
@@ -17,13 +17,13 @@ const layout = Handlebars.compile(`
   </head>
 
   <body>
-    {{#if (noRows rows)}}
+    {{#if (noSections sections)}}
       <div class="temp">
         <h1>{{ title }}</h1>
         <h2>{{ description }}</h2>
       </temp>
     {{/if}}
-    {{ rows }}
+    {{ sections }}
   </body>
 </html>
 `, {

@@ -1,41 +1,27 @@
 module.exports = (sequelize, DataTypes) => {
-  const Field = sequelize.define('Field', {
+  const Section = sequelize.define('Section', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    sectionId: {
+    schemaId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    webPageId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: {
-          tableName: 'section',
+          tableName: 'webPage',
         },
         key: 'id',
       },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    label: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     order: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    value: {
-      type: DataTypes.STRING,
       allowNull: false,
     },
     createdAt: {
@@ -48,17 +34,11 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     freezeTableName: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ['sectionId', 'name'],
-      }
-    ]
   });
 
-  Field.associate = function (models) {
+  Section.associate = function(models) {
     // associations can be defined here
   };
 
-  return Field;
+  return Section;
 };

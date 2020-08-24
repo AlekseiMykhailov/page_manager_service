@@ -22,9 +22,16 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id',
       },
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
   }, {
     freezeTableName: true,
-    paranoid: true,
   });
 
   DomainSettings.associate = function(models) {

@@ -1,41 +1,41 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('WebPage', {
+  up: (queryInterface, DataTypes) => queryInterface.createTable('WebPage', {
     id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
     },
     domainId: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     domain: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     slug: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     title: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     description: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     createdAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     updatedAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     deletedAt: {
       allowNull: true,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
   }).then(() => queryInterface.addIndex(
     'WebPage',
@@ -45,5 +45,5 @@ module.exports = {
     },
   )),
 
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('WebPage')
+  down: (queryInterface, DataTypes) => queryInterface.dropTable('WebPage')
 };

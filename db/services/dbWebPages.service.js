@@ -125,5 +125,25 @@ module.exports = {
           .catch((error) => ({ ok: false, error }));
       },
     },
+
+    checkSlug: {
+      params: {
+        domainId: 'number',
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { domainId, slug } = ctx.params;
+
+        return this.settings.model.findOne({ where: { domainId, slug, } })
+          .then((response) => {
+            if (response) {
+              return { ok: true };
+            }
+
+            return { ok: false };
+          })
+          .catch((error) => ({ ok: false, error }));
+      },
+    },
   },
 };

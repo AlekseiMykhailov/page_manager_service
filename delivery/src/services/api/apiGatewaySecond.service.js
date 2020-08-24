@@ -23,14 +23,32 @@ module.exports = {
         aliases: {
           'GET /': function (req, res) {
             const domain = req.headers.host;
+
             return this.broker.call('publish.getPublishedPageHTML', { domain })
-              .then((html) => res.end(html));
+              .then((html) => res.end(html))
+              .catch((error) => { this.logger.info('ERROR: ', error); });
           },
-          'GET /:slug': function (req, res) {
-            const { slug } = req.$params;
+
+          'GET /:slug': async function (req, res) {
             const domain = req.headers.host;
+            const { slug } = req.$params;
+            const redirect = await this.broker.call('publish.checkRedirect', {
+              domain,
+              slug,
+            });
+
+            if (redirect.ok) {
+              res.writeHead(301, { Location: redirect.slug });
+              res.end();
+            }
+
             return this.broker.call('publish.getPublishedPageHTML', { domain, slug })
-              .then((html) => res.end(html));
+              .then((response) => {
+                if (typeof (response) === 'string') {
+                  res.end(response);
+                }
+              })
+              .catch((error) => { this.logger.info('ERROR SLUG: ', error); });
           },
         },
         bodyParsers: {

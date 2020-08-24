@@ -28,7 +28,7 @@ module.exports = ({
     updatePublishedPage: {
       params: {
         webPageId: 'number',
-        domainId: 'number', 
+        domainId: 'number',
         domain: 'string',
         slug: 'string',
         html: 'string',
@@ -143,6 +143,26 @@ module.exports = ({
             return { ok: false, error: err };
           });
       }
+    },
+
+    checkRedirect: {
+      handler(ctx) {
+        const { domain, slug } = ctx.params;
+
+        return this.broker.call('dbRedirects.getWebPageRedirectsBySlug', { domain, slug })
+          .then((response) => {
+            if (response.ok) {
+              return this.broker.call('dbWebPages.getWebPageById', { id: response.redirect.dataValues.webPageId });
+            }
+          })
+          .then((webPage) => {
+            if (webPage) {
+              return { ok: true, slug: webPage.data.slug };
+            }
+
+            return { ok: false };
+          });
+      },
     },
   }
 });

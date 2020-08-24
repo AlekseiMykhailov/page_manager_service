@@ -1,23 +1,23 @@
 /* eslint-disable no-restricted-syntax */
 module.exports = ({
-  name: 'rows',
+  name: 'sections',
   actions: {
-    createRow: {
+    createSection: {
       handler(ctx) {
-        const row = { ...ctx.params };
-        return this.broker.call('dbRows.createRow', { row });
+        const section = { ...ctx.params };
+        return this.broker.call('dbSections.createSection', { section });
       },
     },
 
-    updateRowFields: {
+    updateSectionFields: {
       params: {
-        rowId: 'string',
+        sectionId: 'string',
       },
       handler(ctx) {
-        const { rowId, fields } = ctx.params;
+        const { sectionId, fields } = ctx.params;
         const preparedFields = fields
           .filter((field) => field.value.trim())
-          .map((field) => ({ ...field, rowId: +rowId }));
+          .map((field) => ({ ...field, sectionId: +sectionId }));
 
         const fieldsForDelete = fields
           .filter((field) => field.id && !field.value.trim())
@@ -27,50 +27,51 @@ module.exports = ({
           .then(() => this.broker.call('dbFields.createFields', { fields: preparedFields }))
           .then(() => JSON.stringify({ ok: true }))
           .catch((error) => {
-            this.logger.error('ERROR ROW WITH FIELDS UPDATE: ', error);
-
+            this.logger.error('ERROR SECTION WITH FIELDS UPDATE: ', error);
             return { ok: false, error };
           });
       },
     },
 
-    updateRowOrder: {
+    updateSectionOrder: {
       params: {
-        rowId: 'string',
+        sectionId: 'string',
         order: 'number',
       },
       handler(ctx) {
-        const { rowId, order } = ctx.params;
+        const { sectionId, order } = ctx.params;
 
-        return this.broker.call('dbRows.updateRow', { rowId, order });
+        return this.broker.call('dbSections.updateSection', { sectionId, order });
       },
     },
 
-    deleteRow: {
+    deleteSection: {
       params: { id: 'string' },
       handler(ctx) {
         const { id } = ctx.params;
 
-        return this.broker.call('dbRows.deleteRow', { id })
+        return this.broker.call('dbSections.deleteSection', { id })
           .then((res) => JSON.stringify(res));
       },
     },
 
-    getRowsForWebPage: {
+    getSectionsForWebPage: {
       params: {
         webPageId: 'number',
       },
       handler(ctx) {
         const { webPageId } = ctx.params;
 
-        return this.broker.call('dbRows.getRowsByWebPageId', { webPageId })
-          .then((rowsData) => rowsData.map(({ id, order, schemaId }) => ({ id, order, schemaId })));
+        return this.broker.call('dbSections.getSectionsByWebPageId', { webPageId })
+          .then((sectionsData) => sectionsData.map(({ id, order, schemaId }) => (
+            { id, order, schemaId }
+          )));
       },
     },
 
-    getAllRows: {
+    getAllSections: {
       handler() {
-        return this.broker.call('dbRows.getAllRows')
+        return this.broker.call('dbSections.getAllSections')
           .then((res) => JSON.stringify(res, null, 2));
       },
     },

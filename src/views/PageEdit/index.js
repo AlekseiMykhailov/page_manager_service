@@ -16,8 +16,9 @@ import * as FETCH from 'src/utils/fetch';
 import PageEditForm from 'src/components/WebPage/PageEditForm';
 import PageEditHeader from './PageEditHeader';
 import PageEditButtons from './PageEditButtons';
-import RowEditForm from './RowEditForm';
-import RowAddForm from './RowAddForm';
+import RedirectControls from './RedirectControls';
+import SectionEditForm from './SectionEditForm';
+import SectionAddForm from './SectionAddForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,33 +34,36 @@ const useStyles = makeStyles((theme) => ({
 
 function PageEdit() {
   const classes = useStyles();
-  const [setStatusMessage] = useStatusMessage();
   const { domainId, webPageId } = useParams();
-  const [pageSchema, setPageSchema] = useState(null);
+  const [setStatusMessage] = useStatusMessage();
+
+  const [domainData, setDomainData] = useState(null);
+  const [redirectsData, setRedirectsData] = useState(null);
   const [pageData, setPageData] = useState(null);
-  const [rowsSchemas, setRowSchemas] = useState([]);
-  const [rowsData, setRowsData] = useState([]);
+  const [sectionsData, setSectionsData] = useState([]);
   const [publishData, setPublishData] = useState(null);
-  const [homePageId, setHomePageId] = useState(null);
+
+  const [pageSchema, setPageSchema] = useState(null);
+  const [sectionSchemas, setSectionSchemas] = useState([]);
+
   const [isDeleted, setIsDeleted] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
 
-  // TODO: combine into one fetch
+  // TODO: combine into one-two fetch
   const getPageData = useCallback(() => {
     FETCH.getData(`${API_URL}/pages/${webPageId}`)
       .then((response) => {
         if (response.ok) {
+          setDomainData(response.domain);
+          setRedirectsData(response.redirects);
           setPageData(response.webPage);
-          setRowsData(response.rows);
+          setSectionsData(response.sections);
           return response.webPage.domain;
         }
-      })
-      .then((domain) => FETCH.getData(`${API_URL}/domains/${domain}`))
-      .then((response) => {
-        if (response.ok) {
-          setHomePageId(response.webPageId);
-        }
+
+        setStatusMessage(response, null, 'Something went wrong...');
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_URL, webPageId]);
 
   const getPageSchema = useCallback(() => {
@@ -71,17 +75,17 @@ function PageEdit() {
       });
   }, [API_URL]);
 
-  const getRowSchemas = useCallback(() => {
-    FETCH.getData(`${API_URL}/schemas/rows`)
+  const getSectionSchemas = useCallback(() => {
+    FETCH.getData(`${API_URL}/schemas/sections`)
       .then((response) => {
         if (response.ok) {
-          setRowSchemas(response.schemas);
+          setSectionSchemas(response.schemas);
         }
       });
   }, [API_URL]);
 
   const getPublishData = useCallback(() => {
-    FETCH.getData(`${API_URL}/published/${webPageId}`)
+    FETCH.getData(`${API_URL}/publish/${webPageId}`)
       .then((response) => {
         if (response.ok) {
           setPublishData(response.data);
@@ -93,10 +97,10 @@ function PageEdit() {
 
   useEffect(() => {
     getPageSchema();
-    getRowSchemas();
+    getSectionSchemas();
     getPageData();
     getPublishData();
-  }, [getPageData, getPublishData, getRowSchemas, getPageSchema]);
+  }, [getPageData, getPublishData, getSectionSchemas, getPageSchema]);
 
   const handlePageDataInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -124,10 +128,10 @@ function PageEdit() {
       .then((response) => setStatusMessage(response, setIsDeleted(true), 'Page was archived'));
   };
 
-  const saveRowData = (rowData) => {
-    FETCH.putData(`${API_URL}/rows/${rowData.id}`, rowData)
+  const saveSectionData = (sectionData) => {
+    FETCH.putData(`${API_URL}/sections/${sectionData.id}`, sectionData)
       .then((response) => {
-        setStatusMessage(response, getPageData, 'Row was edited');
+        setStatusMessage(response, getPageData, 'Section was edited');
 
         if (response.ok) {
           getPageData();
@@ -136,10 +140,10 @@ function PageEdit() {
       });
   };
 
-  const saveRowOrder = (rowId, order) => {
-    FETCH.putData(`${API_URL}/rows/order/${rowId}`, { rowId, order })
+  const saveSectionOrder = (sectionId, order) => {
+    FETCH.putData(`${API_URL}/sections/order/${sectionId}`, { sectionId: +sectionId, order })
       .then((response) => {
-        setStatusMessage(response, null, 'Row order was changed');
+        setStatusMessage(response, null, 'Section order was changed');
 
         if (response.ok) {
           savePageData();
@@ -147,23 +151,23 @@ function PageEdit() {
       });
   };
 
-  const handleSaveRow = (e) => {
+  const handleSaveSection = (e) => {
     e.preventDefault();
 
     const { id } = e.target;
-    const rowData = rowsData.find((row) => row.id === +id);
+    const sectionData = sectionsData.find((section) => section.id === +id);
 
-    saveRowData(rowData);
+    saveSectionData(sectionData);
   };
 
-  const changeRowInput = (e) => {
+  const changeSectionInput = (e) => {
     const { name, value } = e.target;
-    const { rowId } = e.currentTarget.dataset;
-    const rowsDataUpdated = [...rowsData].map((row) => {
-      if (row.id === +rowId) {
+    const { sectionId } = e.currentTarget.dataset;
+    const sectionsDataUpdated = [...sectionsData].map((section) => {
+      if (section.id === +sectionId) {
         return {
-          ...row,
-          fields: [...row.fields].map((field) => {
+          ...section,
+          fields: [...section.fields].map((field) => {
             if (field.name === name) {
               return {
                 ...field,
@@ -176,104 +180,104 @@ function PageEdit() {
         };
       }
 
-      return row;
+      return section;
     });
 
-    setRowsData(rowsDataUpdated);
+    setSectionsData(sectionsDataUpdated);
   };
 
-  const changeRowsOrder = (changingRows) => {
-    const updatedRows = rowsData.map((row) => {
-      if (row.id === changingRows.rowA.id) {
+  const changeSectionsOrder = (changingSections) => {
+    const updatedSections = sectionsData.map((section) => {
+      if (section.id === changingSections.sectionA.id) {
         return {
-          ...row,
-          order: changingRows.rowA.order,
+          ...section,
+          order: changingSections.sectionA.order,
         };
       }
 
-      if (row.id === changingRows.rowB.id) {
+      if (section.id === changingSections.sectionB.id) {
         return {
-          ...row,
-          order: changingRows.rowB.order,
+          ...section,
+          order: changingSections.sectionB.order,
         };
       }
 
-      return row;
+      return section;
     });
 
-    setRowsData(updatedRows);
-    updatedRows.forEach(({ id, order }) => saveRowOrder(id, order));
+    setSectionsData(updatedSections);
+    updatedSections.forEach(({ id, order }) => saveSectionOrder(id, order));
   };
 
-  const handleRowsOrder = (e) => {
-    const { direction, rowId } = e.currentTarget.dataset;
-    const changingRows = {
-      rowA: null,
-      rowB: null,
+  const handleSectionsOrder = (e) => {
+    const { direction, sectionId } = e.currentTarget.dataset;
+    const changingSections = {
+      sectionA: null,
+      sectionB: null,
     };
 
-    rowsData.forEach((row, i) => {
-      if (rowsData[i].id === +rowId && direction === 'down' && i < (rowsData.length - 1)) {
-        changingRows.rowA = {
-          id: row.id,
-          order: rowsData[i + 1].order,
+    sectionsData.forEach((section, i) => {
+      if (sectionsData[i].id === +sectionId && direction === 'down' && i < (sectionsData.length - 1)) {
+        changingSections.sectionA = {
+          id: section.id,
+          order: sectionsData[i + 1].order,
         };
-        changingRows.rowB = {
-          id: rowsData[i + 1].id,
-          order: row.order,
+        changingSections.sectionB = {
+          id: sectionsData[i + 1].id,
+          order: section.order,
         };
       }
 
-      if (rowsData[i].id === +rowId && direction === 'up' && i > 0) {
-        changingRows.rowA = {
-          id: row.id,
-          order: rowsData[i - 1].order,
+      if (sectionsData[i].id === +sectionId && direction === 'up' && i > 0) {
+        changingSections.sectionA = {
+          id: section.id,
+          order: sectionsData[i - 1].order,
         };
-        changingRows.rowB = {
-          id: rowsData[i - 1].id,
-          order: row.order,
+        changingSections.sectionB = {
+          id: sectionsData[i - 1].id,
+          order: section.order,
         };
       }
     });
 
-    if (changingRows.rowA && changingRows.rowB) {
-      changeRowsOrder(changingRows);
+    if (changingSections.sectionA && changingSections.sectionB) {
+      changeSectionsOrder(changingSections);
     }
   };
 
   const addField = (e) => {
-    const { rowId } = e.currentTarget.dataset;
-    const rowData = rowsData.find((row) => row.id === +rowId);
-    const sortedFields = rowData.fields.sort((a, b) => a.order - b.order);
+    const { sectionId } = e.currentTarget.dataset;
+    const sectionData = sectionsData.find((section) => section.id === +sectionId);
+    const sortedFields = sectionData.fields.sort((a, b) => a.order - b.order);
     const lastOrder = sortedFields[sortedFields.length - 1].order;
-    const rowSchema = rowsSchemas.find((schema) => schema.id === rowData.schemaId);
-    const clonableField = rowSchema.fields.find((field) => field.clonable);
+    const sectionSchema = sectionSchemas.find((schema) => schema.id === sectionData.schemaId);
+    const clonableField = sectionSchema.fields.find((field) => field.clonable);
     const newField = {
       ...clonableField,
       name: `${clonableField.name}-${lastOrder + 1}`,
       order: lastOrder + 1,
       value: '',
     };
-    const newRowsData = rowsData.map((row) => {
-      if (row.id !== +rowId) {
-        return row;
+    const newSectionsData = sectionsData.map((section) => {
+      if (section.id !== +sectionId) {
+        return section;
       }
 
       return {
-        ...row,
-        fields: [...row.fields, newField],
+        ...section,
+        fields: [...section.fields, newField],
       };
     });
 
-    setRowsData(newRowsData);
+    setSectionsData(newSectionsData);
   };
 
-  const deleteRow = (e) => {
-    const { rowId } = e.currentTarget.dataset;
+  const deleteSection = (e) => {
+    const { sectionId } = e.currentTarget.dataset;
 
-    FETCH.deleteData(`${API_URL}/rows/${rowId}`)
+    FETCH.deleteData(`${API_URL}/sections/${sectionId}`)
       .then((response) => {
-        setStatusMessage(response, getPageData, 'Row was deleted');
+        setStatusMessage(response, getPageData, 'Section was deleted');
 
         if (response.ok) {
           savePageData();
@@ -308,9 +312,39 @@ function PageEdit() {
       });
   };
 
-  const getSortedRows = useMemo(() => (
-    rowsData.sort((a, b) => a.order - b.order)
-  ), [rowsData]);
+  const handleAddRedirect = (slug) => {
+    const redirectData = {
+      domainId: +domainData.id,
+      webPageId: +pageData.id,
+      slug,
+    };
+
+    FETCH.postData(`${API_URL}/redirects`, { redirectData })
+      .then((response) => {
+        setStatusMessage(response, getPageData, 'Redirect was added');
+
+        if (response.ok) {
+          getPageData();
+        }
+      });
+  };
+
+  const handleDeleteRedirect = (e) => {
+    const { redirectId } = e.currentTarget.dataset;
+
+    FETCH.deleteData(`${API_URL}/redirects/${redirectId}`)
+      .then((response) => {
+        setStatusMessage(response, getPageData, 'Redirect was deleted');
+
+        if (response.ok) {
+          getPageData();
+        }
+      });
+  };
+
+  const getSortedSections = useMemo(() => (
+    sectionsData.sort((a, b) => a.order - b.order)
+  ), [sectionsData]);
 
   return (
     <Page
@@ -323,7 +357,7 @@ function PageEdit() {
           <PageEditHeader
             name="Edit Page"
             title={pageData.title}
-            homePageId={homePageId}
+            homePageId={domainData.homePageId}
             pageData={pageData}
             publishData={publishData}
           />
@@ -331,7 +365,7 @@ function PageEdit() {
         {pageData && (
           <PageEditButtons
             pageId={pageData.id}
-            homePageId={homePageId}
+            homePageId={domainData.homePageId}
             isPublished={Boolean(publishData)}
             handleDelete={deleteWepPage}
             handlePublish={handlePublish}
@@ -352,28 +386,36 @@ function PageEdit() {
               />
             )}
 
-            {getSortedRows.map((row, i) => (
-              <RowEditForm
-                row={row}
+            {pageData && (
+              <RedirectControls
+                redirectsData={redirectsData}
+                handleAddRedirect={handleAddRedirect}
+                handleDeleteRedirect={handleDeleteRedirect}
+              />
+            )}
+
+            {getSortedSections.map((section, i) => (
+              <SectionEditForm
+                section={section}
                 index={i}
-                maxIndex={rowsData.length - 1}
+                maxIndex={sectionsData.length - 1}
                 className={classes.section}
-                schemas={rowsSchemas}
-                handleSubmit={handleSaveRow}
-                handleInputChange={changeRowInput}
-                handleDelete={deleteRow}
-                handleChangeOrder={handleRowsOrder}
+                schemas={sectionSchemas}
+                handleSubmit={handleSaveSection}
+                handleInputChange={changeSectionInput}
+                handleDelete={deleteSection}
+                handleChangeOrder={handleSectionsOrder}
                 handleAddField={addField}
-                key={row.id}
+                key={section.id}
               />
             ))}
 
             {pageData && (
-              <RowAddForm
+              <SectionAddForm
                 pageId={pageData.id}
                 className={classes.section}
-                schemas={rowsSchemas}
-                newRowOrder={rowsData.length + 1}
+                schemas={sectionSchemas}
+                newSectionOrder={sectionsData.length + 1}
                 getPageData={getPageData}
               />
             )}

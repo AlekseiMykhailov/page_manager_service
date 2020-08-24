@@ -20,14 +20,14 @@ class WebPage {
   }
 }
 
-class RowMeta {
+class SectionMeta {
   constructor(title, templateHbs) {
     this.title = title;
     this.templateHbs = templateHbs;
   }
 }
 
-class Row {
+class Section {
   constructor(id, webPageId, order, schema, dependencies, fields) {
     this.id = id;
     this.webPageId = webPageId;
@@ -38,9 +38,9 @@ class Row {
   }
 }
 
-class RowSchemasStore {
-  constructor(rowSchemas) {
-    this.schemas = rowSchemas;
+class SectionSchemasStore {
+  constructor(sectionSchemas) {
+    this.schemas = sectionSchemas;
   }
 
   add(schema) {
@@ -59,7 +59,7 @@ const webPageSchema = {
   description: new FieldSchema('description', 'Description', 'text', 50),
 };
 
-const rowsSchemas = [
+const sectionsSchemas = [
   {
     id: '1',
     webPageId: 'number',
@@ -117,7 +117,7 @@ const rowsSchemas = [
   },
 ];
 
-const rowSchemasStore = new RowSchemasStore(rowsSchemas);
+const sectionSchemasStore = new SectionSchemasStore(sectionsSchemas);
 
 module.exports = ({
   name: 'schemas',
@@ -129,9 +129,9 @@ module.exports = ({
       },
     },
 
-    getRowSchemas: {
+    getSectionSchemas: {
       handler() {
-        return { ok: true, schemas: rowSchemasStore.getList() };
+        return { ok: true, schemas: sectionSchemasStore.getList() };
       }
     },
 
@@ -150,7 +150,7 @@ module.exports = ({
       },
     },
 
-    constructRow: {
+    constructSection: {
       params: {
         webPageId: 'number',
         order: 'number',
@@ -160,10 +160,10 @@ module.exports = ({
           meta, webPageId, order, dependencies, fields
         } = ctx.params;
         const { title, templateHbs } = meta;
-        const rowMeta = new RowMeta(title, templateHbs);
+        const sectionMeta = new SectionMeta(title, templateHbs);
         const id = v4();
 
-        return new Row(id, webPageId, +order, rowMeta, dependencies, fields);
+        return new Section(id, webPageId, +order, sectionMeta, dependencies, fields);
       },
     },
   },

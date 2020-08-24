@@ -7,12 +7,12 @@
   "private": true,
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "nodemon index.js -w services",
+    "migrate": "npx sequelize-cli db:migrate",
+    "seed": "npx sequelize-cli db:seed:all",
     "react": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "less": "yarn run react-less-watcher -d src/assets/less/app.less"
+    "test": "react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"

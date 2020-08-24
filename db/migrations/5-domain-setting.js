@@ -1,23 +1,23 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => {
+  up: (queryInterface, DataTypes) => {
     return queryInterface.createTable('DomainSettings', {
       id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
       },
       domain: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         unique: true,
         allowNull: false,
       },
       name: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       homePageId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         references: {
           model: {
             tableName: 'webpage',
@@ -26,17 +26,17 @@ module.exports = {
         },
       },
       createdAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
       },
       updatedAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
       },
       deletedAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
     }, {});
   },
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('DomainSettings')
+  down: (queryInterface, DataTypes) => queryInterface.dropTable('DomainSettings')
 };

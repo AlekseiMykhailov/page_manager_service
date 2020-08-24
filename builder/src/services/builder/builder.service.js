@@ -6,14 +6,14 @@ module.exports = ({
   name: 'builder',
   actions: {
     createWebPageHTML(ctx) {
-      const { webPage, rows } = ctx.params;
+      const { webPage, sections } = ctx.params;
       const { title, description, slug } = webPage;
-      const rowIds = rows.map((row) => row.id);
-      let rowSchemas;
+      const sectionIds = sections.map((section) => section.id);
+      let sectionSchemas;
 
-      return this.broker.call('schemas.getRowSchemas')
-        .then(({ schemas }) => { rowSchemas = schemas; })
-        .then(() => this.broker.call('dbFields.getFieldsByRowId', { rowIds }))
+      return this.broker.call('schemas.getSectionSchemas')
+        .then(({ schemas }) => { sectionSchemas = schemas; })
+        .then(() => this.broker.call('dbFields.getFieldsBySectionId', { sectionIds }))
         .then(({ fields }) => {
           if (!fields) {
             return template.layout({ slug, title, description });
@@ -22,50 +22,50 @@ module.exports = ({
           const cssDependencies = new Set();
           const jsDependencies = new Set();
 
-          const rowsHtml = [...rows].sort((a, b) => a.order - b.order)
+          const sectionsHtml = [...sections].sort((a, b) => a.order - b.order)
             .map(({ id, schemaId }) => {
-              const rowSchema = rowSchemas.find((schema) => schema.id === schemaId);
-              const rowFields = fields.filter((field) => (
-                field.rowId === id && Boolean(field.value.trim())
+              const sectionSchema = sectionSchemas.find((schema) => schema.id === schemaId);
+              const sectionFields = fields.filter((field) => (
+                field.sectionId === id && Boolean(field.value.trim())
               ));
-              const rowFieldsMap = rowFields.reduce((fieldsMap, field) => ({
+              const sectionFieldsMap = sectionFields.reduce((fieldsMap, field) => ({
                 ...fieldsMap,
                 [field.name]: field.value,
               }), {});
-              const { meta, dependencies } = rowSchema;
+              const { meta, dependencies } = sectionSchema;
               const { templateHbs } = meta;
-              const rowDependencies = {
+              const sectionDependencies = {
                 css: dependencies.filter((dependency) => dependency.endsWith('.css')),
                 js: dependencies.filter((dependency) => dependency.endsWith('.js')),
               };
 
-              if (rowDependencies.css.length > 0) {
-                cssDependencies.add(...rowDependencies.css);
+              if (sectionDependencies.css.length > 0) {
+                cssDependencies.add(...sectionDependencies.css);
               }
 
-              if (rowDependencies.js.length > 0) {
-                jsDependencies.add(...rowDependencies.js);
+              if (sectionDependencies.js.length > 0) {
+                jsDependencies.add(...sectionDependencies.js);
               }
 
-              const rowTemplate = {
+              const sectionTemplate = {
                 bricks: () => template.rowBricks({
-                  title: rowFieldsMap.title,
-                  bricks: rowFields.filter((field) => field.name.startsWith('brick')),
+                  title: sectionFieldsMap.title,
+                  bricks: sectionFields.filter((field) => field.name.startsWith('brick')),
                 }),
 
                 withImage: () => template.rowWithImage({
-                  title: rowFieldsMap.title,
-                  backgroundImageURL: rowFieldsMap.backgroundImageURL,
-                  description: rowFieldsMap.description,
+                  title: sectionFieldsMap.title,
+                  backgroundImageURL: sectionFieldsMap.backgroundImageURL,
+                  description: sectionFieldsMap.description,
                 }),
 
                 default: () => {
-                  this.logger.error(`ROW TEMPLATE "${templateHbs}" NOT FOUND`);
+                  this.logger.error(`SECTION TEMPLATE "${templateHbs}" NOT FOUND`);
                   return '';
                 },
               };
 
-              return (rowTemplate[templateHbs]() || rowTemplate.default());
+              return (sectionTemplate[templateHbs]() || sectionTemplate.default());
             })
             .join('');
 
@@ -83,7 +83,7 @@ module.exports = ({
             jsCode,
             title,
             description,
-            rows: rowsHtml,
+            sections: sectionsHtml,
           });
 
           return html;

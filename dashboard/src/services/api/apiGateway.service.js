@@ -51,8 +51,8 @@ module.exports = {
       {
         path: '/pages',
         aliases: {
-          'GET /': 'dashboard.listWebPages',
-          'GET /:id': 'dashboard.editWebPage',
+          'GET /': 'webPages.getListWebPages',
+          'GET /:id': 'webPages.editWebPage',
           'POST /': 'webPages.createWebPage',
           'POST /clone': 'webPages.cloneWebPage',
           'PUT /:id': 'webPages.updateWebPage',
@@ -77,14 +77,31 @@ module.exports = {
         }
       },
 
-      // ROWS
       {
-        path: '/rows',
+        path: '/redirects',
         aliases: {
-          'POST /': 'rows.createRow',
-          'PUT /:rowId': 'rows.updateRowFields',
-          'PUT /order/:rowId': 'rows.updateRowOrder',
-          'DELETE /:id': 'rows.deleteRow',
+          'POST /': 'webPages.addWebPageRedirect',
+          'DELETE /:redirectId': 'webPages.deleteWebPageRedirect',
+        },
+        authorization: false,
+        bodyParsers: {
+          json: true,
+          urlencoded: { extended: true }
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
+      },
+
+      // SECTIONS
+      {
+        path: '/sections',
+        aliases: {
+          'POST /': 'sections.createSection',
+          'PUT /:sectionId': 'sections.updateSectionFields',
+          'PUT /order/:sectionId': 'sections.updateSectionOrder',
+          'DELETE /:id': 'sections.deleteSection',
         },
         authorization: false,
         bodyParsers: {
@@ -101,7 +118,7 @@ module.exports = {
       {
         path: '/schemas',
         aliases: {
-          'GET /rows': 'schemas.getRowSchemas',
+          'GET /sections': 'schemas.getSectionSchemas',
           'GET /pages': 'schemas.getWebPageSchema',
         },
         authorization: false,
@@ -135,26 +152,11 @@ module.exports = {
       {
         path: '/publish',
         aliases: {
+          'GET /': 'webPages.listPublishedWebPages',
+          'GET /:id': 'webPages.getPublishedWebPage',
           'POST /': 'webPages.publishWebPage',
           'PUT /': 'webPages.updatePublishedWebPage',
           'DELETE /:id': 'webPages.unPublishWebPage',
-        },
-        authorization: false,
-        bodyParsers: {
-          json: true,
-          urlencoded: { extended: true }
-        },
-        onBeforeCall: (ctx, route, req, res) => {
-          ctx.meta.$responseType = 'application/json; charset=utf-8';
-          ctx.meta.userAgent = req.headers['user-agent'];
-        },
-      },
-
-      {
-        path: '/published',
-        aliases: {
-          'GET /': 'webPages.getAllPublishedPagesData',
-          'GET /:id': 'webPages.getPublishedPageData',
         },
         authorization: false,
         bodyParsers: {

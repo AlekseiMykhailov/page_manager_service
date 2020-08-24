@@ -9,7 +9,7 @@ import {
   colors,
 } from '@material-ui/core';
 import { Visibility, Delete, Publish } from '@material-ui/icons';
-import PageClone from './PageClone';
+import PageClone from './PageCloneControl';
 
 const useStyles = makeStyles((theme) => ({
   root: {

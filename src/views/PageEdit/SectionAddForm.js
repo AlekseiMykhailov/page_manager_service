@@ -53,11 +53,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function RowAddForm({
-  pageId, schemas, newRowOrder, getPageData
+function SectionAddForm({
+  pageId, schemas, newSectionOrder, getPageData
 }) {
-  const [selectedRowSchemaId, setSelectedRowSchemaId] = useState('');
-  const [selectedRowSchema, setSelectedRowSchema] = useState();
+  const [selectedSectionSchemaId, setSelectedSectionSchemaId] = useState('');
+  const [selectedSectionSchema, setSelectedSectionSchema] = useState();
   const [setStatusMessage] = useStatusMessage();
 
   const classes = useStyles();
@@ -67,12 +67,12 @@ function RowAddForm({
     e.preventDefault();
 
     FETCH.postData(
-      `${API_URL}/rows`,
-      selectedRowSchema,
+      `${API_URL}/sections`,
+      selectedSectionSchema,
     ).then((response) => {
       if (response.ok) {
-        setSelectedRowSchemaId('');
-        setSelectedRowSchema('');
+        setSelectedSectionSchemaId('');
+        setSelectedSectionSchema('');
         getPageData();
       }
 
@@ -83,9 +83,9 @@ function RowAddForm({
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    setSelectedRowSchema({
-      ...selectedRowSchema,
-      fields: [...selectedRowSchema.fields].map((field) => {
+    setSelectedSectionSchema({
+      ...selectedSectionSchema,
+      fields: [...selectedSectionSchema.fields].map((field) => {
         if (field.name === name) {
           return {
             ...field,
@@ -98,13 +98,13 @@ function RowAddForm({
     });
   };
 
-  const handleSelectRowSchema = (e) => {
+  const handleSelectSectionSchema = (e) => {
     const { value } = e.target;
-    const selectedSchema = { ...schemas.find((rowSchema) => rowSchema.id === value) };
+    const selectedSchema = { ...schemas.find((sectionSchema) => sectionSchema.id === value) };
 
     selectedSchema.schemaId = selectedSchema.id;
     selectedSchema.webPageId = pageId;
-    selectedSchema.order = newRowOrder;
+    selectedSchema.order = newSectionOrder;
     selectedSchema.fields = selectedSchema.fields.map((field) => ({
       ...field,
       value: '',
@@ -112,13 +112,13 @@ function RowAddForm({
 
     delete selectedSchema.id;
 
-    setSelectedRowSchemaId(value);
-    setSelectedRowSchema(selectedSchema);
+    setSelectedSectionSchemaId(value);
+    setSelectedSectionSchema(selectedSchema);
   };
 
   const addField = () => {
-    const clonableField = selectedRowSchema.fields.find((field) => field.clonable);
-    const sortedFields = selectedRowSchema.fields.sort((a, b) => a.order - b.order);
+    const clonableField = selectedSectionSchema.fields.find((field) => field.clonable);
+    const sortedFields = selectedSectionSchema.fields.sort((a, b) => a.order - b.order);
     const lastOrder = sortedFields[sortedFields.length - 1].order;
     const newField = {
       ...clonableField,
@@ -126,12 +126,12 @@ function RowAddForm({
       order: lastOrder + 1,
       value: '',
     };
-    const updatedRowSchema = {
-      ...selectedRowSchema,
-      fields: [...selectedRowSchema.fields, newField],
+    const updatedSectionSchema = {
+      ...selectedSectionSchema,
+      fields: [...selectedSectionSchema.fields, newField],
     };
 
-    setSelectedRowSchema(updatedRowSchema);
+    setSelectedSectionSchema(updatedSectionSchema);
   };
 
   return (
@@ -149,19 +149,19 @@ function RowAddForm({
             variant="h4"
             className={classes.heading}
           >
-            {selectedRowSchemaId
-              ? `Add New ${(schemas.length > 0) && schemas.find((rowSchema) => rowSchema.id === selectedRowSchemaId).meta.title}`
+            {selectedSectionSchemaId
+              ? `Add New ${(schemas.length > 0) && schemas.find((sectionSchema) => sectionSchema.id === selectedSectionSchemaId).meta.title}`
               : 'Add New Section'}
           </Typography>
         </Grid>
         <Grid item>
           <FormControl variant="outlined" className={classes.formControl}>
-            <InputLabel id="new-row-schema-label">Section Type</InputLabel>
+            <InputLabel id="new-section-schema-label">Section Type</InputLabel>
             <Select
-              labelId="new-row-schema-label"
-              id="new-row-schema"
-              value={selectedRowSchemaId}
-              onChange={handleSelectRowSchema}
+              labelId="new-section-schema-label"
+              id="new-section-schema"
+              value={selectedSectionSchemaId}
+              onChange={handleSelectSectionSchema}
               label="Section Schema"
               fullWidth
             >
@@ -175,37 +175,37 @@ function RowAddForm({
         </Grid>
       </Grid>
 
-      {selectedRowSchema && (
+      {selectedSectionSchema && (
       <form
-        id="new-row"
-        action={`${API_URL}/rows`}
+        id="new-section"
+        action={`${API_URL}/sections`}
         noValidate
         autoComplete="off"
         onSubmit={handleSubmit}
         className={classes.form}
-        key="new-row"
+        key="new-section"
       >
         <div className={classes.hidden}>
           <TextField
-            id="new-row-webPageId"
+            id="new-section-webPageId"
             name="webPageId"
             type="hidden"
             value={pageId}
           />
           <TextField
-            id="new-row-schemaId"
+            id="new-section-schemaId"
             name="order"
             type="hidden"
-            value={selectedRowSchemaId}
+            value={selectedSectionSchemaId}
           />
           <TextField
-            id="new-row-order"
+            id="new-section-order"
             name="order"
             type="hidden"
-            value={newRowOrder}
+            value={newSectionOrder}
           />
         </div>
-        {selectedRowSchema.fields.map(({ name, label, type, value }) => (
+        {selectedSectionSchema.fields.map(({ name, label, type, value }) => (
           <TextField
             fullWidth
             id={name}
@@ -219,7 +219,7 @@ function RowAddForm({
             key={name}
           />
         ))}
-        {selectedRowSchema.fields.some((field) => field.clonable) && (
+        {selectedSectionSchema.fields.some((field) => field.clonable) && (
           <Fab
             color="primary"
             aria-label="add"
@@ -261,11 +261,11 @@ function RowAddForm({
   );
 }
 
-RowAddForm.propTypes = {
+SectionAddForm.propTypes = {
   pageId: PropTypes.number.isRequired,
   schemas: PropTypes.array.isRequired,
-  newRowOrder: PropTypes.number.isRequired,
+  newSectionOrder: PropTypes.number.isRequired,
   getPageData: PropTypes.func,
 };
 
-export default RowAddForm;
+export default SectionAddForm;

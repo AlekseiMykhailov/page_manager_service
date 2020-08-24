@@ -71,7 +71,7 @@ function Pages() {
 
     FETCH.getData(`${API_URL}/pages`)
       .then((response) => { pageList = response.pages; })
-      .then(() => FETCH.getData(`${API_URL}/published`))
+      .then(() => FETCH.getData(`${API_URL}/publish`))
       .then((published) => {
         const pagesWithPublishData = pageList.map((page) => {
           const publishedPageData = published.pages.find((publishedPage) => (

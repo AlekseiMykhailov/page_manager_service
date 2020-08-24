@@ -2,7 +2,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Field', [
       {
-        rowId: 1,
+        sectionId: 1,
         name: 'title',
         label: 'Title',
         type: 'text',
@@ -12,7 +12,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 1,
+        sectionId: 1,
         name: 'description',
         label: 'Description',
         type: 'text',
@@ -22,7 +22,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 1,
+        sectionId: 1,
         name: 'backgroundImageURL',
         label: 'Background Image URL',
         type: 'url',
@@ -33,7 +33,7 @@ module.exports = {
       },
 
       {
-        rowId: 2,
+        sectionId: 2,
         name: 'title',
         label: 'Title',
         type: 'text',
@@ -43,7 +43,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 2,
+        sectionId: 2,
         name: 'brick-1',
         label: 'Block',
         type: 'text',
@@ -53,7 +53,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 2,
+        sectionId: 2,
         name: 'brick-2',
         label: 'Block',
         type: 'text',
@@ -63,7 +63,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 2,
+        sectionId: 2,
         name: 'brick-3',
         label: 'Block',
         type: 'text',
@@ -73,7 +73,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 2,
+        sectionId: 2,
         name: 'brick-4',
         label: 'Block',
         type: 'text',
@@ -83,7 +83,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 2,
+        sectionId: 2,
         name: 'brick-5',
         label: 'Block',
         type: 'text',
@@ -93,7 +93,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 2,
+        sectionId: 2,
         name: 'brick-6',
         label: 'Block',
         type: 'text',
@@ -104,7 +104,7 @@ module.exports = {
       },
 
       {
-        rowId: 3,
+        sectionId: 3,
         name: 'title',
         label: 'Title',
         type: 'text',
@@ -114,7 +114,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 3,
+        sectionId: 3,
         name: 'description',
         label: 'Description',
         type: 'text',
@@ -124,7 +124,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 3,
+        sectionId: 3,
         name: 'backgroundImageURL',
         label: 'Background Image URL',
         type: 'url',
@@ -135,7 +135,7 @@ module.exports = {
       },
 
       {
-        rowId: 4,
+        sectionId: 4,
         name: 'title',
         label: 'Title',
         type: 'text',
@@ -145,7 +145,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 4,
+        sectionId: 4,
         name: 'brick-1',
         label: 'Block',
         type: 'text',
@@ -155,7 +155,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 4,
+        sectionId: 4,
         name: 'brick-2',
         label: 'Block',
         type: 'text',
@@ -165,7 +165,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 4,
+        sectionId: 4,
         name: 'brick-3',
         label: 'Block',
         type: 'text',
@@ -175,7 +175,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 4,
+        sectionId: 4,
         name: 'brick-4',
         label: 'Block',
         type: 'text',
@@ -185,7 +185,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 4,
+        sectionId: 4,
         name: 'brick-5',
         label: 'Block',
         type: 'text',
@@ -195,7 +195,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 4,
+        sectionId: 4,
         name: 'brick-6',
         label: 'Block',
         type: 'text',
@@ -206,7 +206,7 @@ module.exports = {
       },
 
       {
-        rowId: 5,
+        sectionId: 5,
         name: 'title',
         label: 'Title',
         type: 'text',
@@ -216,7 +216,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 5,
+        sectionId: 5,
         name: 'description',
         label: 'Description',
         type: 'text',
@@ -226,7 +226,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 5,
+        sectionId: 5,
         name: 'backgroundImageURL',
         label: 'Background Image URL',
         type: 'url',
@@ -237,7 +237,7 @@ module.exports = {
       },
 
       {
-        rowId: 6,
+        sectionId: 6,
         name: 'title',
         label: 'Title',
         type: 'text',
@@ -247,7 +247,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 6,
+        sectionId: 6,
         name: 'brick-1',
         label: 'Block',
         type: 'text',
@@ -257,7 +257,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 6,
+        sectionId: 6,
         name: 'brick-2',
         label: 'Block',
         type: 'text',
@@ -267,7 +267,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 6,
+        sectionId: 6,
         name: 'brick-3',
         label: 'Block',
         type: 'text',
@@ -277,7 +277,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        rowId: 6,
+        sectionId: 6,
         name: 'brick-4',
         label: 'Block',
         type: 'text',
