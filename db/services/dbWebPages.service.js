@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const db = require('../models');
 const Rest = require('../mixins/rest');
 
@@ -110,6 +111,29 @@ module.exports = {
           })
           .then((data) => ({ ok: true, data }))
           .catch((error) => ({ ok: false, error }));
+      },
+    },
+
+    numberWebPagesWithSlug: {
+      params: {
+        domainId: 'number',
+        slug: 'string',
+      },
+      handler(ctx) {
+        const { domainId, slug } = ctx.params;
+
+        return this.settings.model.count({
+          where: {
+            domainId,
+            slug: {
+              [Op.endsWith]: slug,
+            },
+          }
+        }, { paranoid: false }) // TODO: deleted pages not counting, fix it
+          .catch((error) => {
+            this.logger.error('ERROR: ', error);
+            return { ok: false, error };
+          });
       },
     },
 

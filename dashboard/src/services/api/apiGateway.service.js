@@ -32,9 +32,27 @@ module.exports = {
       {
         path: '/domains',
         aliases: {
-          'GET /:domain': 'domainSettings.getDomainSettings',
           'GET /': 'domainSettings.getDomains',
+          'GET /:id': 'domainSettings.getDomainSettingsByDomainId',
           'PUT /': 'domainSettings.setDomainSettings',
+        },
+        authorization: false,
+        bodyParsers: {
+          json: true,
+          urlencoded: { extended: true }
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
+      },
+
+      // ALIASES
+      {
+        path: '/aliases',
+        aliases: {
+          'POST /': 'domainSettings.addDomainAlias',
+          'DELETE /:id': 'domainSettings.deleteDomainAlias',
         },
         authorization: false,
         bodyParsers: {

@@ -6,10 +6,10 @@ const broker = new ServiceBroker();
 broker.createService(ApiService);
 
 module.exports = {
-  name: 'apiGatewaySecond',
+  name: 'deliveryHTTP',
   mixins: [ApiService],
   settings: {
-    port: 5002,
+    port: 80,
     cors: {
       origin: ['*'],
       methods: ['GET'],
@@ -21,23 +21,30 @@ module.exports = {
       {
         path: '/',
         aliases: {
-          'GET /': function (req, res) {
+          'GET /': async function (req, res) {
             const domain = req.headers.host;
+            const alias = await this.broker.call('publish.checkAlias', { domain });
+
+            if (alias.ok) {
+              res.writeHead(301, { Location: `http://${alias.domain}` });
+              res.end();
+            }
 
             return this.broker.call('publish.getPublishedPageHTML', { domain })
               .then((html) => res.end(html))
-              .catch((error) => { this.logger.info('ERROR: ', error); });
+              .catch((error) => { this.logger.error('ERROR: ', error); });
           },
 
           'GET /:slug': async function (req, res) {
             const domain = req.headers.host;
             const { slug } = req.$params;
-            const redirect = await this.broker.call('publish.checkRedirect', {
-              domain,
-              slug,
-            });
+            const alias = await this.broker.call('publish.checkAlias', { domain });
+            const redirect = await this.broker.call('publish.checkRedirect', { domain, slug });
 
-            if (redirect.ok) {
+            if (alias.ok) {
+              res.writeHead(301, { Location: `http://${alias.domain}/${slug}` });
+              res.end();
+            } else if (redirect.ok) {
               res.writeHead(301, { Location: redirect.slug });
               res.end();
             }
@@ -48,7 +55,7 @@ module.exports = {
                   res.end(response);
                 }
               })
-              .catch((error) => { this.logger.info('ERROR SLUG: ', error); });
+              .catch((error) => { this.logger.error('ERROR: ', error); });
           },
         },
         bodyParsers: {

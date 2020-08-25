@@ -8,6 +8,7 @@ const Section = require('./Section');
 const Field = require('./Field');
 const PublishedPage = require('./PublishedPage');
 const Redirect = require('./Redirect');
+const Alias = require('./Alias');
 
 const db = {};
 
@@ -28,6 +29,7 @@ db.Field = Field(sequelize, Sequelize);
 db.PublishedPage = PublishedPage(sequelize, Sequelize);
 db.DomainSettings = DomainSettings(sequelize, Sequelize);
 db.Redirect = Redirect(sequelize, Sequelize);
+db.Alias = Alias(sequelize, Sequelize);
 
 db.WebPage.hasMany(db.Section, { foreignKey: 'webPageId' });
 db.WebPage.hasMany(db.PublishedPage, { foreignKey: 'webPageId' });
@@ -42,8 +44,11 @@ db.Field.belongsTo(db.Section, { foreignKey: 'sectionId' });
 db.PublishedPage.belongsTo(db.WebPage, { foreignKey: 'webPageId' });
 
 db.DomainSettings.belongsTo(db.WebPage, { foreignKey: 'homePageId' });
+db.Alias.hasMany(db.DomainSettings, { foreignKey: 'id' });
 
 db.Redirect.belongsTo(db.WebPage, { foreignKey: 'webPageId' });
+
+db.Alias.belongsTo(db.DomainSettings, { foreignKey: 'domainId' });
 
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {

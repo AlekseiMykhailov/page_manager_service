@@ -33,7 +33,7 @@ function PageHeader({
         </Typography>
       </Box>
       <Typography variant="h1">
-        {title}
+        {`${title} `}
         {link && (
           <a
             href={link}

@@ -106,10 +106,10 @@ module.exports = ({
             });
         }
 
-        return this.broker.call('dbDomainSettings.getDomainSettings', { domain })
-          .then((domainSettings) => {
-            const { webPageId } = domainSettings;
-            return this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId });
+        return this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain })
+          .then(({ domainSettings }) => {
+            const { homePageId } = domainSettings;
+            return this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId: homePageId });
           })
           .then((res) => ((res.ok) ? res.data.html : res))
           .catch((err) => {
@@ -151,7 +151,7 @@ module.exports = ({
 
         return this.broker.call('dbRedirects.getWebPageRedirectsBySlug', { domain, slug })
           .then((response) => {
-            if (response.ok) {
+            if (response && response.ok) {
               return this.broker.call('dbWebPages.getWebPageById', { id: response.redirect.dataValues.webPageId });
             }
           })
@@ -159,10 +159,36 @@ module.exports = ({
             if (webPage) {
               return { ok: true, slug: webPage.data.slug };
             }
-
             return { ok: false };
+          })
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return { ok: false, error: err };
           });
       },
     },
-  }
+
+    checkAlias: {
+      handler(ctx) {
+        const { domain } = ctx.params;
+
+        return this.broker.call('dbAliases.getMainDomainId', { domainAlias: domain })
+          .then((response) => {
+            if (response && response.ok) {
+              return this.broker.call('dbDomainSettings.getDomainSettingsByDomainId', { id: response.domainId });
+            }
+          })
+          .then((response) => {
+            if (response && response.ok) {
+              return { ok: true, domain: response.domainSettings.domain };
+            }
+            return { ok: false };
+          })
+          .catch((err) => {
+            this.logger.error('ERROR: ', err);
+            return { ok: false, error: err };
+          });
+      },
+    },
+  },
 });

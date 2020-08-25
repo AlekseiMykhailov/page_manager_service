@@ -290,28 +290,20 @@ module.exports = ({
         const cloneData = {};
 
         return this.broker.call('dbWebPages.getWebPageById', { id: cloningWebPageId })
-          .then((response) => {
+          .then(async (response) => {
             const {
               title, slug, description, domainId
             } = response.data;
-            const toSameDomain = domainId === toDomainId;
+            const toSameDomain = (domainId === toDomainId);
+            const number = await this.broker.call('dbWebPages.numberWebPagesWithSlug', { domainId, slug });
 
             cloneData.webPage = {
-              title: (toSameDomain) ? `${title}-copy` : title,
-              slug: (toSameDomain) ? `${slug}-copy` : slug,
+              title: (toSameDomain) ? `Copy ${number} of ${title}` : title,
+              slug: (toSameDomain) ? `copy-${number}-of-${slug}` : slug,
               domainId: toDomainId,
               domain: toDomain,
               description,
             };
-          })
-          .then(() => this.broker.call('dbWebPages.checkWebPageBySlug', {
-            domain: cloneData.webPage.domain,
-            slug: cloneData.webPage.slug,
-          }))
-          .then((res) => {
-            if (res.ok) {
-              cloneData.webPage.slug += `-${v4()}`;
-            }
           })
           .then(() => this.broker.call('webPages.createWebPage', cloneData.webPage))
           .then((response) => {
@@ -340,14 +332,19 @@ module.exports = ({
           .then((sectionIds) => this.broker.call('dbFields.getFieldsBySectionId', { sectionIds }))
           .then(({ fields }) => fields.map(({
             sectionId, name, label, type, order, value
-          }) => ({
-            sectionId: cloneData.sections.find((section) => section.donorSectionId === sectionId).id,
-            name,
-            label,
-            type,
-            order,
-            value,
-          })))
+          }) => {
+            const newSection = cloneData.sections.find((section) => section.donorSectionId === sectionId);
+            if (newSection) {
+              return {
+                sectionId: newSection.id,
+                name,
+                label,
+                type,
+                order,
+                value,
+              };
+            }
+          }))
           .then((fields) => this.broker.call('dbFields.bulkCreateFields', { fields }))
           .then(() => JSON.stringify({ ok: true, id: cloneData.webPageId }, null, 2))
           .catch((err) => {

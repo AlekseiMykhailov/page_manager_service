@@ -21,6 +21,11 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(3),
   },
+  item: {
+    '&:hover': {
+      backgroundColor: theme.palette.common.white,
+    },
+  },
   form: {
     width: '100%',
     boxSizing: 'border-box',
@@ -31,30 +36,31 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function RedirectControls({
+function DomainAliasesControl({
   className,
-  redirectsData,
-  handleAddRedirect,
-  handleDeleteRedirect,
+  aliases,
+  handleAddAlias,
+  handleDeleteAlias,
 
 }) {
   const classes = useStyles();
   const API_URL = process.env.REACT_APP_API_URL;
-  const [redirectSlug, setRedirectSlug] = useState('');
+  const [domainAlias, setDomainAlias] = useState('');
 
   const handleChange = (e) => {
     const { value } = e.target;
-    const pattern = new RegExp('[^A-Za-z0-9-]', 'g');
+    const pattern = new RegExp('[^A-Za-z0-9-_.]', 'g');
 
-    setRedirectSlug(value.replace(pattern, ''));
+    setDomainAlias(value.replace(pattern, ''));
   };
 
-  const handleSubmit = () => {
-    if (!redirectSlug) {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!domainAlias) {
       return;
     }
-    handleAddRedirect(redirectSlug);
-    setRedirectSlug('');
+    handleAddAlias(domainAlias);
+    setDomainAlias('');
   };
 
   return (
@@ -66,12 +72,12 @@ function RedirectControls({
       >
         Page Redirects
       </Typography>
-      <List dense aria-label="page redirects">
-        {redirectsData.length > 0 && redirectsData.map((redirect) => (
-          <ListItem key={redirect.id}>
-            <ListItemText primary={redirect.slug} />
-            <ListItemSecondaryAction onClick={handleDeleteRedirect} data-redirect-id={redirect.id}>
-              <IconButton edge="end" aria-label="delete redirect">
+      <List aria-label="domain aliases" className={classes.list}>
+        {aliases.length > 0 && aliases.map((alias) => (
+          <ListItem key={alias.id} className={classes.item}>
+            <ListItemText primary={alias.domainAlias} />
+            <ListItemSecondaryAction onClick={handleDeleteAlias} data-alias-id={alias.id}>
+              <IconButton edge="end" aria-label="delete alias">
                 <Delete />
               </IconButton>
             </ListItemSecondaryAction>
@@ -80,21 +86,21 @@ function RedirectControls({
         <ListItem key="form-add-line" className={classes.noPaddingLeft}>
           <form
             className={classes.form}
-            id="add-redirect-form"
-            action={`${API_URL}/redirects`}
+            id="add-alias-form"
+            action={`${API_URL}/aliases`}
             noValidate
             autoComplete="off"
             onSubmit={handleSubmit}
           >
             <TextField
               fullWidth
-              id="add-redirect-field"
-              label="Redirect Slug"
+              id="add-domain-alias"
+              label="Domain Alias"
               margin="normal"
-              name="redirect-slug"
+              name="domain-alias"
               type="text"
               variant="outlined"
-              value={redirectSlug}
+              value={domainAlias}
               onChange={handleChange}
             />
             <ListItemSecondaryAction onClick={handleSubmit}>
@@ -110,11 +116,11 @@ function RedirectControls({
   );
 }
 
-RedirectControls.propTypes = {
+DomainAliasesControl.propTypes = {
   className: PropTypes.string,
-  redirectsData: PropTypes.array,
-  handleAddRedirect: PropTypes.func,
-  handleDeleteRedirect: PropTypes.func,
+  aliases: PropTypes.array,
+  handleAddAlias: PropTypes.func,
+  handleDeleteAlias: PropTypes.func,
 };
 
-export default RedirectControls;
+export default DomainAliasesControl;

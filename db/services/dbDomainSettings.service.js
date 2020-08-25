@@ -53,7 +53,25 @@ module.exports = {
       }
     },
 
-    getDomainSettings: {
+    getDomainSettingsByDomainId: {
+      params: {
+        id: 'number',
+      },
+      handler(ctx) {
+        const { id } = ctx.params;
+
+        return this.settings.model.findOne({
+          where: { id },
+        })
+          .then(async (response) => ({
+            ok: true,
+            domainSettings: response.dataValues,
+          }))
+          .catch((error) => ({ ok: false, error }));
+      },
+    },
+
+    getDomainSettingsByDomainName: {
       params: {
         domain: 'string',
       },
@@ -63,7 +81,10 @@ module.exports = {
         return this.settings.model.findOne({
           where: { domain },
         })
-          .then((response) => ({ ok: true, webPageId: response.dataValues.homePageId }))
+          .then(async (response) => ({
+            ok: true,
+            domainSettings: response.dataValues,
+          }))
           .catch((error) => ({ ok: false, error }));
       },
     },

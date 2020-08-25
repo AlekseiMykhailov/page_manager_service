@@ -10,7 +10,8 @@ import {
 } from '@material-ui/core';
 import Page from 'src/components/Page';
 import PageHeader from 'src/components/PageHeader';
-import FormDomainSettings from '../../components/FormDomainSettings';
+import FormDomainSettings from 'src/components/FormDomainSettings';
+import DomainAliasesControl from './DomainAliassesControl';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,14 +23,23 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(3)
   },
+  form: {
+    width: '100%',
+    boxSizing: 'border-box',
+    marginRight: theme.spacing(5),
+  },
+  noPaddingLeft: {
+    paddingLeft: 0,
+  },
 }));
 
 function DomainsSettings() {
   const classes = useStyles();
-  const [setStatusMessage] = useStatusMessage();
   const API_URL = process.env.REACT_APP_API_URL;
   const { domainId } = useParams();
+  const [setStatusMessage] = useStatusMessage();
   const [currentDomain, setCurrentDomain] = useState();
+  const [domainAliases, setDomainAliases] = useState();
   const [domainFieldsData, setDomainFieldsData] = useState({});
   const fields = Object.values(domainFieldsData);
 
@@ -37,16 +47,15 @@ function DomainsSettings() {
     let pagesList = [];
     let homePageId;
 
-    FETCH.getData(`${API_URL}/domains`)
-      .then((response) => {
-        const domainData = response.domains.find((domain) => domain.id === +domainId);
-
-        homePageId = domainData.homePageId;
-        setCurrentDomain(domainData);
+    FETCH.getData(`${API_URL}/domains/${domainId}`)
+      .then((domainData) => {
+        homePageId = domainData.settings.homePageId;
+        setCurrentDomain(domainData.settings);
+        setDomainAliases(domainData.aliases);
       })
       .then(() => FETCH.getData(`${API_URL}/pages`))
       .then((response) => { pagesList = response.pages; })
-      .then(() => FETCH.getData(`${API_URL}/published`))
+      .then(() => FETCH.getData(`${API_URL}/publish`))
       .then((published) => {
         pagesList = pagesList.filter((page) => {
           const isPublished = published.pages.some((publishedPage) => (
@@ -102,6 +111,35 @@ function DomainsSettings() {
       .then((response) => setStatusMessage(response, fetchData, 'Domain settings was changed'));
   };
 
+  const handleAddAlias = (domainAlias) => {
+    const aliasData = {
+      domainId: +domainId,
+      domainAlias,
+    };
+
+    FETCH.postData(`${API_URL}/aliases`, { aliasData })
+      .then((response) => {
+        setStatusMessage(response, fetchData, 'Alias was added');
+
+        if (response.ok) {
+          fetchData();
+        }
+      });
+  };
+
+  const handleDeleteAlias = (e) => {
+    const { aliasId } = e.currentTarget.dataset;
+
+    FETCH.deleteData(`${API_URL}/aliases/${aliasId}`)
+      .then((response) => {
+        setStatusMessage(response, fetchData, 'Alias was deleted');
+
+        if (response.ok) {
+          fetchData();
+        }
+      });
+  };
+
   return (
     <Page
       className={classes.root}
@@ -122,6 +160,13 @@ function DomainsSettings() {
             fields={fields}
             handleChange={handleChange}
             handleSubmit={handleSubmit}
+          />
+        )}
+        {domainAliases && (
+          <DomainAliasesControl
+            aliases={domainAliases}
+            handleAddAlias={handleAddAlias}
+            handleDeleteAlias={handleDeleteAlias}
           />
         )}
       </Container>

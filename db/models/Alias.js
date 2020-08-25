@@ -1,23 +1,20 @@
 module.exports = (sequelize, DataTypes) => {
-  const DomainSettings = sequelize.define('DomainSettings', {
+  const Alias = sequelize.define('Alias', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    domain: {
+    domainAlias: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    name: {
-      type: DataTypes.STRING,
-    },
-    homePageId: {
+    domainId: {
       type: DataTypes.INTEGER,
       references: {
         model: {
-          tableName: 'webpage',
+          tableName: 'domainSettings',
         },
         key: 'id',
       },
@@ -35,14 +32,14 @@ module.exports = (sequelize, DataTypes) => {
     indexes: [
       {
         unique: true,
-        fields: ['domain'],
+        fields: ['aliasDomain'],
       }
     ],
   });
 
-  DomainSettings.associate = function(models) {
+  Alias.associate = function(models) {
     // associations can be defined here
   };
 
-  return DomainSettings;
+  return Alias;
 };

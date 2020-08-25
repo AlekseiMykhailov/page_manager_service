@@ -2,14 +2,14 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('DomainSettings', [
       {
-        domain: 'localhost:5001',
+        domain: 'jobeasy.loc',
         name: 'JobEasy',
         homePageId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        domain: 'localhost:5002',
+        domain: 'careerist.loc',
         name: 'Careerist',
         homePageId: 3,
         createdAt: new Date(),

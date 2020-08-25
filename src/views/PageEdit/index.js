@@ -16,7 +16,7 @@ import * as FETCH from 'src/utils/fetch';
 import PageEditForm from 'src/components/WebPage/PageEditForm';
 import PageEditHeader from './PageEditHeader';
 import PageEditButtons from './PageEditButtons';
-import RedirectControls from './RedirectControls';
+import PageRedirectControl from './PageRedirectControl';
 import SectionEditForm from './SectionEditForm';
 import SectionAddForm from './SectionAddForm';
 
@@ -387,7 +387,7 @@ function PageEdit() {
             )}
 
             {pageData && (
-              <RedirectControls
+              <PageRedirectControl
                 redirectsData={redirectsData}
                 handleAddRedirect={handleAddRedirect}
                 handleDeleteRedirect={handleDeleteRedirect}

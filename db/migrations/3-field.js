@@ -15,6 +15,7 @@ module.exports = {
         },
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     name: {
       type: DataTypes.STRING,
