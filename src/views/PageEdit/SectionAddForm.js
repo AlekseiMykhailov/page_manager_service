@@ -12,6 +12,7 @@ import {
   Grid,
   FormControl,
   MenuItem,
+  Paper,
   Select,
   TextField,
   Typography,
@@ -32,6 +33,17 @@ const useStyles = makeStyles((theme) => ({
     '& > *': {
       margin: theme.spacing(1),
     },
+  },
+  fieldset: {
+    position: 'relative',
+    width: '100%',
+    padding: theme.spacing(2),
+    borderRadius: '4px',
+    borderColor: theme.palette.common.black[100],
+  },
+  legend: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
   },
   divider: {
     height: '4px',
@@ -56,12 +68,21 @@ const useStyles = makeStyles((theme) => ({
 function SectionAddForm({
   pageId, schemas, newSectionOrder, getPageData
 }) {
-  const [selectedSectionSchemaId, setSelectedSectionSchemaId] = useState('');
-  const [selectedSectionSchema, setSelectedSectionSchema] = useState();
   const [setStatusMessage] = useStatusMessage();
+  const [selectedSectionSchemaName, setSelectedSectionSchemaName] = useState('');
+  const [selectedSectionSchema, setSelectedSectionSchema] = useState();
+  const [sectionData, setSectionData] = useState({
+    schema: '',
+    webPageId: pageId,
+    order: newSectionOrder,
+    fields: [],
+    fieldsets: [],
+  });
 
   const classes = useStyles();
   const API_URL = process.env.REACT_APP_API_URL;
+
+  console.log(sectionData);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -71,7 +92,7 @@ function SectionAddForm({
       selectedSectionSchema,
     ).then((response) => {
       if (response.ok) {
-        setSelectedSectionSchemaId('');
+        setSelectedSectionSchemaName('');
         setSelectedSectionSchema('');
         getPageData();
       }
@@ -100,20 +121,27 @@ function SectionAddForm({
 
   const handleSelectSectionSchema = (e) => {
     const { value } = e.target;
-    const selectedSchema = { ...schemas.find((sectionSchema) => sectionSchema.id === value) };
+    const selectedSchema = { ...schemas.find((sectionSchema) => sectionSchema.name === value) };
 
-    selectedSchema.schemaId = selectedSchema.id;
-    selectedSchema.webPageId = pageId;
-    selectedSchema.order = newSectionOrder;
-    selectedSchema.fields = selectedSchema.fields.map((field) => ({
-      ...field,
-      value: '',
-    }));
-
-    delete selectedSchema.id;
-
-    setSelectedSectionSchemaId(value);
+    setSelectedSectionSchemaName(value);
     setSelectedSectionSchema(selectedSchema);
+
+    setSectionData({
+      ...sectionData,
+      schema: value,
+      fields: selectedSchema.fields,
+      fieldsets: selectedSchema.fieldsets.map((fieldset) => ({
+        ...fieldset,
+        itemFields: fieldset.itemFields.map((itemField) => ({
+          ...itemField,
+          name: itemField.name.replace('.', `[${fieldset.itemQty}].`)
+        }))
+      })),
+    });
+  };
+
+  const addFieldSet = (fieldsetName) => {
+
   };
 
   const addField = () => {
@@ -149,8 +177,8 @@ function SectionAddForm({
             variant="h4"
             className={classes.heading}
           >
-            {selectedSectionSchemaId
-              ? `Add New ${(schemas.length > 0) && schemas.find((sectionSchema) => sectionSchema.id === selectedSectionSchemaId).meta.title}`
+            {selectedSectionSchemaName
+              ? `Add New ${(schemas.length > 0) && schemas.find((sectionSchema) => sectionSchema.name === selectedSectionSchemaName).title}`
               : 'Add New Section'}
           </Typography>
         </Grid>
@@ -160,14 +188,14 @@ function SectionAddForm({
             <Select
               labelId="new-section-schema-label"
               id="new-section-schema"
-              value={selectedSectionSchemaId}
+              value={selectedSectionSchemaName}
               onChange={handleSelectSectionSchema}
-              label="Section Schema"
+              label="Section Type"
               fullWidth
             >
               {schemas.map((schema) => (
-                <MenuItem value={schema.id} key={schema.id}>
-                  {schema.meta.title}
+                <MenuItem value={schema.name} key={schema.name}>
+                  {schema.title}
                 </MenuItem>
               ))}
             </Select>
@@ -193,10 +221,10 @@ function SectionAddForm({
             value={pageId}
           />
           <TextField
-            id="new-section-schemaId"
+            id="new-section-name"
             name="order"
             type="hidden"
-            value={selectedSectionSchemaId}
+            value={selectedSectionSchemaName}
           />
           <TextField
             id="new-section-order"
@@ -205,11 +233,13 @@ function SectionAddForm({
             value={newSectionOrder}
           />
         </div>
-        {selectedSectionSchema.fields.map(({ name, label, type, value }) => (
+        {selectedSectionSchema.fields.map(({
+          name, description, type, value
+        }) => (
           <TextField
             fullWidth
             id={name}
-            label={label}
+            label={description}
             margin="normal"
             name={name}
             type={type}
@@ -219,6 +249,7 @@ function SectionAddForm({
             key={name}
           />
         ))}
+
         {selectedSectionSchema.fields.some((field) => field.clonable) && (
           <Fab
             color="primary"
@@ -229,6 +260,40 @@ function SectionAddForm({
             <AddIcon />
           </Fab>
         )}
+
+        {selectedSectionSchema.fieldsets.map((fieldset) => (
+          <Paper
+            variant="outlined"
+            className={classes.fieldset}
+            key={fieldset.name}
+          >
+            <Typography variant="h5">
+              {fieldset.title}
+            </Typography>
+            {fieldset.itemFields.map((itemField) => (
+              <TextField
+                fullWidth
+                id={itemField.name}
+                label={itemField.description}
+                margin="normal"
+                name={itemField.name}
+                type={itemField.type}
+                variant="outlined"
+                value={itemField.value}
+                onChange={handleInputChange}
+                key={itemField.name}
+              />
+            ))}
+            <Fab
+              color="primary"
+              aria-label="add fieldset"
+              className={classes.fab}
+              onClick={() => addFieldSet(fieldset.name)}
+            >
+              <AddIcon />
+            </Fab>
+          </Paper>
+        ))}
         <Grid
           container
           direction="row"

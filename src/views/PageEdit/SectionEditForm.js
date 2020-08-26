@@ -60,15 +60,17 @@ function SectionEditForm({
   handleDelete,
   handleAddField,
 }) {
-  const { id, fields, schemaId } = section;
+  const { id, fields, name } = section;
   const sortedFields = fields.sort((a, b) => a.order - b.order);
   const fieldsMap = sortedFields.reduce((map, field) => ({
     ...map,
     [field.name]: field.value,
   }), {});
-  const schema = schemas.find((sectionSchema) => sectionSchema.id === schemaId);
+  const currentSchema = schemas.find((schema) => schema.name === name);
   const API_URL = process.env.REACT_APP_API_URL;
   const classes = useStyles();
+
+  
 
   return (
     <>
@@ -93,7 +95,7 @@ function SectionEditForm({
               gutterBottom
               variant="h4"
             >
-              {schema && schema.meta.title}
+              {currentSchema && currentSchema.title}
             </Typography>
           </Grid>
           <Grid item>
@@ -136,7 +138,7 @@ function SectionEditForm({
             key={name}
           />
         ))}
-        {schema && schema.fields.some((field) => field.clonable) && (
+        {currentSchema && currentSchema.fields.some((field) => field.clonable) && (
           <Fab
             data-section-id={id}
             color="primary"
@@ -183,11 +185,7 @@ function SectionEditForm({
 }
 
 SectionEditForm.propTypes = {
-  section: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    schemaId: PropTypes.string.isRequired,
-    fields: PropTypes.array,
-  }),
+  section: PropTypes.object,
   index: PropTypes.number.isRequired,
   maxIndex: PropTypes.number.isRequired,
   schemas: PropTypes.array.isRequired,

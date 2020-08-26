@@ -1,6 +1,6 @@
 const Handlebars = require('handlebars');
 
-const rowWithImage = Handlebars.compile(`
+const header = Handlebars.compile(`
   <section class="with-image container" style="background-image: url({{ backgroundImageURL }});">
     <div class="with-image__wrapper">
       <div class="with-image__content-block">
@@ -11,4 +11,4 @@ const rowWithImage = Handlebars.compile(`
   </section>
 `);
 
-module.exports = { rowWithImage };
+module.exports = { header };

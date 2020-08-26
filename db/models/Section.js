@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       allowNull: false,
     },
-    schemaId: {
+    schema: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },

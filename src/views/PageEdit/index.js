@@ -49,7 +49,6 @@ function PageEdit() {
   const [isDeleted, setIsDeleted] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
 
-  // TODO: combine into one-two fetch
   const getPageData = useCallback(() => {
     FETCH.getData(`${API_URL}/pages/${webPageId}`)
       .then((response) => {
@@ -58,7 +57,6 @@ function PageEdit() {
           setRedirectsData(response.redirects);
           setPageData(response.webPage);
           setSectionsData(response.sections);
-          return response.webPage.domain;
         }
 
         setStatusMessage(response, null, 'Something went wrong...');

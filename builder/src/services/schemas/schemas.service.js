@@ -20,37 +20,37 @@ class WebPage {
   }
 }
 
-class SectionMeta {
-  constructor(title, templateHbs) {
-    this.title = title;
-    this.templateHbs = templateHbs;
-  }
-}
+// class SectionMeta {
+//   constructor(title, templateHbs) {
+//     this.title = title;
+//     this.templateHbs = templateHbs;
+//   }
+// }
 
-class Section {
-  constructor(id, webPageId, order, schema, dependencies, fields) {
-    this.id = id;
-    this.webPageId = webPageId;
-    this.order = order;
-    this.meta = schema;
-    this.dependencies = dependencies;
-    this.fields = fields;
-  }
-}
+// class Section {
+//   constructor(id, webPageId, order, schema, dependencies, fields) {
+//     this.id = id;
+//     this.webPageId = webPageId;
+//     this.order = order;
+//     this.meta = schema;
+//     this.dependencies = dependencies;
+//     this.fields = fields;
+//   }
+// }
 
-class SectionSchemasStore {
-  constructor(sectionSchemas) {
-    this.schemas = sectionSchemas;
-  }
+// class SectionSchemasStore {
+//   constructor(sectionSchemas) {
+//     this.schemas = sectionSchemas;
+//   }
 
-  add(schema) {
-    this.schemas = [...this.schemas, schema];
-  }
+//   add(schema) {
+//     this.schemas = [...this.schemas, schema];
+//   }
 
-  getList() {
-    return this.schemas;
-  }
-}
+//   getList() {
+//     return this.schemas;
+//   }
+// }
 
 const webPageSchema = {
   title: new FieldSchema('title', 'Title', 'text', 10),
@@ -61,63 +61,108 @@ const webPageSchema = {
 
 const sectionsSchemas = [
   {
-    id: '1',
+    name: 'header',
+    title: 'Header Section',
+    dependencies: ['header.css', 'button.css'],
     webPageId: 'number',
     order: 'number',
-    dependencies: ['withImage.css'],
-    meta: {
-      title: 'Header Section',
-      templateHbs: 'withImage',
-    },
     fields: [
       {
         name: 'title',
-        label: 'Title',
         type: 'text',
-        order: 1,
+        title: 'Title',
+        description: 'Catchy a course title',
+        value: '',
+        order: 100,
       },
       {
         name: 'description',
-        label: 'Description',
         type: 'text',
-        order: 2,
+        title: 'Description',
+        description: 'Short description of a course',
+        value: '',
+        order: 110,
       },
       {
-        name: 'backgroundImageURL',
-        label: 'Background Image URL',
+        name: 'backgroundImage',
         type: 'url',
-        order: 3,
+        title: 'Background',
+        description: 'Background Image',
+        value: '',
+        order: 120,
       },
+    ],
+    fieldsets: [
+      {
+        title: 'Call To Action',
+        name: 'ctaHeader',
+        itemQty: 1,
+        maxItemsQty: 1,
+        itemFields: [
+          {
+            name: 'ctaHeader.text',
+            type: 'text',
+            title: 'Text',
+            description: 'CTA on button',
+            value: '',
+            order: 100,
+          },
+          {
+            name: 'ctaHeader.url',
+            type: 'url',
+            title: 'URL',
+            description: 'URL',
+            value: '',
+            order: 110,
+          },
+        ],
+      }
     ],
   },
   {
-    id: '2',
+    name: 'benefits',
+    title: 'Section With Benefits',
+    dependencies: ['benefits.css'],
     webPageId: 'number',
     order: 'number',
-    dependencies: ['bricks.css'],
-    meta: {
-      title: 'How it Works',
-      templateHbs: 'bricks',
-    },
     fields: [
       {
         name: 'title',
-        label: 'Title',
         type: 'text',
-        order: 1,
+        title: 'Title',
+        description: 'Title of the benefits block',
+        value: '',
+        order: 100,
       },
+    ],
+    fieldsets: [
       {
-        name: 'brick',
-        label: 'Block',
-        type: 'text',
-        order: 10,
-        clonable: true,
-      },
+        title: 'Benefits',
+        name: 'benefits',
+        itemQty: 1,
+        maxItemsQty: 6,
+        itemFields: [
+          {
+            name: 'benefitItem.title',
+            type: 'text',
+            title: 'Title',
+            description: 'Benefit`s title',
+            value: '',
+            order: 100,
+          },
+          {
+            name: 'benefitItem.description',
+            type: 'text',
+            title: 'Description',
+            description: 'Description of the benefit',
+            value: '',
+            order: 110,
+          },
+        ],
+      }
     ],
   },
 ];
-
-const sectionSchemasStore = new SectionSchemasStore(sectionsSchemas);
 
 module.exports = ({
   name: 'schemas',
@@ -131,7 +176,7 @@ module.exports = ({
 
     getSectionSchemas: {
       handler() {
-        return { ok: true, schemas: sectionSchemasStore.getList() };
+        return JSON.stringify({ ok: true, schemas: sectionsSchemas }, null, 2);
       }
     },
 
@@ -150,21 +195,18 @@ module.exports = ({
       },
     },
 
-    constructSection: {
-      params: {
-        webPageId: 'number',
-        order: 'number',
-      },
-      handler(ctx) {
-        const {
-          meta, webPageId, order, dependencies, fields
-        } = ctx.params;
-        const { title, templateHbs } = meta;
-        const sectionMeta = new SectionMeta(title, templateHbs);
-        const id = v4();
+    // constructSection: {
+    //   params: {
+    //     webPageId: 'number',
+    //     order: 'number',
+    //   },
+    //   handler(ctx) {
+    //     const {
+    //       name, webPageId, order, dependencies, fields
+    //     } = ctx.params;
 
-        return new Section(id, webPageId, +order, sectionMeta, dependencies, fields);
-      },
-    },
+    //     return new Section(webPageId, +order, dependencies, fields);
+    //   },
+    // },
   },
 });

@@ -7,7 +7,7 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
       },
-      schemaId: {
+      schema: {
         type: DataTypes.STRING,
         allowNull: false,
       },

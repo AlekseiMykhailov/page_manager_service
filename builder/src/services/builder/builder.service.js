@@ -48,12 +48,12 @@ module.exports = ({
               }
 
               const sectionTemplate = {
-                bricks: () => template.rowBricks({
+                header: () => template.header({
                   title: sectionFieldsMap.title,
                   bricks: sectionFields.filter((field) => field.name.startsWith('brick')),
                 }),
 
-                withImage: () => template.rowWithImage({
+                benefits: () => template.benefits({
                   title: sectionFieldsMap.title,
                   backgroundImageURL: sectionFieldsMap.backgroundImageURL,
                   description: sectionFieldsMap.description,

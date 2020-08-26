@@ -1,6 +1,6 @@
 const Handlebars = require('handlebars');
 
-const rowBricks = Handlebars.compile(`
+const benefits = Handlebars.compile(`
 <section class="bricks container">
   <div class="bricks__wrapper">
     <h2 class="bricks__title">{{ title }}</h2>
@@ -15,4 +15,4 @@ const rowBricks = Handlebars.compile(`
 </section>
 `);
 
-module.exports = { rowBricks };
+module.exports = { benefits };

@@ -21,14 +21,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    label: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     order: {
       type: DataTypes.INTEGER,
       allowNull: false,
