@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 module.exports = ({
   name: 'publish',
   actions: {
@@ -99,7 +101,7 @@ module.exports = ({
 
         if (slug) {
           return this.broker.call('dbPublishedPage.getPublishedPageBySlug', { domain, slug })
-            .then((res) => ((res.ok) ? res.data.html : res))
+            .then((res) => ((res.ok) ? res.data.html : ''))
             .catch((err) => {
               this.logger.error('ERROR: ', err);
               return { ok: false, error: err };
@@ -111,7 +113,7 @@ module.exports = ({
             const { homePageId } = domainSettings;
             return this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId: homePageId });
           })
-          .then((res) => ((res.ok) ? res.data.html : res))
+          .then((res) => ((res.ok) ? res.data.html : ''))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
@@ -120,8 +122,10 @@ module.exports = ({
     },
 
     getAllPublishedPages: {
-      handler() {
-        return this.broker.call('dbPublishedPage.getAllPublishedPages')
+      handler(ctx) {
+        const { domain } = ctx.params;
+
+        return this.broker.call('dbPublishedPage.getAllPublishedPages', { domain })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
@@ -187,6 +191,39 @@ module.exports = ({
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
+          });
+      },
+    },
+
+    generateSiteMap: {
+      handler(ctx) {
+        const { domain } = ctx.params;
+        let homePageId;
+
+        return this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain })
+          .then(({ domainSettings }) => { homePageId = domainSettings.homePageId; })
+          .then(() => this.broker.call('dbPublishedPage.getAllPublishedPages', { domain }))
+          .then(({ pages }) => {
+            const urls = pages.map((page) => {
+              const url = (page.id === homePageId)
+                ? `http://${domain}`
+                : `http://${domain}/${page.slug}`;
+
+              return (`
+                <url>
+                  <loc>${url}</loc>
+                  <lastmod>${moment(page.publishedAt).format('YYYY-MM-DD')}</lastmod>
+                  <changefreq>monthly</changefreq>
+                  <priority>0.8</priority>
+                </url>
+              `);
+            }).join('');
+            const xml = `<?xml version="1.0" encoding="UTF-8"?>
+              <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+                ${urls}
+              </urlset> 
+            `;
+            return xml;
           });
       },
     },

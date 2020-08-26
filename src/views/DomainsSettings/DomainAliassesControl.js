@@ -70,7 +70,7 @@ function DomainAliasesControl({
         gutterBottom
         variant="h4"
       >
-        Page Redirects
+        Domain Aliases
       </Typography>
       <List aria-label="domain aliases" className={classes.list}>
         {aliases.length > 0 && aliases.map((alias) => (

@@ -33,7 +33,7 @@ module.exports = {
         path: '/domains',
         aliases: {
           'GET /': 'domainSettings.getDomains',
-          'GET /:id': 'domainSettings.getDomainSettingsByDomainId',
+          'GET /:id': 'domainSettings.getDomainSettings',
           'PUT /': 'domainSettings.setDomainSettings',
         },
         authorization: false,

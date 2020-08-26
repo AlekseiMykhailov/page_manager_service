@@ -49,8 +49,9 @@ module.exports = {
       },
       handler(ctx) {
         const { webPageId, slug, html } = ctx.params;
+        const publishedAt = new Date();
 
-        return this.settings.model.update({ slug, html }, {
+        return this.settings.model.update({ slug, html, publishedAt }, {
           where: { webPageId }
         })
           .then(() => ({ ok: true }))
@@ -129,11 +130,16 @@ module.exports = {
     },
 
     getAllPublishedPages: {
-      handler() {
-        return this.settings.model.findAll({ raw: true })
+      handler(ctx) {
+        const { domain } = ctx.params;
+
+        return (domain
+          ? this.settings.model.findAll({ where: { domain } })
+          : this.settings.model.findAll({ raw: true })
+        )
           .then(
             (pages) => (pages.map(({
-              id, webPageId, domainId, domain, slug, publishedAt
+              id, webPageId, domainId, slug, publishedAt
             }) => ({
               id,
               webPageId,
