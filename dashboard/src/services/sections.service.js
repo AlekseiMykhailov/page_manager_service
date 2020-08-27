@@ -4,8 +4,24 @@ module.exports = ({
   actions: {
     createSection: {
       handler(ctx) {
-        const section = { ...ctx.params };
-        return this.broker.call('dbSections.createSection', { section });
+        const {
+          schema, webPageId, order, fields, fieldsets
+        } = ctx.params;
+        const fieldsetsFields = fieldsets.map((fieldset) => (fieldset.itemFields)).flat(Infinity);
+
+        return this.broker.call('dbSections.createSection', { schema, webPageId, order })
+          .then(({ sectionId }) => {
+            const preparedFields = [...fields, ...fieldsetsFields].map((field) => ({
+              ...field,
+              sectionId,
+            }));
+
+            return this.broker.call('dbFields.createFields', { fields: preparedFields });
+          })
+          .catch((error) => {
+            this.logger.error('ERROR SECTION CREATE: ', error);
+            return { ok: false, error };
+          });
       },
     },
 

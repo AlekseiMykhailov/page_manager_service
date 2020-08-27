@@ -96,7 +96,7 @@ const sectionsSchemas = [
       {
         title: 'Call To Action',
         name: 'ctaHeader',
-        itemQty: 1,
+        itemsQty: 1,
         maxItemsQty: 1,
         itemFields: [
           {
@@ -139,7 +139,7 @@ const sectionsSchemas = [
       {
         title: 'Benefits',
         name: 'benefits',
-        itemQty: 1,
+        itemsQty: 1,
         maxItemsQty: 6,
         itemFields: [
           {

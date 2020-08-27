@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useStatusMessage } from 'src/hooks';
 
@@ -38,8 +38,12 @@ const useStyles = makeStyles((theme) => ({
     position: 'relative',
     width: '100%',
     padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
     borderRadius: '4px',
     borderColor: theme.palette.common.black[100],
+  },
+  fieldsetHeader: {
+    alignSelf: 'flex-start',
   },
   legend: {
     paddingLeft: theme.spacing(2),
@@ -69,31 +73,31 @@ function SectionAddForm({
   pageId, schemas, newSectionOrder, getPageData
 }) {
   const [setStatusMessage] = useStatusMessage();
-  const [selectedSectionSchemaName, setSelectedSectionSchemaName] = useState('');
-  const [selectedSectionSchema, setSelectedSectionSchema] = useState();
-  const [sectionData, setSectionData] = useState({
+  const [currentSchemaName, setCurrentSchemaName] = useState('');
+  const [currentSchema, setCurrentSchema] = useState();
+  const initialSectionData = useMemo(() => ({
     schema: '',
     webPageId: pageId,
     order: newSectionOrder,
     fields: [],
     fieldsets: [],
-  });
+  }), [pageId, newSectionOrder]);
+  const [sectionData, setSectionData] = useState(initialSectionData);
 
   const classes = useStyles();
   const API_URL = process.env.REACT_APP_API_URL;
-
-  console.log(sectionData);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     FETCH.postData(
       `${API_URL}/sections`,
-      selectedSectionSchema,
+      sectionData,
     ).then((response) => {
       if (response.ok) {
-        setSelectedSectionSchemaName('');
-        setSelectedSectionSchema('');
+        setCurrentSchemaName('');
+        setCurrentSchema(null);
+        setSectionData(initialSectionData);
         getPageData();
       }
 
@@ -101,12 +105,43 @@ function SectionAddForm({
     });
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e, fieldsetName, fieldsBlockIndex) => {
     const { name, value } = e.target;
 
-    setSelectedSectionSchema({
-      ...selectedSectionSchema,
-      fields: [...selectedSectionSchema.fields].map((field) => {
+    if (fieldsetName) {
+      setSectionData({
+        ...sectionData,
+        fieldsets: sectionData.fieldsets.map((fieldset) => {
+          if (fieldset.name === fieldsetName) {
+            return {
+              ...fieldset,
+              itemFields: fieldset.itemFields.map((itemFieldBlock, i) => {
+                if (i === fieldsBlockIndex) {
+                  return itemFieldBlock.map((itemField) => {
+                    if (itemField.name === name) {
+                      return {
+                        ...itemField,
+                        value,
+                      };
+                    }
+                    return itemField;
+                  });
+                }
+                return itemFieldBlock;
+              })
+            };
+          }
+
+          return fieldset;
+        })
+      });
+
+      return;
+    }
+
+    setSectionData({
+      ...sectionData,
+      fields: [...sectionData.fields].map((field) => {
         if (field.name === name) {
           return {
             ...field,
@@ -121,45 +156,53 @@ function SectionAddForm({
 
   const handleSelectSectionSchema = (e) => {
     const { value } = e.target;
-    const selectedSchema = { ...schemas.find((sectionSchema) => sectionSchema.name === value) };
+    const selectedSchema = { ...schemas.find((schema) => schema.name === value) };
 
-    setSelectedSectionSchemaName(value);
-    setSelectedSectionSchema(selectedSchema);
+    setCurrentSchemaName(value);
+    setCurrentSchema(selectedSchema);
 
     setSectionData({
       ...sectionData,
+      order: newSectionOrder,
       schema: value,
       fields: selectedSchema.fields,
       fieldsets: selectedSchema.fieldsets.map((fieldset) => ({
         ...fieldset,
-        itemFields: fieldset.itemFields.map((itemField) => ({
+        itemFields: [fieldset.itemFields.map((itemField) => ({
           ...itemField,
-          name: itemField.name.replace('.', `[${fieldset.itemQty}].`)
-        }))
+          name: itemField.name.replace('.', `[${fieldset.itemsQty}].`)
+        }))],
       })),
     });
   };
 
-  const addFieldSet = (fieldsetName) => {
+  const addFieldSet = (name) => {
+    const newItemFields = [
+      ...currentSchema.fieldsets.find((fieldset) => fieldset.name === name).itemFields,
+    ];
 
-  };
+    setSectionData({
+      ...sectionData,
+      fieldsets: sectionData.fieldsets.map((fieldset) => {
+        if (fieldset.name === name) {
+          const itemsQty = fieldset.itemsQty + 1;
 
-  const addField = () => {
-    const clonableField = selectedSectionSchema.fields.find((field) => field.clonable);
-    const sortedFields = selectedSectionSchema.fields.sort((a, b) => a.order - b.order);
-    const lastOrder = sortedFields[sortedFields.length - 1].order;
-    const newField = {
-      ...clonableField,
-      name: `${clonableField.name}-${lastOrder + 1}`,
-      order: lastOrder + 1,
-      value: '',
-    };
-    const updatedSectionSchema = {
-      ...selectedSectionSchema,
-      fields: [...selectedSectionSchema.fields, newField],
-    };
+          return {
+            ...fieldset,
+            itemFields: [
+              ...fieldset.itemFields,
+              newItemFields.map((field) => ({
+                ...field,
+                name: field.name.replace('.', `[${itemsQty}].`),
+              })),
+            ],
+            itemsQty,
+          };
+        }
 
-    setSelectedSectionSchema(updatedSectionSchema);
+        return fieldset;
+      })
+    });
   };
 
   return (
@@ -177,8 +220,8 @@ function SectionAddForm({
             variant="h4"
             className={classes.heading}
           >
-            {selectedSectionSchemaName
-              ? `Add New ${(schemas.length > 0) && schemas.find((sectionSchema) => sectionSchema.name === selectedSectionSchemaName).title}`
+            {currentSchema
+              ? `Add New ${schemas.find((schema) => (schema.name === currentSchema.name)).title}`
               : 'Add New Section'}
           </Typography>
         </Grid>
@@ -188,7 +231,7 @@ function SectionAddForm({
             <Select
               labelId="new-section-schema-label"
               id="new-section-schema"
-              value={selectedSectionSchemaName}
+              value={currentSchemaName}
               onChange={handleSelectSectionSchema}
               label="Section Type"
               fullWidth
@@ -203,7 +246,7 @@ function SectionAddForm({
         </Grid>
       </Grid>
 
-      {selectedSectionSchema && (
+      {currentSchema && (
       <form
         id="new-section"
         action={`${API_URL}/sections`}
@@ -224,7 +267,7 @@ function SectionAddForm({
             id="new-section-name"
             name="order"
             type="hidden"
-            value={selectedSectionSchemaName}
+            value={currentSchema.name}
           />
           <TextField
             id="new-section-order"
@@ -233,7 +276,7 @@ function SectionAddForm({
             value={newSectionOrder}
           />
         </div>
-        {selectedSectionSchema.fields.map(({
+        {sectionData.fields.map(({
           name, description, type, value
         }) => (
           <TextField
@@ -250,49 +293,46 @@ function SectionAddForm({
           />
         ))}
 
-        {selectedSectionSchema.fields.some((field) => field.clonable) && (
-          <Fab
-            color="primary"
-            aria-label="add"
-            className={classes.fab}
-            onClick={addField}
-          >
-            <AddIcon />
-          </Fab>
-        )}
-
-        {selectedSectionSchema.fieldsets.map((fieldset) => (
-          <Paper
-            variant="outlined"
-            className={classes.fieldset}
-            key={fieldset.name}
-          >
-            <Typography variant="h5">
+        {sectionData.fieldsets.map((fieldset) => (
+          <React.Fragment key={fieldset.name}>
+            <Typography variant="h4" className={classes.fieldsetHeader}>
               {fieldset.title}
             </Typography>
-            {fieldset.itemFields.map((itemField) => (
-              <TextField
-                fullWidth
-                id={itemField.name}
-                label={itemField.description}
-                margin="normal"
-                name={itemField.name}
-                type={itemField.type}
+            {fieldset.itemFields.map((itemFieldBlock, i) => (
+              <Paper
                 variant="outlined"
-                value={itemField.value}
-                onChange={handleInputChange}
-                key={itemField.name}
-              />
+                className={classes.fieldset}
+                key={i}
+              >
+                {itemFieldBlock.map(({
+                  name, type, description, value
+                }) => (
+                  <TextField
+                    fullWidth
+                    id={name}
+                    label={description}
+                    margin="normal"
+                    name={name}
+                    type={type}
+                    variant="outlined"
+                    value={value}
+                    onChange={(e) => handleInputChange(e, fieldset.name, i)}
+                    key={name}
+                  />
+                ))}
+              </Paper>
             ))}
-            <Fab
-              color="primary"
-              aria-label="add fieldset"
-              className={classes.fab}
-              onClick={() => addFieldSet(fieldset.name)}
-            >
-              <AddIcon />
-            </Fab>
-          </Paper>
+            {(fieldset.itemsQty < fieldset.maxItemsQty) && (
+              <Fab
+                color="primary"
+                aria-label="add fieldset"
+                className={classes.fab}
+                onClick={() => addFieldSet(fieldset.name)}
+              >
+                <AddIcon />
+              </Fab>
+            )}
+          </React.Fragment>
         ))}
         <Grid
           container

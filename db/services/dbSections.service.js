@@ -13,20 +13,10 @@ module.exports = {
     createSection: {
       params: {},
       handler(ctx) {
-        const { section } = ctx.params;
-        const {
-          schemaId, webPageId, order, fields
-        } = section;
-        let sectionId;
+        const { schema, webPageId, order } = ctx.params;
 
-        return this.settings.model.create({ schemaId, webPageId, order })
-          .then((res) => {
-            sectionId = res.dataValues.id;
-            const preparedFields = fields.map((field) => ({ ...field, sectionId }));
-
-            return this.broker.call('dbFields.createFields', { fields: preparedFields });
-          })
-          .then(() => ({ ok: true, sectionId }))
+        return this.settings.model.create({ schema, webPageId, order })
+          .then((res) => ({ ok: true, sectionId: res.dataValues.id }))
           .catch((error) => {
             this.logger.error('ERROR SECTION CREATE: ', error);
             return { ok: false, error };
