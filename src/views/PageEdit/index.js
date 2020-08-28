@@ -58,8 +58,6 @@ function PageEdit() {
           setPageData(response.webPage);
           setSectionsData(response.sections);
         }
-
-        setStatusMessage(response, null, 'Something went wrong...');
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_URL, webPageId]);
@@ -126,18 +124,6 @@ function PageEdit() {
       .then((response) => setStatusMessage(response, setIsDeleted(true), 'Page was archived'));
   };
 
-  const saveSectionData = (sectionData) => {
-    FETCH.putData(`${API_URL}/sections/${sectionData.id}`, sectionData)
-      .then((response) => {
-        setStatusMessage(response, getPageData, 'Section was edited');
-
-        if (response.ok) {
-          getPageData();
-          savePageData();
-        }
-      });
-  };
-
   const saveSectionOrder = (sectionId, order) => {
     FETCH.putData(`${API_URL}/sections/order/${sectionId}`, { sectionId: +sectionId, order })
       .then((response) => {
@@ -147,41 +133,6 @@ function PageEdit() {
           savePageData();
         }
       });
-  };
-
-  const handleSaveSection = (e) => {
-    e.preventDefault();
-
-    const { id } = e.target;
-    const sectionData = sectionsData.find((section) => section.id === +id);
-
-    saveSectionData(sectionData);
-  };
-
-  const changeSectionInput = (e) => {
-    const { name, value } = e.target;
-    const { sectionId } = e.currentTarget.dataset;
-    const sectionsDataUpdated = [...sectionsData].map((section) => {
-      if (section.id === +sectionId) {
-        return {
-          ...section,
-          fields: [...section.fields].map((field) => {
-            if (field.name === name) {
-              return {
-                ...field,
-                value,
-              };
-            }
-
-            return field;
-          }),
-        };
-      }
-
-      return section;
-    });
-
-    setSectionsData(sectionsDataUpdated);
   };
 
   const changeSectionsOrder = (changingSections) => {
@@ -243,46 +194,6 @@ function PageEdit() {
     }
   };
 
-  const addField = (e) => {
-    const { sectionId } = e.currentTarget.dataset;
-    const sectionData = sectionsData.find((section) => section.id === +sectionId);
-    const sortedFields = sectionData.fields.sort((a, b) => a.order - b.order);
-    const lastOrder = sortedFields[sortedFields.length - 1].order;
-    const sectionSchema = sectionSchemas.find((schema) => schema.id === sectionData.schemaId);
-    const clonableField = sectionSchema.fields.find((field) => field.clonable);
-    const newField = {
-      ...clonableField,
-      name: `${clonableField.name}-${lastOrder + 1}`,
-      order: lastOrder + 1,
-      value: '',
-    };
-    const newSectionsData = sectionsData.map((section) => {
-      if (section.id !== +sectionId) {
-        return section;
-      }
-
-      return {
-        ...section,
-        fields: [...section.fields, newField],
-      };
-    });
-
-    setSectionsData(newSectionsData);
-  };
-
-  const deleteSection = (e) => {
-    const { sectionId } = e.currentTarget.dataset;
-
-    FETCH.deleteData(`${API_URL}/sections/${sectionId}`)
-      .then((response) => {
-        setStatusMessage(response, getPageData, 'Section was deleted');
-
-        if (response.ok) {
-          savePageData();
-        }
-      });
-  };
-
   const handlePublish = () => {
     const publishMethod = publishData ? FETCH.putData : FETCH.postData;
     const publishMessage = publishData
@@ -340,6 +251,66 @@ function PageEdit() {
       });
   };
 
+  const prepareSectionData = (section) => {
+    const preparedData = {
+      ...sectionSchemas.find((schema) => schema.name === section.schema),
+      fieldsMap: section.fields.reduce((acc, field) => {
+        acc[field.name] = field;
+        return acc;
+      }, {}),
+      id: section.id,
+      order: section.order,
+    };
+    preparedData.fieldsets = preparedData.fieldsets.map((fieldset) => ({
+      ...fieldset,
+      fieldsBlocks: [],
+    }));
+
+    section.fields.forEach((fieldData) => {
+      const notDigits = new RegExp(/\D/g);
+      const fieldsBlockIndex = fieldData.name.replace(notDigits, '');
+
+      if (fieldsBlockIndex) {
+        const fieldsetName = fieldData.name.split('[')[0];
+        const currentFieldset = preparedData.fieldsets.find((fieldset) => (
+          fieldset.name === fieldsetName
+        ));
+
+        const fieldSchema = currentFieldset.itemFields.find((itemFieldSchema) => (
+          itemFieldSchema.name === fieldData.name.replace(/\[\d+\]/g, '')
+        ));
+
+        const preparedField = { ...fieldSchema, ...fieldData };
+
+        if (currentFieldset.fieldsBlocks[fieldsBlockIndex]) {
+          currentFieldset.fieldsBlocks[fieldsBlockIndex] = [
+            ...currentFieldset.fieldsBlocks[fieldsBlockIndex],
+            preparedField,
+          ];
+        } else {
+          currentFieldset.fieldsBlocks[fieldsBlockIndex] = [preparedField];
+        }
+      } else {
+        preparedData.fields = preparedData.fields.map((fieldSchema) => {
+          if (fieldSchema.name === fieldData.name) {
+            return {
+              ...fieldSchema,
+              ...fieldData,
+            };
+          }
+          return fieldSchema;
+        });
+      }
+    });
+
+    preparedData.fieldsets = preparedData.fieldsets.map((fieldset) => ({
+      ...fieldset,
+      fieldsBlocks: fieldset.fieldsBlocks.filter(Boolean),
+    }));
+
+    return preparedData;
+  };
+
   const getSortedSections = useMemo(() => (
     sectionsData.sort((a, b) => a.order - b.order)
   ), [sectionsData]);
@@ -394,16 +365,14 @@ function PageEdit() {
 
             {getSortedSections.map((section, i) => (
               <SectionEditForm
-                section={section}
+                sectionData={prepareSectionData(section)}
                 index={i}
                 maxIndex={sectionsData.length - 1}
                 className={classes.section}
-                schemas={sectionSchemas}
-                handleSubmit={handleSaveSection}
-                handleInputChange={changeSectionInput}
-                handleDelete={deleteSection}
+                schema={sectionSchemas.find((schema) => schema.name === section.schema)}
+                getPageData={getPageData}
+                savePageData={savePageData}
                 handleChangeOrder={handleSectionsOrder}
-                handleAddField={addField}
                 key={section.id}
               />
             ))}

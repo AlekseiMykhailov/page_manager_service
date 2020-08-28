@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useStatusMessage } from 'src/hooks';
+import * as FETCH from 'src/utils/fetch';
 import {
   ButtonGroup,
   Button,
   Divider,
   Fab,
   Grid,
+  Paper,
   TextField,
   Typography,
   colors,
@@ -26,6 +29,17 @@ const useStyles = makeStyles((theme) => ({
     '& > *': {
       margin: theme.spacing(1),
     },
+  },
+  fieldset: {
+    position: 'relative',
+    width: '100%',
+    padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    borderRadius: '4px',
+    borderColor: theme.palette.common.black[300],
+  },
+  fieldsetHeader: {
+    alignSelf: 'flex-start',
   },
   divider: {
     height: '4px',
@@ -50,27 +64,90 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function SectionEditForm({
-  section,
+  sectionData,
   index,
   maxIndex,
-  schemas,
-  handleSubmit,
-  handleInputChange,
   handleChangeOrder,
-  handleDelete,
-  handleAddField,
+  getPageData,
+  savePageData,
 }) {
-  const { id, fields, name } = section;
-  const sortedFields = fields.sort((a, b) => a.order - b.order);
-  const fieldsMap = sortedFields.reduce((map, field) => ({
-    ...map,
-    [field.name]: field.value,
-  }), {});
-  const currentSchema = schemas.find((schema) => schema.name === name);
   const API_URL = process.env.REACT_APP_API_URL;
   const classes = useStyles();
+  const { id } = sectionData;
+  const [setStatusMessage] = useStatusMessage();
+  const [sectionSchema, setSectionSchema] = useState({
+    fields: sectionData.fields,
+    fieldsets: sectionData.fieldsets,
+  });
+  const [sectionFieldsMap, setSectionFieldsMap] = useState(sectionData.fieldsMap);
 
-  
+  const handleAddFieldsBlock = (e) => {
+    const { fieldsetName } = e.currentTarget.dataset;
+    const currentFieldset = sectionSchema.fieldsets.find((fieldset) => (
+      fieldset.name === fieldsetName
+    ));
+    const fieldsBlockQty = currentFieldset.fieldsBlocks.length;
+    const newFieldsBlock = currentFieldset.itemFields.map((itemField) => ({
+      ...itemField,
+      name: itemField.name.replace('.', `[${fieldsBlockQty + 1}].`)
+    }));
+
+    setSectionFieldsMap({
+      ...sectionFieldsMap,
+      ...newFieldsBlock.reduce((acc, field) => {
+        acc[field.name] = field;
+        return acc;
+      }, {}),
+    });
+    setSectionSchema({
+      ...sectionSchema,
+      fieldsets: sectionSchema.fieldsets.map((fieldset) => {
+        if (fieldset.name === fieldsetName) {
+          return {
+            ...fieldset,
+            fieldsBlocks: [...fieldset.fieldsBlocks, newFieldsBlock],
+          };
+        }
+        return fieldset;
+      }),
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setSectionFieldsMap({
+      ...sectionFieldsMap,
+      [name]: {
+        ...sectionFieldsMap[name],
+        value,
+      }
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    FETCH.putData(`${API_URL}/sections/${id}`, { fields: Object.values(sectionFieldsMap) })
+      .then((response) => {
+        setStatusMessage(response, getPageData, 'Section was edited');
+
+        if (response.ok) {
+          savePageData();
+        }
+      });
+  };
+
+  const handleDelete = () => {
+    FETCH.deleteData(`${API_URL}/sections/${id}`)
+      .then((response) => {
+        setStatusMessage(response, getPageData, 'Section was deleted');
+
+        if (response.ok) {
+          savePageData();
+        }
+      });
+  };
 
   return (
     <>
@@ -95,7 +172,7 @@ function SectionEditForm({
               gutterBottom
               variant="h4"
             >
-              {currentSchema && currentSchema.title}
+              {sectionData.title}
             </Typography>
           </Grid>
           <Grid item>
@@ -123,32 +200,72 @@ function SectionEditForm({
             )}
           </Grid>
         </Grid>
-        {sortedFields.map(({ name, type, label }) => (
+        {sectionSchema.fields.map(({
+          name, type, description
+        }) => (
           <TextField
             fullWidth
             id={`${id}-${name}`}
             inputProps={{ 'data-section-id': id }}
-            label={label}
+            label={description}
             margin="normal"
             name={name}
             type={type}
             variant="outlined"
-            value={fieldsMap[name]}
-            onChange={handleInputChange}
+            value={sectionFieldsMap[name].value}
+            onChange={handleChange}
             key={name}
           />
         ))}
-        {currentSchema && currentSchema.fields.some((field) => field.clonable) && (
-          <Fab
-            data-section-id={id}
-            color="primary"
-            aria-label="add"
-            className={classes.fab}
-            onClick={handleAddField}
-          >
-            <AddIcon />
-          </Fab>
-        )}
+
+        {sectionSchema.fieldsets.map((fieldset) => (
+          <React.Fragment key={fieldset.name}>
+            <Typography variant="h4" className={classes.fieldsetHeader}>
+              {fieldset.title}
+            </Typography>
+            {fieldset.fieldsBlocks.map((fieldsBlock) => {
+              if (fieldsBlock) {
+                return (
+                  <Paper
+                    variant="outlined"
+                    className={classes.fieldset}
+                    key={JSON.stringify(fieldsBlock)}
+                  >
+                    {fieldsBlock.map(({
+                      name, type, description
+                    }) => (
+                      <TextField
+                        fullWidth
+                        id={`${id}-${name}`}
+                        inputProps={{ 'data-section-id': id }}
+                        label={description}
+                        margin="normal"
+                        name={name}
+                        type={type}
+                        variant="outlined"
+                        value={sectionFieldsMap[name].value}
+                        onChange={handleChange}
+                        key={name}
+                      />
+                    ))}
+                  </Paper>
+                );
+              }
+            })}
+            {fieldset.fieldsBlocks.length < fieldset.maxItemsQty && (
+              <Fab
+                data-fieldset-name={fieldset.name}
+                color="primary"
+                aria-label="add"
+                className={classes.fab}
+                onClick={handleAddFieldsBlock}
+              >
+                <AddIcon />
+              </Fab>
+            )}
+          </React.Fragment>
+        ))}
+
         <Grid
           container
           direction="row"
@@ -185,15 +302,12 @@ function SectionEditForm({
 }
 
 SectionEditForm.propTypes = {
-  section: PropTypes.object,
+  sectionData: PropTypes.object,
   index: PropTypes.number.isRequired,
   maxIndex: PropTypes.number.isRequired,
-  schemas: PropTypes.array.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
-  handleInputChange: PropTypes.func.isRequired,
+  getPageData: PropTypes.func.isRequired,
+  savePageData: PropTypes.func.isRequired,
   handleChangeOrder: PropTypes.func.isRequired,
-  handleDelete: PropTypes.func.isRequired,
-  handleAddField: PropTypes.func.isRequired,
 };
 
 export default SectionEditForm;

@@ -28,7 +28,7 @@ module.exports = {
       {
         sectionId: 1,
         order: 10,
-        name: 'qtaButton[1].text',
+        name: 'qtaHeader[1].text',
         value: 'Apply Now',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -36,7 +36,7 @@ module.exports = {
       {
         sectionId: 1,
         order: 10,
-        name: 'qtaButton[1].url',
+        name: 'qtaHeader[1].url',
         value: '#form',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -53,7 +53,7 @@ module.exports = {
       {
         sectionId: 2,
         order: 10,
-        name: 'benefitItem[1].title',
+        name: 'benefits[1].title',
         value: 'Really easy and fast to learn',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -61,7 +61,7 @@ module.exports = {
       {
         sectionId: 2,
         order: 20,
-        name: 'benefitItem[1].description',
+        name: 'benefits[1].description',
         value: 'Python is really easy to understand language with friendly syntaxis',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -69,7 +69,7 @@ module.exports = {
       {
         sectionId: 2,
         order: 10,
-        name: 'benefitItem[2].title',
+        name: 'benefits[2].title',
         value: 'The most popular language',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -77,7 +77,7 @@ module.exports = {
       {
         sectionId: 2,
         order: 20,
-        name: 'benefitItem[2].description',
+        name: 'benefits[2].description',
         value: 'A lot of employers need Python developers on their projects',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -85,7 +85,7 @@ module.exports = {
       {
         sectionId: 2,
         order: 10,
-        name: 'benefitItem[3].title',
+        name: 'benefits[3].title',
         value: 'Large community',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -93,7 +93,7 @@ module.exports = {
       {
         sectionId: 2,
         order: 20,
-        name: 'benefitItem[3].description',
+        name: 'benefits[3].description',
         value: 'There is a large online community of Python users and experts',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -101,7 +101,7 @@ module.exports = {
       {
         sectionId: 2,
         order: 10,
-        name: 'benefitItem[4].title',
+        name: 'benefits[4].title',
         value: 'Higher Salary',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -109,7 +109,7 @@ module.exports = {
       {
         sectionId: 2,
         order: 20,
-        name: 'benefitItem[4].description',
+        name: 'benefits[4].description',
         value: 'Python developers earn $116,028 per year on average in the US',
         createdAt: new Date(),
         updatedAt: new Date(),

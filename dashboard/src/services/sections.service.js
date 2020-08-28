@@ -79,8 +79,8 @@ module.exports = ({
         const { webPageId } = ctx.params;
 
         return this.broker.call('dbSections.getSectionsByWebPageId', { webPageId })
-          .then((sectionsData) => sectionsData.map(({ id, order, schemaId }) => (
-            { id, order, schemaId }
+          .then((sectionsData) => sectionsData.map(({ id, order, schema }) => (
+            { id, order, schema }
           )));
       },
     },

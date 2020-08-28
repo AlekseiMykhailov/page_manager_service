@@ -143,7 +143,7 @@ const sectionsSchemas = [
         maxItemsQty: 6,
         itemFields: [
           {
-            name: 'benefitItem.title',
+            name: 'benefits.title',
             type: 'text',
             title: 'Title',
             description: 'Benefit`s title',
@@ -151,7 +151,7 @@ const sectionsSchemas = [
             order: 100,
           },
           {
-            name: 'benefitItem.description',
+            name: 'benefits.description',
             type: 'text',
             title: 'Description',
             description: 'Description of the benefit',
