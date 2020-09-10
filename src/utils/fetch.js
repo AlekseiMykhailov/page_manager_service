@@ -31,8 +31,14 @@ export async function putData(url, formData) {
   return json;
 }
 
-export async function deleteData(url) {
-  const response = await fetch(url, { method: 'DELETE' });
+export async function deleteData(url, formData) {
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8'
+    },
+    body: JSON.stringify(formData),
+  });
   const json = await response.json();
 
   return json;

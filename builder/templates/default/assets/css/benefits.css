@@ -1,22 +1,22 @@
-.bricks {}
-.bricks__wrapper {
+.benefits {}
+.benefits__wrapper {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
 }
-.bricks__title {
+.benefits__title {
   font-size: 40px;
   line-height: 52px;
   text-align: center;
 }
-.bricks__list {
+.benefits__list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   margin: 0;
   padding: 0;
 }
-.bricks__item {
+.benefits__item {
   list-style: none;
   margin: 0;
   padding: 24px 40px;
@@ -33,7 +33,7 @@
 }
 
 @media screen and (max-width: 1024px) {
-  .bricks__list {
+  .benefits__list {
     grid-template-columns: 1fr;
     max-width: 400px;
     margin: 0 auto;

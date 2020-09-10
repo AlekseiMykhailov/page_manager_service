@@ -5,6 +5,10 @@ module.exports = {
         domain: 'jobeasy.loc',
         name: 'JobEasy',
         homePageId: 1,
+        robotsTxt: `User-agent: *
+Allow: /
+
+Sitemap: http://jobeasy.loc/sitemap.xml`,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -12,6 +16,10 @@ module.exports = {
         domain: 'careerist.loc',
         name: 'Careerist',
         homePageId: 3,
+        robotsTxt: `User-agent: *
+Allow: /
+
+Sitemap: http://careerist.loc/sitemap.xml`,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

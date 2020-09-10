@@ -129,7 +129,7 @@ module.exports = {
       },
     },
 
-    getAllPublishedPages: {
+    listPublishedPages: {
       handler(ctx) {
         const { domain } = ctx.params;
 
@@ -149,7 +149,6 @@ module.exports = {
               publishedAt,
             })))
           )
-          .then((pages) => ({ ok: true, pages }))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };

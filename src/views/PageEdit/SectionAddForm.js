@@ -170,13 +170,13 @@ function SectionAddForm({
         ...fieldset,
         itemFields: [fieldset.itemFields.map((itemField) => ({
           ...itemField,
-          name: itemField.name.replace('.', `[${fieldset.itemsQty}].`)
+          name: itemField.name.replace('.', '[1].')
         }))],
       })),
     });
   };
 
-  const addFieldSet = (name) => {
+  const addFieldsBlock = (name) => {
     const newItemFields = [
       ...currentSchema.fieldsets.find((fieldset) => fieldset.name === name).itemFields,
     ];
@@ -185,7 +185,7 @@ function SectionAddForm({
       ...sectionData,
       fieldsets: sectionData.fieldsets.map((fieldset) => {
         if (fieldset.name === name) {
-          const itemsQty = fieldset.itemsQty + 1;
+          const itemsQty = fieldset.itemFields.length + 1;
 
           return {
             ...fieldset,
@@ -306,28 +306,53 @@ function SectionAddForm({
               >
                 {itemFieldBlock.map(({
                   name, type, description, value
-                }) => (
-                  <TextField
-                    fullWidth
-                    id={name}
-                    label={description}
-                    margin="normal"
-                    name={name}
-                    type={type}
-                    variant="outlined"
-                    value={value}
-                    onChange={(e) => handleInputChange(e, fieldset.name, i)}
-                    key={name}
-                  />
-                ))}
+                }) => {
+                  if (type === 'select') {
+                    return (
+                      <FormControl variant="outlined" className={classes.formControl} fullWidth key={name}>
+                        <InputLabel id={name}>{description}</InputLabel>
+                        <Select
+                          labelId={name}
+                          id={name}
+                          name={name}
+                          value={value}
+                          onChange={(e) => handleInputChange(e, fieldset.name, i)}
+                          label={description}
+                          fullWidth
+                        >
+                          {fieldset.options && fieldset.options.map((option) => (
+                            <MenuItem value={option.id} key={option.id}>
+                              {option.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    );
+                  }
+
+                  return (
+                    <TextField
+                      fullWidth
+                      id={name}
+                      label={description}
+                      margin="normal"
+                      name={name}
+                      type={type}
+                      variant="outlined"
+                      value={value}
+                      onChange={(e) => handleInputChange(e, fieldset.name, i)}
+                      key={name}
+                    />
+                  );
+                })}
               </Paper>
             ))}
-            {(fieldset.itemsQty < fieldset.maxItemsQty) && (
+            {(fieldset.itemFields.length < fieldset.maxItemsQty) && (
               <Fab
                 color="primary"
                 aria-label="add fieldset"
                 className={classes.fab}
-                onClick={() => addFieldSet(fieldset.name)}
+                onClick={() => addFieldsBlock(fieldset.name)}
               >
                 <AddIcon />
               </Fab>

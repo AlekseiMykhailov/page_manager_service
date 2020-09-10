@@ -10,8 +10,8 @@ import {
 } from '@material-ui/core';
 import Page from 'src/components/Page';
 import PageHeader from 'src/components/PageHeader';
-import FormDomainSettings from 'src/components/FormDomainSettings';
-import DomainAliasesControl from './DomainAliassesControl';
+import FormDomainSettings from 'src/views/DomainsSettings/FormDomainSettings';
+import DomainAliasesControl from './DomainAliasesControl';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,10 +46,12 @@ function DomainsSettings() {
   const fetchData = useCallback(() => {
     let pagesList = [];
     let homePageId;
+    let robotsTxt;
 
     FETCH.getData(`${API_URL}/domains/${domainId}`)
       .then((domainData) => {
         homePageId = domainData.settings.homePageId;
+        robotsTxt = domainData.settings.robotsTxt;
         setCurrentDomain(domainData.settings);
         setDomainAliases(domainData.aliases);
       })
@@ -58,7 +60,7 @@ function DomainsSettings() {
       .then(() => FETCH.getData(`${API_URL}/publish`))
       .then((published) => {
         pagesList = pagesList.filter((page) => {
-          const isPublished = published.pages.some((publishedPage) => (
+          const isPublished = published.some((publishedPage) => (
             publishedPage.webPageId === page.id
           ));
 
@@ -75,6 +77,12 @@ function DomainsSettings() {
               value: id,
               title,
             }))
+          },
+          robotsTxt: {
+            name: 'robotsTxt',
+            label: 'File robots.txt',
+            type: 'textarea',
+            value: robotsTxt,
           },
         };
 
@@ -93,7 +101,7 @@ function DomainsSettings() {
       ...domainFieldsData,
       [name]: {
         ...domainFieldsData[name],
-        value: +value,
+        value,
       },
     });
   };
@@ -156,7 +164,6 @@ function DomainsSettings() {
         )}
         {(fields.length > 0) && (
           <FormDomainSettings
-            className={classes.section}
             fields={fields}
             handleChange={handleChange}
             handleSubmit={handleSubmit}

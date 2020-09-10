@@ -14,6 +14,9 @@ const layout = Handlebars.compile(`
     <link rel="stylesheet" href="http://{{ domainOfAssets }}/css/index.css">
     {{#if cssCode}}{{{ cssCode }}}{{/if}}
     {{#if jsCode}}{{{ jsCode }}}{{/if}}
+    {{#if disableIndexing}}
+      <meta name="robots" content="noindex">
+    {{/if}}
   </head>
 
   <body>

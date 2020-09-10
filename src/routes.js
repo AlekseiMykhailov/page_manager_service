@@ -1,5 +1,3 @@
-/* eslint-disable react/no-multi-comp */
-/* eslint-disable react/display-name */
 import React, { lazy } from 'react';
 import { Redirect } from 'react-router-dom';
 import DashboardLayout from './layouts/Dashboard';
@@ -43,6 +41,21 @@ export default [
         path: '/pages/:domainId/:webPageId',
         exact: true,
         component: lazy(() => import('src/views/PageEdit'))
+      },
+      {
+        path: '/instructors',
+        exact: true,
+        component: lazy(() => import('src/views/Instructors'))
+      },
+      {
+        path: '/instructors/create',
+        exact: true,
+        component: lazy(() => import('src/views/InstructorCreate'))
+      },
+      {
+        path: '/instructors/:instructorId',
+        exact: true,
+        component: lazy(() => import('src/views/InstructorEdit'))
       },
     ]
   },

@@ -37,7 +37,7 @@ module.exports = {
       },
     },
 
-    deleteFields: {
+    bulkDeleteFields: {
       handler(ctx) {
         const { fieldIds } = ctx.params;
 
@@ -62,9 +62,9 @@ module.exports = {
           },
         })
           .then((res) => res.map(({
-            id, sectionId, type, order, name, label, value
+            id, sectionId, order, name, value
           }) => ({
-            id, sectionId, type, order, name, label, value
+            id, sectionId, order, name, value
           })))
           .then((fields) => ({ ok: true, fields }))
           .catch((error) => ({ ok: false, error }));

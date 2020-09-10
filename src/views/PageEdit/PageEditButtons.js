@@ -8,7 +8,9 @@ import {
   ButtonGroup,
   colors,
 } from '@material-ui/core';
-import { Visibility, Delete, Publish } from '@material-ui/icons';
+import {
+  Archive, Delete, Visibility, Publish
+} from '@material-ui/icons';
 import PageClone from './PageCloneControl';
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +49,6 @@ const useStyles = makeStyles((theme) => ({
 function PageHeader({
   className,
   pageId,
-  homePageId,
   isPublished,
   handleDelete,
   handlePublish,
@@ -79,7 +80,7 @@ function PageHeader({
             disabled={isPublished}
             className={clsx(classes.button, classes.deleteButton)}
             onClick={handleDelete}
-            startIcon={<Delete />}
+            startIcon={<Archive />}
           >
             Archive
           </Button>
@@ -95,7 +96,7 @@ function PageHeader({
           </Button>
           <Button
             variant="contained"
-            disabled={(pageId === homePageId) || !isPublished}
+            disabled={!isPublished}
             className={clsx(classes.button, classes.unPublishButton)}
             onClick={handleUnPublish}
             startIcon={<Delete />}
@@ -119,12 +120,10 @@ function PageHeader({
 PageHeader.propTypes = {
   className: PropTypes.string,
   pageId: PropTypes.number,
-  homePageId: PropTypes.number,
   isPublished: PropTypes.bool,
   handleDelete: PropTypes.func,
   handlePublish: PropTypes.func,
   handleUnPublish: PropTypes.func,
-  handleClone: PropTypes.func,
 };
 
 export default PageHeader;

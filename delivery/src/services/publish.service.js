@@ -125,7 +125,7 @@ module.exports = ({
       handler(ctx) {
         const { domain } = ctx.params;
 
-        return this.broker.call('dbPublishedPage.getAllPublishedPages', { domain })
+        return this.broker.call('dbPublishedPage.listPublishedPages', { domain })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return { ok: false, error: err };
@@ -196,35 +196,42 @@ module.exports = ({
     },
 
     generateSiteMap: {
-      handler(ctx) {
+      async handler(ctx) {
         const { domain } = ctx.params;
-        let homePageId;
 
-        return this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain })
-          .then(({ domainSettings }) => { homePageId = domainSettings.homePageId; })
-          .then(() => this.broker.call('dbPublishedPage.getAllPublishedPages', { domain }))
-          .then(({ pages }) => {
-            const urls = pages.map((page) => {
-              const url = (page.id === homePageId)
-                ? `http://${domain}`
-                : `http://${domain}/${page.slug}`;
+        const homePageId = await this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain })
+          .then(({ domainSettings }) => domainSettings.homePageId);
+        const disableIndexingWebPageIds = await this.broker.call('dbWebPages.listWebPages')
+          .then((pages) => pages.filter((page) => page.disableIndexing))
+          .then((pages) => pages.map((page) => (page.id)));
 
-              return (`
-                <url>
-                  <loc>${url}</loc>
-                  <lastmod>${moment(page.publishedAt).format('YYYY-MM-DD')}</lastmod>
-                  <changefreq>monthly</changefreq>
-                  <priority>0.8</priority>
-                </url>
-              `);
-            }).join('');
-            const xml = `<?xml version="1.0" encoding="UTF-8"?>
-              <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-                ${urls}
-              </urlset> 
-            `;
-            return xml;
-          });
+        const publishedPages = await this.broker.call('dbPublishedPage.listPublishedPages', { domain });
+        const indexingPages = publishedPages.filter((page) => (
+          !disableIndexingWebPageIds.includes(page.webPageId)
+        ));
+
+        const urls = indexingPages.sort((a, b) => b.publishedAt - a.publishedAt)
+          .map((page) => {
+            const url = (page.id === homePageId)
+              ? `http://${domain}`
+              : `http://${domain}/${page.slug}`;
+
+            return (`
+              <url>
+                <loc>${url}</loc>
+                <lastmod>${moment(page.publishedAt).format('YYYY-MM-DD')}</lastmod>
+                <changefreq>monthly</changefreq>
+                <priority>0.8</priority>
+              </url>
+            `);
+          }).join('');
+
+        const xml = `<?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            ${urls}
+          </urlset> 
+        `;
+        return xml;
       },
     },
   },

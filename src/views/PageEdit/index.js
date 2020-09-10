@@ -13,7 +13,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import Page from 'src/components/Page';
 import * as FETCH from 'src/utils/fetch';
-import PageEditForm from 'src/components/WebPage/PageEditForm';
+import FormPageEdit from 'src/components/Forms/FormPageEdit';
 import PageEditHeader from './PageEditHeader';
 import PageEditButtons from './PageEditButtons';
 import PageRedirectControl from './PageRedirectControl';
@@ -37,14 +37,10 @@ function PageEdit() {
   const { domainId, webPageId } = useParams();
   const [setStatusMessage] = useStatusMessage();
 
-  const [domainData, setDomainData] = useState(null);
-  const [redirectsData, setRedirectsData] = useState(null);
   const [pageData, setPageData] = useState(null);
+  const [redirectsData, setRedirectsData] = useState([]);
   const [sectionsData, setSectionsData] = useState([]);
-  const [publishData, setPublishData] = useState(null);
-
-  const [pageSchema, setPageSchema] = useState(null);
-  const [sectionSchemas, setSectionSchemas] = useState([]);
+  const [sectionsSchemas, setSectionsSchemas] = useState([]);
 
   const [isDeleted, setIsDeleted] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
@@ -53,59 +49,77 @@ function PageEdit() {
     FETCH.getData(`${API_URL}/pages/${webPageId}`)
       .then((response) => {
         if (response.ok) {
-          setDomainData(response.domain);
-          setRedirectsData(response.redirects);
-          setPageData(response.webPage);
-          setSectionsData(response.sections);
+          const {
+            id,
+            title,
+            domain,
+            slug,
+            isHomePage,
+            publishedAt,
+            redirects,
+            webPageFields,
+            sections,
+          } = response.data;
+          setPageData({
+            id,
+            title,
+            domain,
+            slug,
+            isHomePage,
+            publishedAt,
+            fields: webPageFields,
+          });
+          setRedirectsData(redirects);
+          setSectionsData(sections);
         }
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_URL, webPageId]);
 
-  const getPageSchema = useCallback(() => {
-    FETCH.getData(`${API_URL}/schemas/pages`)
-      .then((response) => {
-        if (response.ok) {
-          setPageSchema(response.schema);
-        }
-      });
-  }, [API_URL]);
-
-  const getSectionSchemas = useCallback(() => {
+  const getSectionsSchemas = useCallback(() => {
     FETCH.getData(`${API_URL}/schemas/sections`)
       .then((response) => {
         if (response.ok) {
-          setSectionSchemas(response.schemas);
+          setSectionsSchemas(response.schemas);
         }
       });
   }, [API_URL]);
 
-  const getPublishData = useCallback(() => {
-    FETCH.getData(`${API_URL}/publish/${webPageId}`)
-      .then((response) => {
-        if (response.ok) {
-          setPublishData(response.data);
-        } else {
-          setPublishData(null);
-        }
-      });
-  }, [API_URL, webPageId]);
-
   useEffect(() => {
-    getPageSchema();
-    getSectionSchemas();
     getPageData();
-    getPublishData();
-  }, [getPageData, getPublishData, getSectionSchemas, getPageSchema]);
+    getSectionsSchemas();
+  }, [getPageData, getSectionsSchemas]);
 
   const handlePageDataInputChange = (e) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
-      setPageData({ ...pageData, [name]: !pageData[name] });
-    } else {
-      setPageData({ ...pageData, [name]: value });
+      setPageData({
+        ...pageData,
+        fields: pageData.fields.map((field) => {
+          if (field.name === name) {
+            return {
+              ...field,
+              value: !field.value,
+            };
+          }
+          return field;
+        }),
+      });
+      return;
     }
+
+    setPageData({
+      ...pageData,
+      fields: pageData.fields.map((field) => {
+        if (field.name === name) {
+          return {
+            ...field,
+            value,
+          };
+        }
+        return field;
+      }),
+    });
   };
 
   const savePageData = (e) => {
@@ -191,40 +205,33 @@ function PageEdit() {
 
     if (changingSections.sectionA && changingSections.sectionB) {
       changeSectionsOrder(changingSections);
+      savePageData();
     }
   };
 
   const handlePublish = () => {
-    const publishMethod = publishData ? FETCH.putData : FETCH.postData;
-    const publishMessage = publishData
+    const publishMethod = pageData.publishedAt ? FETCH.putData : FETCH.postData;
+    const publishMessage = pageData.publishedAt
       ? 'Published page was updated'
       : 'Page was published';
 
     publishMethod(`${API_URL}/publish`, { webPageId })
       .then((response) => {
-        setStatusMessage(response, getPublishData, publishMessage);
-
-        if (response.ok) {
-          savePageData();
-        }
+        setStatusMessage(response, getPageData, publishMessage);
       });
   };
 
   const handleUnPublish = () => {
     FETCH.deleteData(`${API_URL}/publish/${webPageId}`)
       .then((response) => {
-        setStatusMessage(response, getPublishData, 'Page was unpublished');
-
-        if (response.ok) {
-          savePageData();
-        }
+        setStatusMessage(response, getPageData, 'Page was unpublished');
       });
   };
 
   const handleAddRedirect = (slug) => {
     const redirectData = {
-      domainId: +domainData.id,
-      webPageId: +pageData.id,
+      domainId: +domainId,
+      webPageId: +webPageId,
       slug,
     };
 
@@ -251,66 +258,6 @@ function PageEdit() {
       });
   };
 
-  const prepareSectionData = (section) => {
-    const preparedData = {
-      ...sectionSchemas.find((schema) => schema.name === section.schema),
-      fieldsMap: section.fields.reduce((acc, field) => {
-        acc[field.name] = field;
-        return acc;
-      }, {}),
-      id: section.id,
-      order: section.order,
-    };
-    preparedData.fieldsets = preparedData.fieldsets.map((fieldset) => ({
-      ...fieldset,
-      fieldsBlocks: [],
-    }));
-
-    section.fields.forEach((fieldData) => {
-      const notDigits = new RegExp(/\D/g);
-      const fieldsBlockIndex = fieldData.name.replace(notDigits, '');
-
-      if (fieldsBlockIndex) {
-        const fieldsetName = fieldData.name.split('[')[0];
-        const currentFieldset = preparedData.fieldsets.find((fieldset) => (
-          fieldset.name === fieldsetName
-        ));
-
-        const fieldSchema = currentFieldset.itemFields.find((itemFieldSchema) => (
-          itemFieldSchema.name === fieldData.name.replace(/\[\d+\]/g, '')
-        ));
-
-        const preparedField = { ...fieldSchema, ...fieldData };
-
-        if (currentFieldset.fieldsBlocks[fieldsBlockIndex]) {
-          currentFieldset.fieldsBlocks[fieldsBlockIndex] = [
-            ...currentFieldset.fieldsBlocks[fieldsBlockIndex],
-            preparedField,
-          ];
-        } else {
-          currentFieldset.fieldsBlocks[fieldsBlockIndex] = [preparedField];
-        }
-      } else {
-        preparedData.fields = preparedData.fields.map((fieldSchema) => {
-          if (fieldSchema.name === fieldData.name) {
-            return {
-              ...fieldSchema,
-              ...fieldData,
-            };
-          }
-          return fieldSchema;
-        });
-      }
-    });
-
-    preparedData.fieldsets = preparedData.fieldsets.map((fieldset) => ({
-      ...fieldset,
-      fieldsBlocks: fieldset.fieldsBlocks.filter(Boolean),
-    }));
-
-    return preparedData;
-  };
-
   const getSortedSections = useMemo(() => (
     sectionsData.sort((a, b) => a.order - b.order)
   ), [sectionsData]);
@@ -326,16 +273,15 @@ function PageEdit() {
           <PageEditHeader
             name="Edit Page"
             title={pageData.title}
-            homePageId={domainData.homePageId}
+            isHomePage={pageData.isHomePage}
             pageData={pageData}
-            publishData={publishData}
           />
         )}
         {pageData && (
           <PageEditButtons
             pageId={pageData.id}
-            homePageId={domainData.homePageId}
-            isPublished={Boolean(publishData)}
+            isHomePage={pageData.isHomePage}
+            isPublished={Boolean(pageData.publishedAt)}
             handleDelete={deleteWepPage}
             handlePublish={handlePublish}
             handleUnPublish={handleUnPublish}
@@ -346,9 +292,8 @@ function PageEdit() {
           <CardContent>
 
             {pageData && (
-              <PageEditForm
-                pageSchema={pageSchema}
-                pageData={pageData}
+              <FormPageEdit
+                fields={pageData.fields}
                 className={classes.section}
                 handleSubmit={savePageData}
                 handleChange={handlePageDataInputChange}
@@ -365,11 +310,10 @@ function PageEdit() {
 
             {getSortedSections.map((section, i) => (
               <SectionEditForm
-                sectionData={prepareSectionData(section)}
+                sectionData={section}
                 index={i}
                 maxIndex={sectionsData.length - 1}
                 className={classes.section}
-                schema={sectionSchemas.find((schema) => schema.name === section.schema)}
                 getPageData={getPageData}
                 savePageData={savePageData}
                 handleChangeOrder={handleSectionsOrder}
@@ -381,7 +325,7 @@ function PageEdit() {
               <SectionAddForm
                 pageId={pageData.id}
                 className={classes.section}
-                schemas={sectionSchemas}
+                schemas={sectionsSchemas}
                 newSectionOrder={sectionsData.length + 1}
                 getPageData={getPageData}
               />

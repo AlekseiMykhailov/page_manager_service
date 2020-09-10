@@ -69,12 +69,18 @@ module.exports = {
         const { domain, slug } = ctx.params;
 
         return this.broker.call('dbDomainSettings.getDomainDataByDomain', { domain })
-          .then(({ domainData }) => this.settings.model.findOne({
-            where: {
-              domainId: domainData.id,
-              slug,
+          .then(({ domainData }) => {
+            if (domainData) {
+              return this.settings.model.findOne({
+                where: {
+                  domainId: domainData.id,
+                  slug,
+                }
+              });
             }
-          }))
+
+            return null;
+          })
           .then((redirect) => {
             if (redirect) {
               return { ok: true, redirect };

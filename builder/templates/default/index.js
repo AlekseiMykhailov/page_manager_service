@@ -1,14 +1,18 @@
 const { layout } = require('./layout');
 const { cssStyles } = require('./cssStyles');
 const { jsScripts } = require('./jsScripts');
-const { rowBricks, rowWithImage } = require('./sections');
+const {
+  header, benefits, reviews, instructors
+} = require('./sections');
 
 const template = {
   layout,
   cssStyles,
   jsScripts,
-  rowBricks,
-  rowWithImage,
+  header,
+  benefits,
+  reviews,
+  instructors,
 };
 
 module.exports = template;

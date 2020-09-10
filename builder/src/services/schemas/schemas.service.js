@@ -1,63 +1,45 @@
-/* eslint-disable max-classes-per-file */
-const { v4 } = require('uuid');
-
-class FieldSchema {
-  constructor(name, label, type, order) {
-    this.name = name;
-    this.label = label;
-    this.type = type;
-    this.order = order;
-  }
-}
-
-class WebPage {
-  constructor(slug, title, description, isHomePage) {
-    this.id = v4();
-    this.slug = slug;
-    this.isHomePage = isHomePage;
-    this.title = title;
-    this.description = description;
-  }
-}
-
-// class SectionMeta {
-//   constructor(title, templateHbs) {
-//     this.title = title;
-//     this.templateHbs = templateHbs;
-//   }
-// }
-
-// class Section {
-//   constructor(id, webPageId, order, schema, dependencies, fields) {
-//     this.id = id;
-//     this.webPageId = webPageId;
-//     this.order = order;
-//     this.meta = schema;
-//     this.dependencies = dependencies;
-//     this.fields = fields;
-//   }
-// }
-
-// class SectionSchemasStore {
-//   constructor(sectionSchemas) {
-//     this.schemas = sectionSchemas;
-//   }
-
-//   add(schema) {
-//     this.schemas = [...this.schemas, schema];
-//   }
-
-//   getList() {
-//     return this.schemas;
-//   }
-// }
-
-const webPageSchema = {
-  title: new FieldSchema('title', 'Title', 'text', 10),
-  domain: new FieldSchema('domain', 'Domain', 'select', 20),
-  slug: new FieldSchema('slug', 'Slug', 'text', 30),
-  description: new FieldSchema('description', 'Description', 'text', 50),
-};
+const webPageSchema = [
+  {
+    name: 'title',
+    type: 'text',
+    title: 'Title',
+    description: 'Title of the Web Page',
+    value: '',
+    order: 100,
+  },
+  {
+    name: 'description',
+    type: 'text',
+    title: 'Description',
+    description: 'Description',
+    value: '',
+    order: 200,
+  },
+  {
+    name: 'domain',
+    type: 'select',
+    title: 'Domain',
+    description: 'Domain',
+    value: '',
+    order: 300,
+  },
+  {
+    name: 'slug',
+    type: 'text',
+    title: 'Slug',
+    description: 'Slug',
+    value: '',
+    order: 400,
+  },
+  {
+    name: 'disableIndexing',
+    type: 'checkbox',
+    title: 'Not index',
+    description: 'Exclude this page from site search results',
+    value: false,
+    order: 500,
+  },
+];
 
 const sectionsSchemas = [
   {
@@ -96,7 +78,6 @@ const sectionsSchemas = [
       {
         title: 'Call To Action',
         name: 'ctaHeader',
-        itemsQty: 1,
         maxItemsQty: 1,
         itemFields: [
           {
@@ -130,7 +111,7 @@ const sectionsSchemas = [
         name: 'title',
         type: 'text',
         title: 'Title',
-        description: 'Title of the benefits block',
+        description: 'Title of the benefits section',
         value: '',
         order: 100,
       },
@@ -139,7 +120,6 @@ const sectionsSchemas = [
       {
         title: 'Benefits',
         name: 'benefits',
-        itemsQty: 1,
         maxItemsQty: 6,
         itemFields: [
           {
@@ -162,6 +142,156 @@ const sectionsSchemas = [
       }
     ],
   },
+  {
+    name: 'reviews',
+    title: 'Text Reviews',
+    dependencies: ['reviews.css'],
+    webPageId: 'number',
+    order: 'number',
+    fields: [],
+    fieldsets: [
+      {
+        title: '',
+        name: 'reviews',
+        maxItemsQty: 10,
+        itemFields: [
+          {
+            name: 'reviews.reviewer',
+            type: 'text',
+            title: 'Reviewer',
+            description: 'Reviewer Name',
+            value: '',
+            order: 100,
+          },
+          {
+            name: 'reviews.authorPhoto',
+            type: 'text',
+            title: 'Photo',
+            description: 'Photo',
+            value: '',
+            order: 200,
+          },
+          {
+            name: 'reviews.companyName',
+            type: 'text',
+            title: 'Company',
+            description: 'The name of the company where the reviewer works',
+            value: '',
+            order: 300,
+          },
+          {
+            name: 'reviews.companyLogo',
+            type: 'text',
+            title: 'Company Logo',
+            description: 'The logo of the company',
+            value: '',
+            order: 400,
+          },
+          {
+            name: 'reviews.text',
+            type: 'textarea',
+            title: 'Review Text',
+            description: 'Review Text',
+            value: '',
+            order: 600,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'instructors',
+    title: 'Instructors Section',
+    dependencies: ['instructors.css'],
+    webPageId: 'number',
+    order: 'number',
+    fields: [
+      {
+        name: 'title',
+        type: 'text',
+        title: 'Title',
+        description: 'Title of the instructors section',
+        value: '',
+        order: 100,
+      },
+      {
+        name: 'description',
+        type: 'text',
+        title: 'Description',
+        description: 'Description of the instructors section',
+        value: '',
+        order: 200,
+      },
+    ],
+    fieldsets: [
+      {
+        title: 'Instructors',
+        name: 'instructors',
+        maxItemsQty: 6,
+        itemFields: [
+          {
+            name: 'instructors.person',
+            type: 'select',
+            title: 'Instructor',
+            description: 'Instructor',
+            value: '',
+            order: 100,
+          },
+        ],
+      },
+    ],
+  },
+];
+
+const instructorSchema = [
+  {
+    name: 'name',
+    type: 'text',
+    title: 'Name',
+    description: 'First and Last Name',
+    value: '',
+    order: 100,
+  },
+  {
+    name: 'about',
+    type: 'text',
+    title: 'About',
+    description: 'Short About of the Instructor',
+    value: '',
+    order: 200,
+  },
+  {
+    name: 'photo',
+    type: 'text',
+    title: 'Photo',
+    description: 'Photo',
+    value: '',
+    order: 300,
+  },
+  {
+    name: 'linkedIn',
+    type: 'url',
+    title: 'LinkedIn Link',
+    description: 'Link to LinkedIn Profile',
+    value: '',
+    order: 400,
+  },
+  {
+    name: 'facebook',
+    type: 'url',
+    title: 'Facebook Link',
+    description: 'Link to Facebook Profile',
+    value: '',
+    order: 500,
+  },
+  {
+    name: 'email',
+    type: 'email',
+    title: 'Email',
+    description: 'Email',
+    value: '',
+    order: 600,
+  },
 ];
 
 module.exports = ({
@@ -169,44 +299,49 @@ module.exports = ({
   actions: {
 
     getWebPageSchema: {
-      handler() {
-        return JSON.stringify({ ok: true, schema: webPageSchema }, null, 2);
+      async handler() {
+        const domains = await this.broker.call('dbDomainSettings.listDomains');
+
+        return {
+          ok: true,
+          schema: webPageSchema,
+          domains,
+        };
       },
     },
 
-    getSectionSchemas: {
-      handler() {
-        return JSON.stringify({ ok: true, schemas: sectionsSchemas }, null, 2);
+    getSectionSchema: {
+      handler(ctx) {
+        const { name } = ctx.params;
+
+        return { ok: true, schemas: sectionsSchemas.filter((schema) => schema.name === name) };
       }
     },
 
-    constructWebPage: {
-      params: {
-        slug: 'string',
-        title: 'string',
-        description: 'string',
-      },
-      handler(ctx) {
-        const {
-          slug, title, description
-        } = ctx.params;
+    listSectionSchemas: {
+      async handler() {
+        const instructorSelectOptions = await this.broker.call('instructors.listOptions');
+        const schemas = sectionsSchemas.map((schema) => {
+          if (schema.name === 'instructors') {
+            return {
+              ...schema,
+              fieldsets: schema.fieldsets.map((fieldset) => ({
+                ...fieldset,
+                options: instructorSelectOptions,
+              }))
+            };
+          }
+          return schema;
+        });
 
-        return new WebPage(slug, title, description);
-      },
+        return { ok: true, schemas };
+      }
     },
 
-    // constructSection: {
-    //   params: {
-    //     webPageId: 'number',
-    //     order: 'number',
-    //   },
-    //   handler(ctx) {
-    //     const {
-    //       name, webPageId, order, dependencies, fields
-    //     } = ctx.params;
-
-    //     return new Section(webPageId, +order, dependencies, fields);
-    //   },
-    // },
+    getInstructorSchema: {
+      handler() {
+        return { ok: true, schema: instructorSchema };
+      },
+    },
   },
 });

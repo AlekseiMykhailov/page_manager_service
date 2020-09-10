@@ -1,11 +1,18 @@
 const Handlebars = require('handlebars');
 
 const header = Handlebars.compile(`
-  <section class="with-image container" style="background-image: url({{ backgroundImageURL }});">
-    <div class="with-image__wrapper">
-      <div class="with-image__content-block">
-        <h2 class="with-image__title">{{ title }}</h2>
-        <p class="with-image__description">{{ description }}</p>
+  <section class="header container" style="background-image: url({{ backgroundImage }});">
+    <div class="header__wrapper">
+      <div class="header__content-block">
+        <h2 class="header__title">{{ title }}</h2>
+        <p class="header__description">{{ description }}</p>
+      </div>
+      <div class="buttons">
+        {{#each buttons}}
+          <a href="{{ this.url }}" class="button">
+            {{ this.text}}
+          </a>
+        {{/each}}
       </div>
     </div>
   </section>

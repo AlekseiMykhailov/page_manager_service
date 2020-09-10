@@ -12,8 +12,8 @@ import {
   Container,
 } from '@material-ui/core';
 import PageHeader from 'src/components/PageHeader';
-import PagesControls from '../../components/WebPage/PagesControls';
-import PagesList from '../../components/WebPage/PagesList';
+import PagesControls from 'src/components/WebPage/PagesControls';
+import PagesList from 'src/components/WebPage/PagesList';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,7 +27,7 @@ function Pages() {
   const [setStatusMessage] = useStatusMessage();
   const API_URL = process.env.REACT_APP_API_URL;
   const { domainId } = useParams();
-  const [actualDomain, setActualDomain] = useState();
+  const [actualDomainData, setActualDomainData] = useState();
   const [pages, setPages] = useState([]);
   const [pagesOrder, setPagesOrder] = useState(CONST.sortTypes[0]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,11 +46,11 @@ function Pages() {
   }, [pages, pagesOrder.type]);
 
   const filteredPages = useMemo(() => {
-    if (sortedPages.length > 0 && actualDomain) {
-      return sortedPages.filter((page) => page.domain === actualDomain.domain);
+    if (sortedPages.length > 0 && domainId) {
+      return sortedPages.filter((page) => page.domainId === +domainId);
     }
     return sortedPages;
-  }, [sortedPages, actualDomain]);
+  }, [sortedPages, domainId]);
 
   const searchedPages = useMemo(() => {
     if (debouncedSearchQuery === '') {
@@ -67,36 +67,17 @@ function Pages() {
   }, [filteredPages, debouncedSearchQuery]);
 
   const fetchPages = useCallback(() => {
-    let pageList = [];
-
     FETCH.getData(`${API_URL}/pages`)
-      .then((response) => { pageList = response.pages; })
-      .then(() => FETCH.getData(`${API_URL}/publish`))
-      .then((published) => {
-        const pagesWithPublishData = pageList.map((page) => {
-          const publishedPageData = published.pages.find((publishedPage) => (
-            publishedPage.webPageId === page.id
-          ));
-
-          if (publishedPageData) {
-            return {
-              ...page,
-              publishedAt: publishedPageData.updatedAt,
-            };
-          }
-
-          return page;
-        });
-
-        setPages(pagesWithPublishData);
+      .then((response) => {
+        setPages(response.pages);
       });
   }, [API_URL]);
 
   const fetchDomains = useCallback(() => {
     FETCH.getData(`${API_URL}/domains`)
-      .then((response) => {
-        if (response.ok) {
-          setActualDomain(response.domains.find((domain) => domain.id === +domainId));
+      .then((domains) => {
+        if (domains) {
+          setActualDomainData(domains.find((domain) => domain.id === +domainId));
         }
       });
   }, [API_URL, domainId]);
@@ -135,11 +116,11 @@ function Pages() {
       title="Pages"
     >
       <Container maxWidth="lg">
-        {actualDomain && (
+        {actualDomainData && (
           <PageHeader
             name="pages"
-            title={actualDomain.name}
-            subtitle={actualDomain.domain}
+            title={actualDomainData.name}
+            subtitle={actualDomainData.domain}
           />
         )}
         {filteredPages && (
@@ -154,7 +135,6 @@ function Pages() {
           <PagesList
             className={classes.pages}
             pages={searchedPages}
-            domain={actualDomain}
             deleteWepPage={deleteWepPage}
           />
         )}

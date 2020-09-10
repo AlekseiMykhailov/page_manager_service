@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core';
 import PageHeader from 'src/components/PageHeader';
 import * as FETCH from 'src/utils/fetch';
-import FormPageCreate from '../../components/WebPage/PageCreateForm';
+import FormPageCreate from '../../components/Forms/FormPageCreate';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,37 +24,19 @@ const useStyles = makeStyles((theme) => ({
 
 function PageCreate() {
   const classes = useStyles();
-  const [pageSchema, setPagesSchema] = useState(null);
+  const [pageFields, setPageFields] = useState(null);
   const [domains, setDomains] = useState([]);
-  const [pageData, setPagesData] = useState(null);
-  const [isCreated, setIsCreated] = useState(false);
-  const selectedDomain = domains.find((domain) => domain.domain === pageData.domain);
+  const [redirectData, setRedirectData] = useState();
+  const [isAllowCreate, setIsAllowCreate] = useState(false);
   const [setStatusMessage] = useStatusMessage();
 
   const API_URL = process.env.REACT_APP_API_URL;
 
   const getPageSchema = useCallback(() => {
-    FETCH.getData(`${API_URL}/schemas/pages`)
+    FETCH.getData(`${API_URL}/schemas/page`)
       .then((response) => {
         if (response.ok) {
-          const newPageData = {};
-
-          Object.values(response.schema).map(({ name, type }) => {
-            newPageData[name] = (type === 'checkbox') ? false : '';
-
-            return name;
-          });
-
-          setPagesSchema(response.schema);
-          setPagesData(newPageData);
-        }
-      });
-  }, [API_URL]);
-
-  const getDomains = useCallback(() => {
-    FETCH.getData(`${API_URL}/domains`)
-      .then((response) => {
-        if (response.ok) {
+          setPageFields(response.schema);
           setDomains(response.domains);
         }
       });
@@ -65,44 +47,52 @@ function PageCreate() {
   }, [getPageSchema]);
 
   useEffect(() => {
-    getDomains();
-  }, [getDomains]);
+    if (!pageFields) {
+      return;
+    }
+
+    const hasTitle = pageFields.find((field) => field.name === 'title').value;
+    const hasDomain = pageFields.find((field) => field.name === 'domain').value;
+    const hasSlug = pageFields.find((field) => field.name === 'slug').value;
+
+    setIsAllowCreate(!!hasTitle && !!hasDomain && !!hasSlug);
+  }, [pageFields]);
 
   const handleChange = (event) => {
     const { name, value, type } = event.target;
 
-    if (type === 'checkbox') {
-      setPagesData({ ...pageData, [name]: !pageData[name] });
-    } else {
-      setPagesData({ ...pageData, [name]: value });
-    }
+    setPageFields([
+      ...pageFields.map((field) => {
+        if (field.name === name) {
+          return {
+            ...field,
+            value: (type === 'checkbox') ? !field.value : value,
+          };
+        }
+        return field;
+      })
+    ]);
+
+    setIsAllowCreate(Boolean());
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!pageData.title || !pageData.slug) {
+    if (!isAllowCreate) {
       return;
     }
 
-    const currentDomain = domains.find((domain) => domain.domain === pageData.domain);
-
-    FETCH.postData(
-      `${API_URL}/pages`,
-      {
-        ...pageData,
-        domainId: currentDomain.id,
-      },
-    ).then((response) => {
-      if (response.ok) {
-        setIsCreated(true);
-        setPagesData({
-          ...pageData,
-          id: response.id,
-        });
-      }
-      setStatusMessage(response, null, 'New page was created', response.error);
-    });
+    FETCH.postData(`${API_URL}/pages`, { fields: pageFields })
+      .then((response) => {
+        if (response.ok) {
+          setRedirectData({
+            domainId: response.domainId,
+            webPageId: response.webPageId,
+          });
+        }
+        setStatusMessage(response, null, 'New page was created', response.error);
+      });
   };
 
   return (
@@ -110,8 +100,8 @@ function PageCreate() {
       className={classes.root}
       title="Create New Page"
     >
-      {isCreated && pageData.id && (
-        <Redirect to={`/pages/${selectedDomain.id}/${pageData.id}`} />
+      {redirectData && (
+        <Redirect to={`/pages/${redirectData.domainId}/${redirectData.webPageId}`} />
       )}
       <Container maxWidth="lg">
         <PageHeader
@@ -120,9 +110,9 @@ function PageCreate() {
         />
         <FormPageCreate
           className={classes.section}
-          pageSchema={pageSchema}
-          pageData={pageData}
+          pageFields={pageFields}
           domains={domains}
+          isAllowCreate={isAllowCreate}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
         />

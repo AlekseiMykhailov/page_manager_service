@@ -1,4 +1,3 @@
-/* eslint-disable react/no-multi-comp */
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -18,9 +17,7 @@ import {
   Typography,
   colors,
 } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Edit, Archive, Visibility, FindInPage } from '@material-ui/icons';
 import Label from 'src/components/Label';
 
 const useStyles = makeStyles((theme) => ({
@@ -49,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'block',
   },
   updatedAt: {
-    minWidth: '200px',
+    minWidth: '220px',
   },
   label: {
     color: colors.common.white,
@@ -66,6 +63,12 @@ const useStyles = makeStyles((theme) => ({
       color: colors.blue[900],
     }
   },
+  index: {
+    color: colors.green[600],
+  },
+  noindex: {
+    color: colors.red[600],
+  },
   disabled: {
     marginLeft: theme.spacing(2),
     color: colors.grey[300],
@@ -75,7 +78,6 @@ const useStyles = makeStyles((theme) => ({
 function PagesList({
   className,
   pages,
-  domain,
   deleteWepPage,
 }) {
   const classes = useStyles();
@@ -118,18 +120,21 @@ function PagesList({
                   <Box component="div">
                     <Label color={colors.green[600]}>
                       <a
-                        href={page.id === domain.homePageId
+                        href={page.isHomePage
                           ? `http://${page.domain}`
                           : `http://${page.domain}/${page.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={classes.label}
                       >
-                        {page.id === domain.homePageId
-                          ? 'Published as Home Page'
-                          : 'Published'}
+                        {page.isHomePage ? 'Published as Home Page' : 'Published'}
                       </a>
                     </Label>
+                    {/* {!!page.disableIndexing && (
+                      <Label color={colors.red[600]} className={classes.label}>
+                        No Index
+                      </Label>
+                    )} */}
                   </Box>
                 )}
                 <Box component="div">
@@ -139,6 +144,11 @@ function PagesList({
                 </Box>
               </Box>
 
+              <Tooltip title="Indexing of the Page">
+                <Box component="span" className={(page.disableIndexing) ? classes.noindex : classes.index}>
+                  <FindInPage />
+                </Box>
+              </Tooltip>
               <Tooltip title="Preview">
                 <a
                   href={`${API_URL}/preview/${page.id}`}
@@ -146,7 +156,7 @@ function PagesList({
                   rel="noopener noreferrer"
                   className={classes.button}
                 >
-                  <VisibilityIcon />
+                  <Visibility />
                 </a>
               </Tooltip>
               <Tooltip title="Edit">
@@ -158,10 +168,10 @@ function PagesList({
                   underline="none"
                   className={classes.button}
                 >
-                  <EditIcon />
+                  <Edit />
                 </Link>
               </Tooltip>
-              <Tooltip title="Delete Page">
+              <Tooltip title="Archive  Page">
                 <Box component="span">
                   <Button
                     color="inherit"
@@ -171,7 +181,7 @@ function PagesList({
                     disabled={Object.prototype.hasOwnProperty.call(page, 'publishedAt')}
                     onClick={deleteWepPage}
                   >
-                    <DeleteIcon />
+                    <Archive />
                   </Button>
                 </Box>
               </Tooltip>
@@ -186,7 +196,6 @@ function PagesList({
 PagesList.propTypes = {
   className: PropTypes.string,
   pages: PropTypes.array,
-  domain: PropTypes.object,
   deleteWepPage: PropTypes.func,
 };
 

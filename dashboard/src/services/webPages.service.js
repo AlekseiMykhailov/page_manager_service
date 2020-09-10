@@ -1,20 +1,22 @@
-const { v4 } = require('uuid');
-
 module.exports = ({
   name: 'webPages',
   actions: {
 
     createWebPage: {
       params: {
-        domain: 'string',
-        slug: 'string',
-        title: 'string',
-        description: 'string',
+        fields: 'array',
       },
-      handler(ctx) {
+      async handler(ctx) {
+        const { fields } = ctx.params;
+        const pageData = fields.reduce((acc, field) => ({
+          ...acc,
+          [field.name]: field.value,
+        }), {});
         const {
-          domainId, domain, slug, title, description
-        } = ctx.params;
+          domain, slug, title, description, disableIndexing
+        } = pageData;
+        const domainId = await this.broker.call('dbDomainSettings.getDomainDataByDomain', { domain: pageData.domain })
+          .then((res) => res.domainData.id);
 
         return this.broker.call('dbRedirects.checkSlug', { domainId, slug })
           .then((response) => {
@@ -23,10 +25,15 @@ module.exports = ({
             }
 
             return this.broker.call('dbWebPages.createWebPage', {
-              domainId: +domainId, domain, slug, title, description
+              domainId,
+              domain,
+              slug,
+              title,
+              description,
+              disableIndexing,
             });
           })
-          .then(({ id }) => ({ ok: true, id }))
+          .then(({ id }) => ({ ok: true, domainId, webPageId: id }))
           .catch((error) => {
             this.logger.error('ERROR webPages.createWebPage: ', error);
             return JSON.stringify(error, null, 2);
@@ -36,14 +43,19 @@ module.exports = ({
 
     updateWebPage: {
       params: {
-        slug: 'string',
-        title: 'string',
-        description: 'string',
+        fields: 'array',
       },
-      handler(ctx) {
+      async handler(ctx) {
+        const { id, fields } = ctx.params;
+        const pageData = fields.reduce((acc, field) => ({
+          ...acc,
+          [field.name]: field.value,
+        }), {});
         const {
-          domainId, id, slug, title, description
-        } = ctx.params;
+          slug, title, description, disableIndexing
+        } = pageData;
+        const domainId = await this.broker.call('dbDomainSettings.getDomainDataByDomain', { domain: pageData.domain })
+          .then((res) => res.domainData.id);
 
         return this.broker.call('dbRedirects.checkSlug', { domainId, slug })
           .then((response) => {
@@ -63,9 +75,14 @@ module.exports = ({
                 slug: oldSlug,
               });
             }
+            return null;
           })
           .then(() => this.broker.call('dbWebPages.updateWebPage', {
-            id, slug, title, description
+            id: +id,
+            slug,
+            title,
+            description,
+            disableIndexing,
           }))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
@@ -115,17 +132,16 @@ module.exports = ({
       params: {
         pageId: 'string',
       },
-      handler(ctx) {
-        const { pageId } = ctx.params;
-        let webPage;
+      async handler(ctx) {
+        const id = +ctx.params.pageId;
 
-        return this.broker.call('dbWebPages.getWebPageById', { id: +pageId })
-          .then((res) => {
-            webPage = res.data;
+        const { data, sections, fields } = await this.collectWebPageEntities(id);
 
-            return this.broker.call('sections.getSectionsForWebPage', { webPageId: webPage.id });
-          })
-          .then((sections) => this.broker.call('builder.createWebPageHTML', { webPage, sections }))
+        return this.broker.call('builder.createWebPageHTML', {
+          webPage: data,
+          sections,
+          fields,
+        })
           .catch((err) => {
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
@@ -145,14 +161,25 @@ module.exports = ({
       },
     },
 
-    getListWebPages: {
-      handler() {
-        return this.broker.call('dbWebPages.getAllWebPages')
-          .then(({ pages }) => JSON.stringify({ ok: true, pages }, null, 2))
-          .catch((err) => {
-            this.logger.error('ERROR: ', err);
-            return JSON.stringify(err, null, 2);
-          });
+    listWebPages: {
+      async handler() {
+        const listWebPages = await this.broker.call('dbWebPages.listWebPages');
+        const listPublished = await this.broker.call('dbPublishedPage.listPublishedPages');
+        const listDomains = await this.broker.call('dbDomainSettings.listDomains');
+
+        const pages = listWebPages.map((page) => {
+          const publishData = listPublished.find((published) => published.webPageId === page.id);
+          const domainData = listDomains.find((domain) => domain.id === page.domainId);
+
+          return {
+            ...page,
+            domain: domainData.domain,
+            isHomePage: domainData.homePageId === page.id,
+            publishedAt: publishData && publishData.publishedAt,
+          };
+        });
+
+        return JSON.stringify({ ok: true, pages }, null, 2);
       },
     },
 
@@ -160,19 +187,18 @@ module.exports = ({
       params: {
         webPageId: 'string',
       },
-      handler(ctx) {
-        const webPageId = Number(ctx.params.webPageId);
-        let webPage;
+      async handler(ctx) {
+        const id = +ctx.params.webPageId;
+        const { data, sections, fields } = await this.collectWebPageEntities(id);
 
-        return this.broker.call('dbWebPages.getWebPageById', { id: webPageId })
-          .then((res) => {
-            webPage = res.data;
-            return this.broker.call('sections.getSectionsForWebPage', { webPageId });
-          })
-          .then((sections) => this.broker.call('builder.createWebPageHTML', { webPage, sections }))
+        return this.broker.call('builder.createWebPageHTML', {
+          webPage: data,
+          sections,
+          fields,
+        })
           .then((html) => this.broker.call('publish.createPublishedPage', {
-            ...webPage,
-            webPageId,
+            ...data,
+            webPageId: id,
             html,
           }))
           .then((response) => JSON.stringify(response, null, 2))
@@ -184,18 +210,19 @@ module.exports = ({
     },
 
     updatePublishedWebPage: {
-      handler(ctx) {
-        const { webPageId } = ctx.params;
-        let webPage;
+      async handler(ctx) {
+        const id = +ctx.params.webPageId;
+        const { data, sections, fields } = await this.collectWebPageEntities(id);
 
-        return this.broker.call('dbWebPages.getWebPageById', { id: +webPageId })
-          .then((res) => { webPage = res.data; })
-          .then(() => this.broker.call('sections.getSectionsForWebPage', { webPageId: +webPageId }))
-          .then((sections) => this.broker.call('builder.createWebPageHTML', { webPage, sections }))
+        return this.broker.call('builder.createWebPageHTML', {
+          webPage: data,
+          sections,
+          fields,
+        })
           .then((html) => this.broker.call('dbPublishedPage.updatePublishedPage', {
-            webPageId: webPage.id,
-            domain: webPage.domain,
-            slug: webPage.slug,
+            webPageId: id,
+            domain: data.domain,
+            slug: data.slug,
             html,
           }))
           .then((response) => JSON.stringify(response, null, 2))
@@ -249,36 +276,104 @@ module.exports = ({
       },
     },
 
-    editWebPage: {
+    formEditWebPage: {
       params: {
         id: { type: 'string' },
       },
-      handler(ctx) {
-        const { id } = ctx.params;
-        const response = {};
+      async handler(ctx) {
+        const id = +ctx.params.id;
 
-        return this.broker.call('webPages.getWebPageById', { id: +id })
-          .then((webPage) => { response.webPage = webPage.data; })
-          .then(() => this.broker.call('dbDomainSettings.getDomainData', { domainId: response.webPage.domainId }))
-          .then((domain) => { response.domain = domain.domainData; })
-          .then(() => this.broker.call('sections.getSectionsForWebPage', { webPageId: response.webPage.id }))
-          .then((sections) => {
-            response.sections = sections;
-            return sections.map((section) => section.id);
+        const webPage = await this.broker.call('webPages.getWebPageById', { id }).then((res) => res.data);
+        const [
+          domainData,
+          webPageRedirects,
+          webPageSections,
+          webPagePublishData,
+          webPageSchema,
+          sectionSchemas,
+        ] = await Promise.all([
+          this.broker.call('dbDomainSettings.getDomainData', { domainId: webPage.domainId }).then((res) => res.domainData),
+          this.broker.call('dbRedirects.getWebPageRedirects', { webPageId: webPage.id }).then((res) => res.redirects),
+          this.broker.call('sections.getSectionsForWebPage', { webPageId: webPage.id }),
+          this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId: webPage.id }).then((res) => res.data),
+          this.broker.call('schemas.getWebPageSchema').then((res) => res.schema),
+          this.broker.call('schemas.listSectionSchemas').then((res) => res.schemas),
+        ]);
+        const webPageFields = await this.broker.call('dbFields.getFieldsBySectionId', {
+          sectionIds: webPageSections.map((section) => section.id)
+        }).then((res) => res.fields);
+        const { domain, slug, title } = webPage;
+
+        const preparedData = {
+          id,
+          domain,
+          slug,
+          title,
+          isHomePage: domainData.homePageId === webPage.id,
+          publishedAt: (webPagePublishData && webPagePublishData.publishedAt) || false,
+          webPageFields: [
+            ...webPageSchema.map((field) => ({
+              ...field,
+              value: webPage[field.name],
+            })),
+          ],
+          redirects: webPageRedirects,
+          sections: webPageSections.map((section) => {
+            const sectionSchema = sectionSchemas.find((schema) => schema.name === section.schema);
+            const sectionFields = webPageFields.filter((field) => field.sectionId === section.id);
+
+            const preparedSection = {
+              ...section,
+              name: sectionSchema.name,
+              title: sectionSchema.title,
+              schema: sectionSchema,
+              fields: webPageFields.filter((field) => (field.sectionId === section.id && !field.name.includes('.')))
+                .map((field) => ({
+                  ...sectionSchema.fields.find((fieldSchema) => fieldSchema.name === field.name),
+                  ...field,
+                })),
+              fieldsets: sectionSchema.fieldsets.map((fieldset) => ({
+                ...fieldset,
+                fieldsBlocks: [],
+              })),
+            };
+
+            sectionFields.forEach(async (fieldData) => {
+              const fieldsBlockIndex = fieldData.name.replace(/\D/g, '');
+
+              if (fieldsBlockIndex) {
+                const fieldsetName = fieldData.name.split('[')[0];
+                const targetFieldset = preparedSection.fieldsets.find((fieldset) => (
+                  fieldset.name === fieldsetName
+                ));
+
+                const fieldSchema = targetFieldset.itemFields.find((itemFieldSchema) => (
+                  itemFieldSchema.name === fieldData.name.replace(/\[\d+\]/g, '')
+                ));
+
+                const preparedField = { ...fieldSchema, ...fieldData };
+
+                if (targetFieldset.fieldsBlocks[fieldsBlockIndex]) {
+                  targetFieldset.fieldsBlocks[fieldsBlockIndex] = [
+                    ...targetFieldset.fieldsBlocks[fieldsBlockIndex],
+                    preparedField,
+                  ];
+                } else {
+                  targetFieldset.fieldsBlocks[fieldsBlockIndex] = [preparedField];
+                }
+              }
+            });
+
+            preparedSection.fieldsets = preparedSection.fieldsets.map((fieldset) => ({
+              ...fieldset,
+              fieldsBlocks: fieldset.fieldsBlocks.filter(Boolean),
+            }));
+
+            return preparedSection;
           })
-          .then((sectionIds) => this.broker.call('dbFields.getFieldsBySectionId', { sectionIds }))
-          .then(({ fields }) => response.sections.map((section) => ({
-            ...section,
-            fields: fields.filter((field) => field.sectionId === section.id),
-          })))
-          .then((sections) => { response.sections = sections; })
-          .then(() => this.broker.call('dbRedirects.getWebPageRedirects', { webPageId: response.webPage.id }))
-          .then(({ redirects }) => { response.redirects = redirects; })
-          .then(() => JSON.stringify({ ok: true, ...response }, null, 2))
-          .catch((err) => {
-            this.logger.error('ERROR: ', err);
-            return JSON.stringify(err, null, 2);
-          });
+        };
+
+        return JSON.stringify({ ok: true, data: preparedData }, null, 2);
       },
     },
 
@@ -311,15 +406,15 @@ module.exports = ({
           })
           .then(() => this.broker.call('sections.getSectionsForWebPage', { webPageId: cloningWebPageId }))
           .then((sections) => {
-            cloneData.sections = sections.map(({ id, order, schemaId }) => ({
+            cloneData.sections = sections.map(({ id, order, schema }) => ({
               donorSectionId: id,
               order,
-              schemaId,
+              schema,
               webPageId: cloneData.webPageId,
             }));
           })
-          .then(() => cloneData.sections.map(({ order, schemaId, webPageId }) => (
-            { order, schemaId, webPageId }
+          .then(() => cloneData.sections.map(({ order, schema, webPageId }) => (
+            { order, schema, webPageId }
           )))
           .then((sections) => this.broker.call('dbSections.bulkCreateSection', { sections }))
           .then((createdSections) => {
@@ -333,7 +428,9 @@ module.exports = ({
           .then(({ fields }) => fields.map(({
             sectionId, name, label, type, order, value
           }) => {
-            const newSection = cloneData.sections.find((section) => section.donorSectionId === sectionId);
+            const newSection = cloneData.sections.find((section) => (
+              section.donorSectionId === sectionId
+            ));
             if (newSection) {
               return {
                 sectionId: newSection.id,
@@ -344,8 +441,14 @@ module.exports = ({
                 value,
               };
             }
+            return null;
           }))
-          .then((fields) => this.broker.call('dbFields.bulkCreateFields', { fields }))
+          .then((fields) => {
+            if (fields) {
+              return this.broker.call('dbFields.bulkCreateFields', { fields });
+            }
+            return null;
+          })
           .then(() => JSON.stringify({ ok: true, id: cloneData.webPageId }, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
@@ -384,6 +487,65 @@ module.exports = ({
             this.logger.error('ERROR: ', err);
             return JSON.stringify(err, null, 2);
           });
+      },
+    },
+  },
+
+  methods: {
+    collectWebPageEntities: {
+      async handler(id) {
+        const webPage = {};
+
+        webPage.data = await this.broker.call('dbWebPages.getWebPageById', { id })
+          .then(({ data }) => data);
+        webPage.sections = await this.broker.call('sections.getSectionsForWebPage', { webPageId: id });
+        const sectionIds = webPage.sections.map((section) => section.id);
+        const webPageFields = await this.broker.call('dbFields.getFieldsBySectionId', { sectionIds })
+          .then(({ fields }) => fields);
+        webPage.fields = await this.prepareFields(webPageFields);
+
+        return webPage;
+      },
+    },
+
+    prepareFields: {
+      async handler(fields) {
+        const preparedFields = [];
+
+        fields.forEach(async (field) => {
+          if (field.name.includes('instructors')) {
+            const instructorFields = await this.prepareInstructorsFields(field);
+            preparedFields.push(...instructorFields);
+          }
+          preparedFields.push(field);
+        });
+
+        return preparedFields;
+      },
+    },
+
+    prepareInstructorsFields: {
+      async handler(field) {
+        const instructorsList = await this.broker.call('dbInstructors.listInstructors')
+          .then(({ instructors }) => instructors);
+        const fieldsBlockIndex = field.name.replace(/\D/g, '');
+        const instructorData = instructorsList.find((instructor) => (
+          instructor.id === +field.value
+        ));
+
+        const instructorFields = Object.entries(instructorData).map((entry) => {
+          if (entry[0] === 'id') {
+            return null;
+          }
+
+          return {
+            sectionId: field.sectionId,
+            name: `instructors[${fieldsBlockIndex}].${entry[0]}`,
+            value: entry[1],
+          };
+        }).filter(Boolean);
+
+        return instructorFields;
       },
     },
   },

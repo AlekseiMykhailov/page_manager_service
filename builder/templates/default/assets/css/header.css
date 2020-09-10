@@ -1,4 +1,4 @@
-.with-image {
+.header {
   display: flex;
   align-items: center;
   min-height: 100vh;
@@ -8,7 +8,7 @@
   background-repeat: no-repeat;
 }
 
-.with-image__wrapper {
+.header__wrapper {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
@@ -18,28 +18,29 @@
   justify-items: center;
 }
 
-.with-image__content-block {
+.header__content-block {
   max-width: 400px;
   background-color: #fff;
   border-radius: 2rem;
+  padding-right: 2rem;
 }
 
-.with-image__title {
+.header__title {
   text-align: left;
 }
 
 @media screen and (max-width: 1024px) {
-  .with-image {
+  .header {
     align-items: flex-start;
     background-position: right bottom;
   }
 
-  .with-image__content {
+  .header__content {
     max-width: 100%;
     text-align: center;
   }
 
-  .with-image__title {
+  .header__title {
     text-align: center;
   }
 }

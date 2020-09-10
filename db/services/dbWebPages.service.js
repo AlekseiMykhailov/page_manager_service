@@ -18,12 +18,7 @@ module.exports = {
         description: 'string',
       },
       handler(ctx) {
-        const {
-          domainId, domain, slug, title, description
-        } = ctx.params;
-        const webPage = {
-          domainId, domain, slug, title, description
-        };
+        const webPage = { ...ctx.params };
 
         return this.settings.model.create(webPage)
           .then((res) => ({ ok: true, id: res.dataValues.id }))
@@ -37,10 +32,12 @@ module.exports = {
     updateWebPage: {
       handler(ctx) {
         const {
-          id, slug, title, description
+          id, slug, title, description, disableIndexing
         } = ctx.params;
 
-        return this.settings.model.update({ slug, title, description }, {
+        return this.settings.model.update({
+          slug, title, description, disableIndexing
+        }, {
           where: { id }
         })
           .then(() => ({ ok: true }))
@@ -67,7 +64,7 @@ module.exports = {
       },
     },
 
-    checkWebPageBySlug: {
+    getWebPageBySlug: {
       params: {
         domain: 'string',
         slug: 'string',
@@ -81,12 +78,13 @@ module.exports = {
             slug,
           }
         })
-          .then((response) => {
-            if (response) {
-              return { ok: true };
-            }
-
-            return { ok: false };
+          .then(({ dataValues }) => {
+            const {
+              id, domainId, title, description,disableIndexing, updatedAt
+            } = dataValues;
+            return {
+              id, domainId, domain, slug, title, description, disableIndexing, updatedAt
+            };
           })
           .then((data) => ({ ok: true, data }))
           .catch((error) => ({ ok: false, error }));
@@ -103,10 +101,10 @@ module.exports = {
         return this.settings.model.findOne({ where: { id } })
           .then(({ dataValues }) => {
             const {
-              domainId, domain, slug, title, description, updatedAt
+              domainId, domain, slug, title, description, disableIndexing, updatedAt
             } = dataValues;
             return {
-              id, domainId, domain, slug, title, description, updatedAt
+              id, domainId, domain, slug, title, description, disableIndexing, updatedAt
             };
           })
           .then((data) => ({ ok: true, data }))
@@ -137,15 +135,14 @@ module.exports = {
       },
     },
 
-    getAllWebPages: {
+    listWebPages: {
       handler() {
         return this.settings.model.findAll({ raw: true })
           .then((pages) => (pages.map(({
-            id, domainId, domain, slug, title, description, updatedAt
+            id, domainId, domain, slug, title, description, disableIndexing, updatedAt
           }) => ({
-            id, domainId, domain, slug, title, description, updatedAt
+            id, domainId, domain, slug, title, description, disableIndexing, updatedAt
           }))))
-          .then((pages) => ({ ok: true, pages }))
           .catch((error) => ({ ok: false, error }));
       },
     },

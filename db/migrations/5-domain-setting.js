@@ -25,6 +25,9 @@ module.exports = {
           key: 'id',
         },
       },
+      robotsTxt: {
+        type: DataTypes.STRING,
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

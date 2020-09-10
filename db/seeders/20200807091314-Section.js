@@ -15,6 +15,34 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        schema: 'header',
+        webPageId: 2,
+        order: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        schema: 'benefits',
+        webPageId: 2,
+        order: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        schema: 'header',
+        webPageId: 3,
+        order: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        schema: 'benefits',
+        webPageId: 3,
+        order: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ], {});
   },
 

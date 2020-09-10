@@ -9,6 +9,10 @@ module.exports = {
   },
   actions: {
 
+
+    // TODO: clean redundant actions
+
+    
     addDomain: {
       params: {
         domain: 'string',
@@ -41,11 +45,12 @@ module.exports = {
       params: {
         id: 'number',
         homePageId: 'number',
+        robotsTxt: 'string',
       },
       handler(ctx) {
-        const { id, homePageId } = ctx.params;
+        const { id, homePageId, robotsTxt } = ctx.params;
 
-        return this.settings.model.update({ homePageId }, {
+        return this.settings.model.update({ homePageId, robotsTxt }, {
           where: { id },
         })
           .then(() => ({ ok: true }))
@@ -115,7 +120,7 @@ module.exports = {
       },
     },
 
-    getDomains: {
+    listDomains: {
       handler() {
         return this.settings.model.findAll({ raw: true })
           .then((res) => res.map(({
@@ -123,7 +128,6 @@ module.exports = {
           }) => ({
             id, domain, name, homePageId
           })))
-          .then((domains) => ({ ok: true, domains }))
           .catch((error) => ({ ok: false, error }));
       },
     },

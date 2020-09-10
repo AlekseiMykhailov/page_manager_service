@@ -5,7 +5,9 @@ import { makeStyles } from '@material-ui/styles';
 import {
   Card,
   CardContent,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   Select,
   InputLabel,
   MenuItem,
@@ -22,9 +24,9 @@ const useStyles = makeStyles((theme) => ({
 
 function FormPageCreate({
   className,
-  pageSchema,
-  pageData,
+  pageFields,
   domains,
+  isAllowCreate,
   handleChange,
   handleSubmit,
 }) {
@@ -35,11 +37,12 @@ function FormPageCreate({
       className={clsx(classes.root, className)}
     >
       <CardContent>
-        {pageSchema && pageData && (
+        {pageFields && domains.length > 0 && (
           <form autoComplete="off" onSubmit={handleSubmit}>
-            {Object.values(pageSchema)
-              .sort((a, b) => a.order - b.order)
-              .map(({ name, label, type }) => {
+            {pageFields.sort((a, b) => a.order - b.order)
+              .map(({
+                name, description, type, value
+              }) => {
                 if (name === 'domain') {
                   return (
                     <FormControl
@@ -49,14 +52,14 @@ function FormPageCreate({
                       key={name}
                     >
                       <InputLabel id={`${name}-label`}>
-                        {label}
+                        {description}
                       </InputLabel>
                       <Select
                         fullWidth
                         id={name}
-                        label={label}
+                        label={description}
                         name={name}
-                        value={pageData[name]}
+                        value={value}
                         variant="outlined"
                         onChange={handleChange}
                       >
@@ -70,15 +73,32 @@ function FormPageCreate({
                   );
                 }
 
+                if (type === 'checkbox') {
+                  return (
+                    <FormControlLabel
+                      control={(
+                        <Checkbox
+                          checked={value}
+                          onChange={handleChange}
+                          name={name}
+                          color="primary"
+                        />
+                        )}
+                      label={description}
+                      key={name}
+                    />
+                  );
+                }
+
                 return (
                   <TextField
                     fullWidth
-                    label={label}
+                    label={description}
                     margin="normal"
                     name={name}
                     type={type}
                     onChange={handleChange}
-                    value={pageData[name]}
+                    value={value}
                     variant="outlined"
                     key={name}
                   />
@@ -91,7 +111,7 @@ function FormPageCreate({
               size="large"
               type="submit"
               variant="contained"
-              disabled={!pageData.domain || !pageData.slug || !pageData.title}
+              disabled={!isAllowCreate}
             >
               Create Page
             </Button>
@@ -104,9 +124,9 @@ function FormPageCreate({
 
 FormPageCreate.propTypes = {
   className: PropTypes.string,
-  pageSchema: PropTypes.object,
-  pageData: PropTypes.object,
+  pageFields: PropTypes.array,
   domains: PropTypes.array,
+  isAllowCreate: PropTypes.bool,
   handleChange: PropTypes.func,
   handleSubmit: PropTypes.func,
 };

@@ -1,6 +1,12 @@
-import PageviewIcon from '@material-ui/icons/Pageview';
-import PostAddIcon from '@material-ui/icons/PostAdd';
-import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
+import {
+  Domain,
+  GroupAdd,
+  Pageview,
+  PostAdd,
+  SupervisorAccount,
+  SettingsApplications,
+  Web,
+} from '@material-ui/icons';
 
 export default [
   {
@@ -9,35 +15,56 @@ export default [
       {
         title: 'Pages',
         href: '/pages',
-        icon: PageviewIcon,
+        icon: Pageview,
         items: [
           {
+            title: 'Create New Page',
+            href: '/pages/create',
+            icon: PostAdd,
+          },
+          {
             title: 'JobEasy',
-            href: '/pages/1'
+            href: '/pages/1',
+            icon: Web,
           },
           {
             title: 'Careerist',
-            href: '/pages/2'
+            href: '/pages/2',
+            icon: Web,
           }
         ]
       },
       {
-        title: 'Create new Page',
-        href: '/pages/create',
-        icon: PostAddIcon,
+        title: 'Instructors',
+        href: '/instructors',
+        icon: SupervisorAccount,
+        items: [
+          {
+            title: 'Create New Instructor',
+            href: '/instructors/create',
+            icon: GroupAdd,
+          },
+          {
+            title: 'Instructors List',
+            href: '/instructors',
+            icon: SupervisorAccount,
+          },
+        ],
       },
       {
         title: 'Domains Settings',
         href: '/domains-settings',
-        icon: SettingsApplicationsIcon,
+        icon: SettingsApplications,
         items: [
           {
             title: 'JobEasy',
-            href: '/domains-settings/1'
+            href: '/domains-settings/1',
+            icon: Domain,
           },
           {
             title: 'Careerist',
-            href: '/domains-settings/2'
+            href: '/domains-settings/2',
+            icon: Domain,
           },
         ],
       },

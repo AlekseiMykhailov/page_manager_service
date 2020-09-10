@@ -30,20 +30,27 @@ module.exports = ({
         sectionId: 'string',
       },
       handler(ctx) {
-        const { sectionId, fields } = ctx.params;
-        const preparedFields = fields
-          .filter((field) => field.value.trim())
-          .map((field) => ({ ...field, sectionId: +sectionId }));
+        const { sectionId, fields, deletingFieldIds } = ctx.params;
+        const preparedFields = fields.map((field) => ({ ...field, sectionId: +sectionId }));
 
-        const fieldsForDelete = fields
-          .filter((field) => field.id && !field.value.trim())
-          .map((field) => field.id);
-
-        return this.broker.call('dbFields.deleteFields', { fieldIds: fieldsForDelete })
-          .then(() => this.broker.call('dbFields.createFields', { fields: preparedFields }))
+        return this.broker.call('dbFields.createFields', { fields: preparedFields })
+          .then(() => this.broker.call('dbFields.bulkDeleteFields', { fieldIds: deletingFieldIds }))
           .then(() => JSON.stringify({ ok: true }))
           .catch((error) => {
             this.logger.error('ERROR SECTION WITH FIELDS UPDATE: ', error);
+            return { ok: false, error };
+          });
+      },
+    },
+
+    deleteSectionFields: {
+      handler(ctx) {
+        const { fieldIds } = ctx.params;
+
+        return this.broker.call('dbFields.bulkDeleteFields', { fieldIds })
+          .then(() => JSON.stringify({ ok: true }))
+          .catch((error) => {
+            this.logger.error('ERROR SECTION FIELDS DELETE: ', error);
             return { ok: false, error };
           });
       },

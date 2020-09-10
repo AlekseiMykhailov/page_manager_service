@@ -3,9 +3,9 @@ module.exports = ({
   actions: {
     setDomainSettings: {
       handler(ctx) {
-        const { id, homePageId } = ctx.params;
+        const { id, homePageId, robotsTxt } = ctx.params;
 
-        return this.broker.call('dbDomainSettings.setDomainSettings', { id, homePageId })
+        return this.broker.call('dbDomainSettings.setDomainSettings', { id, homePageId, robotsTxt })
           .then((res) => JSON.stringify(res, null, 2));
       },
     },
@@ -29,10 +29,30 @@ module.exports = ({
       },
     },
 
-    getDomains: {
+    listDomains: {
       handler() {
-        return this.broker.call('dbDomainSettings.getDomains')
+        return this.broker.call('dbDomainSettings.listDomains')
           .then((res) => JSON.stringify(res, null, 2));
+      },
+    },
+
+    isHomePage: {
+      params: {
+        domain: 'string',
+        slug: 'string',
+      },
+      async handler(ctx) {
+        const { domain, slug } = ctx.params;
+        const webPageId = await this.broker.call('dbWebPages.getWebPageBySlug', { domain, slug })
+          .then(({ data }) => (data ? data.id : null));
+
+        return this.broker.call('dbDomainSettings.getDomainDataByDomain', { domain })
+          .then(({ domainData }) => {
+            if (domainData && domainData.homePageId === webPageId) {
+              return { ok: true };
+            }
+            return { ok: false };
+          });
       },
     },
 

@@ -25,6 +25,9 @@ module.exports = {
     description: {
       type: DataTypes.STRING,
     },
+    disableIndexing: {
+      type: DataTypes.BOOLEAN,
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,

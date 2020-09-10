@@ -32,7 +32,7 @@ module.exports = {
       {
         path: '/domains',
         aliases: {
-          'GET /': 'domainSettings.getDomains',
+          'GET /': 'domainSettings.listDomains',
           'GET /:id': 'domainSettings.getDomainSettings',
           'PUT /': 'domainSettings.setDomainSettings',
         },
@@ -69,8 +69,8 @@ module.exports = {
       {
         path: '/pages',
         aliases: {
-          'GET /': 'webPages.getListWebPages',
-          'GET /:id': 'webPages.editWebPage',
+          'GET /': 'webPages.listWebPages',
+          'GET /:id': 'webPages.formEditWebPage',
           'POST /': 'webPages.createWebPage',
           'POST /clone': 'webPages.cloneWebPage',
           'PUT /:id': 'webPages.updateWebPage',
@@ -120,6 +120,7 @@ module.exports = {
           'PUT /:sectionId': 'sections.updateSectionFields',
           'PUT /order/:sectionId': 'sections.updateSectionOrder',
           'DELETE /:id': 'sections.deleteSection',
+          'DELETE /fields': 'sections.deleteSectionFields',
         },
         authorization: false,
         bodyParsers: {
@@ -136,8 +137,30 @@ module.exports = {
       {
         path: '/schemas',
         aliases: {
-          'GET /sections': 'schemas.getSectionSchemas',
-          'GET /pages': 'schemas.getWebPageSchema',
+          'GET /sections': 'schemas.listSectionSchemas',
+          'GET /page': 'schemas.getWebPageSchema',
+          'GET /instructor': 'schemas.getInstructorSchema',
+        },
+        authorization: false,
+        bodyParsers: {
+          json: true,
+          urlencoded: { extended: true }
+        },
+        onBeforeCall: (ctx, route, req, res) => {
+          ctx.meta.$responseType = 'application/json; charset=utf-8';
+          ctx.meta.userAgent = req.headers['user-agent'];
+        },
+      },
+
+      // INSTRUCTORS
+      {
+        path: '/instructors',
+        aliases: {
+          'GET /': 'instructors.listInstructors',
+          'GET /:id': 'instructors.formEditInstructor',
+          'POST /': 'instructors.createInstructor',
+          'PUT /:id': 'instructors.updateInstructor',
+          'DELETE /:id': 'instructors.deleteInstructor',
         },
         authorization: false,
         bodyParsers: {

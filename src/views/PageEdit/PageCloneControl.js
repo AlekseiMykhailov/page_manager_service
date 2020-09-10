@@ -30,9 +30,6 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(3),
     color: theme.palette.common.white,
   },
-  cloneButton: {
-    minWidth: '200px',
-  },
   progress: {
     position: 'absolute',
     top: '50%',

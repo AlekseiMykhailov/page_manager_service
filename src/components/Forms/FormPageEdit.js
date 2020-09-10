@@ -5,10 +5,10 @@ import { makeStyles } from '@material-ui/styles';
 import {
   ButtonGroup,
   Button,
+  Checkbox,
+  FormControlLabel,
   Grid,
   TextField,
-  Checkbox,
-  InputLabel,
 } from '@material-ui/core';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
@@ -20,10 +20,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function PageEditForm({
+function FormPageEdit({
   className,
-  pageSchema,
-  pageData,
+  fields,
   handleSubmit,
   handleChange,
 }) {
@@ -35,39 +34,40 @@ function PageEditForm({
     <form
       id="wep-page-data-form"
       className={className}
-      title={pageData.title}
       action={`${API_URL}/pages/${slug}`}
       onSubmit={handleSubmit}
     >
-      {Object.values(pageSchema)
-        .sort((a, b) => a.order - b.order)
-        .map(({ name, label, type }) => {
+      {fields.sort((a, b) => a.order - b.order)
+        .map(({
+          name, description, type, value
+        }) => {
           if (type === 'checkbox') {
             return (
-              <InputLabel htmlFor={name} key={name}>
-                <Checkbox
-                  id={name}
-                  label={label}
-                  margin="normal"
-                  name={name}
-                  variant="outlined"
-                  checked={pageData[name]}
-                  onChange={handleChange}
-                />
-                Set as home page
-              </InputLabel>
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    checked={value}
+                    onChange={handleChange}
+                    name={name}
+                    color="primary"
+                  />
+                  )}
+                label={description}
+                key={name}
+              />
             );
           }
 
           return (
             <TextField
               fullWidth
-              label={label}
+              label={description}
               margin="normal"
               name={name}
+              type={type}
               disabled={name === 'domain'}
               variant="outlined"
-              value={pageData[name]}
+              value={value}
               onChange={handleChange}
               key={name}
             />
@@ -103,18 +103,15 @@ function PageEditForm({
   );
 }
 
-PageEditForm.defaultProps = {
+FormPageEdit.defaultProps = {
   className: '',
 };
 
-PageEditForm.propTypes = {
-  pageSchema: PropTypes.object,
-  pageData: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-  }).isRequired,
+FormPageEdit.propTypes = {
+  fields: PropTypes.array.isRequired,
   className: PropTypes.string,
   handleSubmit: PropTypes.func.isRequired,
   handleChange: PropTypes.func.isRequired,
 };
 
-export default PageEditForm;
+export default FormPageEdit;

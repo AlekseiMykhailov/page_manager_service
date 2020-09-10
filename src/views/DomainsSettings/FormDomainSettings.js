@@ -10,7 +10,9 @@ import {
   Grid,
   MenuItem,
   Select,
+  TextareaAutosize,
   TextField,
+  Typography,
 } from '@material-ui/core';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
@@ -22,6 +24,19 @@ const useStyles = makeStyles((theme) => ({
     '& > *': {
       margin: theme.spacing(1),
     },
+  },
+  textAreaHeader: {
+    width: '100%',
+    marginTop: theme.spacing(3),
+    textAlign: 'left',
+  },
+  textArea: {
+    borderColor: 'rgba(0,0,0,0.15)',
+    resize: 'none',
+    width: '100%',
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(3),
+    padding: theme.spacing(2),
   },
 }));
 
@@ -40,36 +55,55 @@ function FormDomainSettings({
         name, label, type, value, options
       }) => {
         if (type === 'select') {
-          if (type === 'select') {
-            return (
-              <FormControl
-                variant="outlined"
-                className={classes.formControl}
+          return (
+            <FormControl
+              variant="outlined"
+              className={classes.formControl}
+              fullWidth
+              key={name}
+            >
+              <InputLabel id={`${name}-label`}>
+                {label}
+              </InputLabel>
+              <Select
                 fullWidth
-                key={name}
+                id={name}
+                label={label}
+                name={name}
+                value={value}
+                variant="outlined"
+                onChange={handleChange}
               >
-                <InputLabel id={`${name}-label`}>
-                  {label}
-                </InputLabel>
-                <Select
-                  fullWidth
-                  id={name}
-                  label={label}
-                  name={name}
-                  value={value}
-                  variant="outlined"
-                  onChange={handleChange}
-                >
 
-                  {options.map((option) => (
-                    <MenuItem value={option.value} key={option.value}>
-                      {option.title}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            );
-          }
+                {options.map((option) => (
+                  <MenuItem value={option.value} key={option.value}>
+                    {option.title}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          );
+        }
+
+        if (type === 'textarea') {
+          return (
+            <React.Fragment key={name}>
+              <Typography variant="h4" className={classes.textAreaHeader}>
+                {label}
+              </Typography>
+              <TextareaAutosize
+                rows={6}
+                className={classes.textArea}
+                label="robots.txt"
+                margin="normal"
+                name="robotsTxt"
+                type="text"
+                variant="outlined"
+                value={value}
+                onChange={handleChange}
+              />
+            </React.Fragment>
+          );
         }
 
         return (
@@ -100,7 +134,7 @@ function FormDomainSettings({
             color="primary"
             startIcon={<SaveAltIcon />}
           >
-            Save
+            Save Domain Settings
           </Button>
         </Grid>
       </Grid>

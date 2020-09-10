@@ -1,33 +1,29 @@
 module.exports = (sequelize, DataTypes) => {
-  const WebPage = sequelize.define('WebPage', {
+  const Instructor = sequelize.define('Instructor', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    domainId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    domain: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    slug: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
+    photo: {
       type: DataTypes.STRING,
     },
-    disableIndexing: {
-      type: DataTypes.BOOLEAN,
+    about: {
+      type: DataTypes.STRING,
+    },
+    linkedIn: {
+      type: DataTypes.STRING,
+    },
+    facebook: {
+      type: DataTypes.STRING,
+    },
+    email: {
+      type: DataTypes.STRING,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -37,24 +33,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deletedAt: {
-      allowNull: true,
-      type: DataTypes.DATE,
-    },
   }, {
     freezeTableName: true,
-    paranoid: true,
     indexes: [
       {
         unique: true,
-        fields: ['domain', 'slug'],
-      },
+        fields: ['name'],
+      }
     ],
   });
 
-  WebPage.associate = function (models) {
+  Instructor.associate = function(models) {
     // associations can be defined here
   };
 
-  return WebPage;
+  return Instructor;
 };

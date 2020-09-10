@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function PageEditHeader({
-  className, name, title, subtitle, homePageId, pageData, publishData
+  className, name, isHomePage, pageData
 }) {
   const classes = useStyles();
 
@@ -43,37 +43,47 @@ function PageEditHeader({
         <Typography gutterBottom variant="h1">
           {pageData.title}
         </Typography>
-        {subtitle && (
+
+        <a
+          href={isHomePage
+            ? `http://${pageData.domain}`
+            : `http://${pageData.domain}/${pageData.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={classes.label}
+        >
           <Typography variant="h6">
-            {subtitle}
+            {isHomePage
+              ? `http://${pageData.domain}`
+              : `http://${pageData.domain}/${pageData.slug}`}
           </Typography>
-        )}
+        </a>
       </Grid>
       <Grid item>
-        {pageData && publishData && (
+        {pageData && pageData.publishedAt && (
           <Grid container direction="column">
             <Grid item>
               <Typography variant="body2" className={classes.published}>
                 <Label color={colors.green[600]}>
                   <a
-                    href={pageData.id === homePageId
+                    href={isHomePage
                       ? `http://${pageData.domain}`
                       : `http://${pageData.domain}/${pageData.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={classes.label}
                   >
-                    {pageData.id === homePageId ? 'Published as Home Page' : 'Published'}
+                    {isHomePage ? 'Published as Home Page' : 'Published'}
                   </a>
                 </Label>
               </Typography>
             </Grid>
             <Grid item>
               <Typography variant="body2">
-                {`Published At: ${moment(publishData.updatedAt).format(' LLLL')}`}
+                {`Published At: ${moment(pageData.publishedAt).format(' LLLL')}`}
               </Typography>
             </Grid>
-            {publishData.updatedAt !== pageData.updatedAt && (
+            {pageData.publishedAt !== pageData.updatedAt && (
               <Grid item>
                 <Typography variant="body2">
                   {`Updated At: ${moment(pageData.updatedAt).format(' LLLL')}`}
@@ -82,7 +92,7 @@ function PageEditHeader({
             )}
           </Grid>
         )}
-        {!publishData && (
+        {!pageData.publishedAt && (
           <Grid item>
             <Typography variant="body2">
               {`Updated At: ${moment(pageData.updatedAt).format(' LLLL')}`}
@@ -97,11 +107,8 @@ function PageEditHeader({
 PageEditHeader.propTypes = {
   className: PropTypes.string,
   name: PropTypes.string,
-  title: PropTypes.string,
-  subtitle: PropTypes.string,
-  homePageId: PropTypes.number,
+  isHomePage: PropTypes.bool,
   pageData: PropTypes.object,
-  publishData: PropTypes.object,
 };
 
 export default PageEditHeader;
