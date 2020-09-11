@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
@@ -32,6 +32,14 @@ function FormPageCreate({
 }) {
   const classes = useStyles();
 
+  const ogDefault = pageFields && pageFields.find((field) => field.name === 'ogDefault').value;
+  const ogTitleDefault = useMemo(() => (
+    pageFields && pageFields.find((field) => field.name === 'title').value
+  ), [pageFields]);
+  const ogDescriptionDefault = useMemo(() => (
+    pageFields && pageFields.find((field) => field.name === 'description').value
+  ), [pageFields]);
+
   return (
     <Card
       className={clsx(classes.root, className)}
@@ -43,6 +51,16 @@ function FormPageCreate({
               .map(({
                 name, description, type, value
               }) => {
+                let correctedValue = value;
+
+                if (name === 'ogTitle' && ogDefault) {
+                  correctedValue = ogTitleDefault;
+                }
+
+                if (name === 'ogDescription' && ogDefault) {
+                  correctedValue = ogDescriptionDefault;
+                }
+
                 if (name === 'domain') {
                   return (
                     <FormControl
@@ -98,7 +116,8 @@ function FormPageCreate({
                     name={name}
                     type={type}
                     onChange={handleChange}
-                    value={value}
+                    value={correctedValue}
+                    disabled={(name === 'ogTitle' || name === 'ogDescription') && ogDefault}
                     variant="outlined"
                     key={name}
                   />

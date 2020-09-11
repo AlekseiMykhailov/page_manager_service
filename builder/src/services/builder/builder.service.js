@@ -8,7 +8,14 @@ module.exports = ({
     async createWebPageHTML(ctx) {
       const { webPage, sections, fields } = ctx.params;
       const {
-        title, description, slug, disableIndexing
+        title,
+        description,
+        domain,
+        slug,
+        disableIndexing,
+        ogTitle,
+        ogDescription,
+        ogImage,
       } = webPage;
       const sectionSchemas = await this.broker.call('schemas.listSectionSchemas')
         .then(({ schemas }) => schemas);
@@ -79,13 +86,19 @@ module.exports = ({
               instructors: prepareFieldset(sectionFields, 'instructors'),
             }),
 
+            applyForm: () => template.applyForm({
+              title: sectionFieldsMap.title,
+              description: sectionFieldsMap.description,
+              action: sectionFieldsMap.action,
+              buttonText: sectionFieldsMap.buttonText,
+              additionalFields: prepareFieldset(sectionFields, 'additionalFields'),
+            }),
+
             default: () => {
               this.logger.error(`SECTION TEMPLATE "${sectionName}" NOT FOUND`);
               return '';
             },
           };
-
-          this.logger.info('@@@@@@@ ', sectionFields)
 
           return (
             (sectionTemplate[sectionName] && sectionTemplate[sectionName]())
@@ -94,12 +107,19 @@ module.exports = ({
         })
         .join('');
 
-      const transformToUrls = (domain, type, dependencies) => ({
-        dependencies: [...dependencies].map((file) => (`http://${domain}/${type}/${file}`))
+      const transformToUrls = (assetsDomain, type, dependencies) => ({
+        dependencies: [...dependencies].map((file) => (`http://${assetsDomain}/${type}/${file}`))
       });
 
       const cssCode = template.cssStyles(transformToUrls(domainOfAssets, 'css', cssDependencies));
       const jsCode = template.jsScripts(transformToUrls(domainOfAssets, 'js', jsDependencies));
+
+      const og = {
+        url: `http://${domain}/${slug}`,
+        title: ogTitle,
+        description: ogDescription,
+        image: ogImage,
+      };
 
       const html = template.layout({
         domainOfAssets,
@@ -109,6 +129,7 @@ module.exports = ({
         disableIndexing,
         title,
         description,
+        og,
         sections: sectionsHtml,
       });
 

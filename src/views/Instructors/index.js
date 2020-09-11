@@ -9,8 +9,6 @@ import { makeStyles } from '@material-ui/styles';
 import Page from 'src/components/Page';
 import {
   Avatar,
-  Box,
-  Button,
   Card,
   CardContent,
   Container,
@@ -21,7 +19,6 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
   colors,
 } from '@material-ui/core';
@@ -30,6 +27,7 @@ import {
 } from '@material-ui/icons';
 import getInitials from 'src/utils/getInitials';
 import PageHeader from 'src/components/PageHeader';
+import TooltipIcon from 'src/components/TooltipIcon';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -37,8 +35,7 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(3)
   },
   cardContent: {
-    paddingRight: 0,
-    paddingLeft: 0,
+    padding: 0,
   },
   row: {
     transition: 'background-color 0.3s',
@@ -49,7 +46,6 @@ const useStyles = makeStyles((theme) => ({
   link: {
     display: 'block',
   },
-  icon: {},
   button: {
     display: 'flex',
     alignItems: 'center',
@@ -159,45 +155,31 @@ function Instructors() {
                         spacing={2}
                       >
                         <Grid item>
-                          {instructor.linkedIn && (
-                            <Tooltip title="LinkedIn">
-                              <a
-                                href={instructor.linkedIn}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={classes.button}
-                              >
-                                <LinkedIn />
-                              </a>
-                            </Tooltip>
-                          )}
+                          <TooltipIcon
+                            type="external"
+                            title="LinkedIn"
+                            link={instructor.linkedIn}
+                            disabled={!instructor.linkedIn}
+                            icon={<LinkedIn />}
+                          />
                         </Grid>
                         <Grid item>
-                          {instructor.facebook && (
-                            <Tooltip title="Facebook">
-                              <a
-                                href={instructor.facebook}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={classes.button}
-                              >
-                                <Facebook />
-                              </a>
-                            </Tooltip>
-                          )}
+                          <TooltipIcon
+                            type="external"
+                            title="Facebook"
+                            link={instructor.facebook}
+                            disabled={!instructor.facebook}
+                            icon={<Facebook />}
+                          />
                         </Grid>
                         <Grid item>
-                          {instructor.email && (
-                          <Tooltip title="Email">
-                            <a
-                              href={`mailto:${instructor.email}`}
-                              rel="noopener noreferrer"
-                              className={classes.button}
-                            >
-                              <Email />
-                            </a>
-                          </Tooltip>
-                          )}
+                          <TooltipIcon
+                            type="external"
+                            title="Email"
+                            link={`mailto:${instructor.email}`}
+                            disabled={!instructor.email}
+                            icon={<Email />}
+                          />
                         </Grid>
                       </Grid>
 
@@ -211,33 +193,21 @@ function Instructors() {
                         spacing={2}
                       >
                         <Grid item>
-                          <Tooltip title="Edit">
-                            <Link
-                              component={RouterLink}
-                              to={`/instructors/${instructor.id}`}
-                              variant="h5"
-                              color="textPrimary"
-                              underline="none"
-                              className={classes.button}
-                            >
-                              <Edit />
-                            </Link>
-                          </Tooltip>
+                          <TooltipIcon
+                            type="internal"
+                            title="Edit"
+                            link={`/instructors/${instructor.id}`}
+                            icon={<Edit />}
+                          />
                         </Grid>
                         <Grid item>
-                          <Tooltip title="Delete Instructor">
-                            <Box component="span">
-                              <Button
-                                color="inherit"
-                                underline="none"
-                                data-instructor-id={instructor.id}
-                                className={classes.button}
-                                onClick={deleteInstructor}
-                              >
-                                <Delete />
-                              </Button>
-                            </Box>
-                          </Tooltip>
+                          <TooltipIcon
+                            type="button"
+                            title="Delete Instructor"
+                            data-instructor-id={instructor.id}
+                            onClick={deleteInstructor}
+                            icon={<Delete />}
+                          />
                         </Grid>
                       </Grid>
 

@@ -1,3 +1,38 @@
+const domainSettingsSchema = [
+  {
+    name: 'homePageId',
+    type: 'select',
+    title: 'Home Page',
+    description: 'Home Page of the Site',
+    value: '',
+    order: 100,
+  },
+  {
+    name: 'favicon',
+    type: 'url',
+    title: 'Favicon',
+    description: 'Favicon',
+    value: '',
+    order: 200,
+  },
+  {
+    name: 'webclip',
+    type: 'url',
+    title: 'Webclip',
+    description: 'Webclip',
+    value: '',
+    order: 300,
+  },
+  {
+    name: 'robotsTxt',
+    type: 'textarea',
+    title: 'File robots.txt',
+    description: 'File robots.txt',
+    value: '',
+    order: 400,
+  },
+];
+
 const webPageSchema = [
   {
     name: 'title',
@@ -38,6 +73,38 @@ const webPageSchema = [
     description: 'Exclude this page from site search results',
     value: false,
     order: 500,
+  },
+  {
+    name: 'ogTitle',
+    type: 'text',
+    title: 'OG:Title',
+    description: 'Open Graph Title',
+    value: '',
+    order: 600,
+  },
+  {
+    name: 'ogDescription',
+    type: 'text',
+    title: 'OG:Description',
+    description: 'Open Graph Description',
+    value: '',
+    order: 700,
+  },
+  {
+    name: 'ogDefault',
+    type: 'checkbox',
+    title: 'Create OG from Meta',
+    description: 'Create OG from Title and Description',
+    value: true,
+    order: 800,
+  },
+  {
+    name: 'ogImage',
+    type: 'url', // TODO: It should be changed to select when OG:Image collections will be ready
+    title: 'OG:Image',
+    description: 'Open Graph Image',
+    value: '',
+    order: 900,
   },
 ];
 
@@ -241,6 +308,88 @@ const sectionsSchemas = [
       },
     ],
   },
+  {
+    name: 'applyForm',
+    title: 'Apply Form',
+    dependencies: ['form.css', 'button.css', 'form.js'],
+    webPageId: 'number',
+    order: 'number',
+    fields: [
+      {
+        name: 'title',
+        type: 'text',
+        title: 'Title',
+        description: 'Title of the Apply Form',
+        value: '',
+        order: 100,
+      },
+      {
+        name: 'description',
+        type: 'text',
+        title: 'Description',
+        description: 'Description of the Apply Form',
+        value: '',
+        order: 200,
+      },
+      {
+        name: 'action',
+        type: 'text',
+        title: 'Action URI',
+        description: 'Action URI',
+        value: '',
+        order: 300,
+      },
+      {
+        name: 'buttonText',
+        type: 'text',
+        title: 'Button text',
+        description: 'Button text',
+        value: 'Submit',
+        order: 400,
+      },
+    ],
+    fieldsets: [
+      {
+        title: 'Additional Fields',
+        name: 'additionalFields',
+        maxItemsQty: 6,
+        itemFields: [
+          {
+            name: 'additionalFields.name',
+            type: 'text',
+            title: 'Field Name',
+            description: 'Field Name',
+            value: '',
+            order: 100,
+          },
+          {
+            name: 'additionalFields.type',
+            type: 'text',
+            title: 'Field Type',
+            description: 'Field Type',
+            value: '',
+            order: 100,
+          },
+          {
+            name: 'additionalFields.title',
+            type: 'text',
+            title: 'Field Title',
+            description: 'Field Title',
+            value: '',
+            order: 100,
+          },
+          {
+            name: 'additionalFields.description',
+            type: 'text',
+            title: 'Field Description',
+            description: 'Field Description',
+            value: '',
+            order: 100,
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 const instructorSchema = [
@@ -297,6 +446,32 @@ const instructorSchema = [
 module.exports = ({
   name: 'schemas',
   actions: {
+    getDomainSettingsSchema: {
+      async handler(ctx) {
+        const { domain } = ctx.params;
+        const [homePageId, listWebPages, listPublished] = await Promise.all([
+          this.broker.call('domainSettings.getHomePageId', { domain }),
+          this.broker.call('dbWebPages.listWebPages'),
+          this.broker.call('dbPublishedPage.listPublishedPages'),
+        ]);
+
+        const publishedWebPages = listWebPages.filter((page) => page.domain === domain)
+          .filter((page) => listPublished.some((published) => published.webPageId === page.id));
+
+        const schema = domainSettingsSchema.map((field) => {
+          if (field.name === 'homePageId') {
+            return {
+              ...field,
+              options: publishedWebPages,
+              value: homePageId,
+            };
+          }
+          return field;
+        });
+
+        return { ok: true, schema };
+      },
+    },
 
     getWebPageSchema: {
       async handler() {

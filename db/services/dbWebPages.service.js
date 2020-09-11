@@ -32,11 +32,26 @@ module.exports = {
     updateWebPage: {
       handler(ctx) {
         const {
-          id, slug, title, description, disableIndexing
+          id,
+          slug,
+          title,
+          description,
+          disableIndexing,
+          ogDefault,
+          ogTitle,
+          ogDescription,
+          ogImage,
         } = ctx.params;
 
         return this.settings.model.update({
-          slug, title, description, disableIndexing
+          slug,
+          title,
+          description,
+          disableIndexing,
+          ogDefault,
+          ogTitle,
+          ogDescription,
+          ogImage,
         }, {
           where: { id }
         })
@@ -80,10 +95,30 @@ module.exports = {
         })
           .then(({ dataValues }) => {
             const {
-              id, domainId, title, description,disableIndexing, updatedAt
+              id,
+              domainId,
+              title,
+              description,
+              ogDefault,
+              ogTitle,
+              ogDescription,
+              ogImage,
+              disableIndexing,
+              updatedAt,
             } = dataValues;
             return {
-              id, domainId, domain, slug, title, description, disableIndexing, updatedAt
+              id,
+              domainId,
+              domain,
+              slug,
+              title,
+              description,
+              ogDefault,
+              ogTitle,
+              ogDescription,
+              ogImage,
+              disableIndexing,
+              updatedAt,
             };
           })
           .then((data) => ({ ok: true, data }))
@@ -101,10 +136,31 @@ module.exports = {
         return this.settings.model.findOne({ where: { id } })
           .then(({ dataValues }) => {
             const {
-              domainId, domain, slug, title, description, disableIndexing, updatedAt
+              domain,
+              slug,
+              domainId,
+              title,
+              description,
+              ogDefault,
+              ogTitle,
+              ogDescription,
+              ogImage,
+              disableIndexing,
+              updatedAt,
             } = dataValues;
             return {
-              id, domainId, domain, slug, title, description, disableIndexing, updatedAt
+              id,
+              domainId,
+              domain,
+              slug,
+              title,
+              description,
+              ogDefault,
+              ogTitle,
+              ogDescription,
+              ogImage,
+              disableIndexing,
+              updatedAt,
             };
           })
           .then((data) => ({ ok: true, data }))
@@ -127,7 +183,7 @@ module.exports = {
               [Op.endsWith]: slug,
             },
           }
-        }, { paranoid: false }) // TODO: deleted pages not counting, fix it
+        }, { paranoid: false }) // FIXME: deleted pages not counting
           .catch((error) => {
             this.logger.error('ERROR: ', error);
             return { ok: false, error };

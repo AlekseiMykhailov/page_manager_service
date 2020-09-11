@@ -28,6 +28,18 @@ module.exports = {
     disableIndexing: {
       type: DataTypes.BOOLEAN,
     },
+    ogTitle: {
+      type: DataTypes.STRING,
+    },
+    ogDescription: {
+      type: DataTypes.STRING,
+    },
+    ogDefault: {
+      type: DataTypes.BOOLEAN,
+    },
+    ogImage: {
+      type: DataTypes.STRING,
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,

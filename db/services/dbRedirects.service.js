@@ -68,12 +68,12 @@ module.exports = {
       handler(ctx) {
         const { domain, slug } = ctx.params;
 
-        return this.broker.call('dbDomainSettings.getDomainDataByDomain', { domain })
-          .then(({ domainData }) => {
-            if (domainData) {
+        return this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain })
+          .then(({ domainSettings }) => {
+            if (domainSettings) {
               return this.settings.model.findOne({
                 where: {
-                  domainId: domainData.id,
+                  domainId: domainSettings.id,
                   slug,
                 }
               });

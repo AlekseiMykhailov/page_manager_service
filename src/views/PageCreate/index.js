@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core';
 import PageHeader from 'src/components/PageHeader';
 import * as FETCH from 'src/utils/fetch';
-import FormPageCreate from '../../components/Forms/FormPageCreate';
+import FormPageCreate from './FormPageCreate';
 
 const useStyles = makeStyles((theme) => ({
   root: {

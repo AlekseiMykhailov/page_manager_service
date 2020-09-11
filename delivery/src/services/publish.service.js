@@ -121,7 +121,7 @@ module.exports = ({
       },
     },
 
-    getAllPublishedPages: {
+    listPublishedPages: {
       handler(ctx) {
         const { domain } = ctx.params;
 
@@ -179,7 +179,9 @@ module.exports = ({
         return this.broker.call('dbAliases.getMainDomainId', { domainAlias: domain })
           .then((response) => {
             if (response && response.ok) {
-              return this.broker.call('dbDomainSettings.getDomainSettingsByDomainId', { id: response.domainId });
+              return this.broker.call('dbDomainSettings.getDomainSettingsByDomainId', {
+                domainId: response.domainId,
+              });
             }
           })
           .then((response) => {

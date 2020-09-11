@@ -52,7 +52,7 @@ function FormDomainSettings({
       onSubmit={handleSubmit}
     >
       {fields.map(({
-        name, label, type, value, options
+        name, description, type, value, options
       }) => {
         if (type === 'select') {
           return (
@@ -63,12 +63,12 @@ function FormDomainSettings({
               key={name}
             >
               <InputLabel id={`${name}-label`}>
-                {label}
+                {description}
               </InputLabel>
               <Select
                 fullWidth
                 id={name}
-                label={label}
+                label={description}
                 name={name}
                 value={value}
                 variant="outlined"
@@ -76,7 +76,7 @@ function FormDomainSettings({
               >
 
                 {options.map((option) => (
-                  <MenuItem value={option.value} key={option.value}>
+                  <MenuItem value={option.id} key={option.id}>
                     {option.title}
                   </MenuItem>
                 ))}
@@ -89,15 +89,14 @@ function FormDomainSettings({
           return (
             <React.Fragment key={name}>
               <Typography variant="h4" className={classes.textAreaHeader}>
-                {label}
+                {description}
               </Typography>
               <TextareaAutosize
                 rows={6}
                 className={classes.textArea}
-                label="robots.txt"
+                label={description}
                 margin="normal"
-                name="robotsTxt"
-                type="text"
+                name={name}
                 variant="outlined"
                 value={value}
                 onChange={handleChange}
@@ -109,7 +108,7 @@ function FormDomainSettings({
         return (
           <TextField
             fullWidth
-            label={label}
+            label={description}
             margin="normal"
             name={name}
             type={type}

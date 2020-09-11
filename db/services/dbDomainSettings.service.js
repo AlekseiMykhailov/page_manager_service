@@ -8,65 +8,41 @@ module.exports = {
     model: db.DomainSettings,
   },
   actions: {
-
-
-    // TODO: clean redundant actions
-
-    
-    addDomain: {
+    createDomain: {
       params: {
         domain: 'string',
         homePageId: 'number',
       },
       handler(ctx) {
-        const { domain, homePageId } = ctx.params;
-
-        return this.settings.model.create({ domain, homePageId });
-      },
-    },
-
-    setHomePageId: {
-      params: {
-        domain: 'string',
-        homePageId: 'number',
-      },
-      handler(ctx) {
-        const { domain, homePageId } = ctx.params;
-
-        return this.settings.model.update({ homePageId }, {
-          where: {
-            domain,
-          }
-        });
+        return this.settings.model.create({ ...ctx.params });
       },
     },
 
     setDomainSettings: {
       params: {
         id: 'number',
-        homePageId: 'number',
-        robotsTxt: 'string',
       },
       handler(ctx) {
-        const { id, homePageId, robotsTxt } = ctx.params;
+        const { id, ...rest } = ctx.params;
 
-        return this.settings.model.update({ homePageId, robotsTxt }, {
-          where: { id },
-        })
+        return this.settings.model.update({ ...rest }, { where: { id } })
           .then(() => ({ ok: true }))
-          .catch((error) => ({ ok: false, error }));
+          .catch((err) => {
+            this.logger.error('ERROR SET DOMAIN SETTINGS DB: ', err);
+            return { ok: false, error: err };
+          });
       }
     },
 
     getDomainSettingsByDomainId: {
       params: {
-        id: 'number',
+        domainId: 'number',
       },
       handler(ctx) {
-        const { id } = ctx.params;
+        const { domainId } = ctx.params;
 
         return this.settings.model.findOne({
-          where: { id },
+          where: { id: domainId },
         })
           .then(async (response) => ({
             ok: true,
@@ -90,32 +66,6 @@ module.exports = {
             ok: true,
             domainSettings: response.dataValues,
           }))
-          .catch((error) => ({ ok: false, error }));
-      },
-    },
-
-    getDomainData: {
-      params: {
-        domainId: 'number',
-      },
-      handler(ctx) {
-        const { domainId } = ctx.params;
-
-        return this.settings.model.findOne({ where: { id: domainId } })
-          .then((response) => ({ ok: true, domainData: response.dataValues }))
-          .catch((error) => ({ ok: false, error }));
-      },
-    },
-
-    getDomainDataByDomain: {
-      params: {
-        domain: 'string',
-      },
-      handler(ctx) {
-        const { domain } = ctx.params;
-
-        return this.settings.model.findOne({ where: { domain } })
-          .then((response) => ({ ok: true, domainData: response.dataValues }))
           .catch((error) => ({ ok: false, error }));
       },
     },

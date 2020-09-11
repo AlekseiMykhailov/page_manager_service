@@ -25,6 +25,12 @@ module.exports = (sequelize, DataTypes) => {
     robotsTxt: {
       type: DataTypes.STRING,
     },
+    favicon: {
+      type: DataTypes.STRING,
+    },
+    webclip: {
+      type: DataTypes.STRING,
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,

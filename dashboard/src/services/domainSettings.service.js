@@ -3,29 +3,64 @@ module.exports = ({
   actions: {
     setDomainSettings: {
       handler(ctx) {
-        const { id, homePageId, robotsTxt } = ctx.params;
+        const { id, ...rest } = ctx.params;
 
-        return this.broker.call('dbDomainSettings.setDomainSettings', { id, homePageId, robotsTxt })
-          .then((res) => JSON.stringify(res, null, 2));
+        return this.broker.call('dbDomainSettings.setDomainSettings', { id: +id, ...rest })
+          .then((res) => JSON.stringify(res, null, 2))
+          .catch((err) => {
+            this.logger.error('ERROR SET DOMAIN SETTINGS: ', err);
+            return { ok: false, error: err };
+          });
       },
     },
 
     getDomainSettings: {
       params: {
-        id: 'string',
+        domainId: 'number',
+      },
+      async handler(ctx) {
+        const { domainId } = ctx.params;
+        const settings = await this.getDomainData(domainId);
+        const aliases = await this.getDomainAliases(domainId);
+
+        return { settings, aliases };
+      },
+    },
+
+    getHomePageId: {
+      params: {
+        domain: 'string',
       },
       handler(ctx) {
-        const { id } = ctx.params;
-        const domainData = {};
+        const { domain } = ctx.params;
 
-        return this.broker.call('dbDomainSettings.getDomainSettingsByDomainId', { id: +id })
-          .then((response) => { domainData.settings = response.domainSettings; })
-          .then(() => this.broker.call('dbAliases.getDomainAliases', { domainId: +id }))
-          .then((response) => { domainData.aliases = response.aliases; })
-          .then(() => JSON.stringify(domainData, null, 2))
-          .catch((error) => {
-            this.logger.error('ERROR: ', error);
-          });
+        return this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain })
+          .then(({ domainSettings }) => domainSettings.homePageId);
+      },
+    },
+
+    formEditDomainSettings: {
+      params: {
+        id: 'string',
+      },
+      async handler(ctx) {
+        const domainId = +ctx.params.id;
+        const data = await this.getDomainData(domainId);
+        const aliases = await this.getDomainAliases(domainId);
+        const schema = await this.getDomainSettingsSchema(data.domain);
+
+        const fields = schema.map((field) => ({
+          ...field,
+          value: data[field.name]
+        }));
+
+        const domainData = {
+          data,
+          fields,
+          aliases,
+        };
+
+        return JSON.stringify({ ok: true, domainData }, null, 2);
       },
     },
 
@@ -46,9 +81,9 @@ module.exports = ({
         const webPageId = await this.broker.call('dbWebPages.getWebPageBySlug', { domain, slug })
           .then(({ data }) => (data ? data.id : null));
 
-        return this.broker.call('dbDomainSettings.getDomainDataByDomain', { domain })
-          .then(({ domainData }) => {
-            if (domainData && domainData.homePageId === webPageId) {
+        return this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain })
+          .then(({ domainSettings }) => {
+            if (domainSettings && domainSettings.homePageId === webPageId) {
               return { ok: true };
             }
             return { ok: false };
@@ -78,6 +113,29 @@ module.exports = ({
           .catch((error) => {
             this.logger.error('ERROR: ', error);
           });
+      },
+    },
+  },
+
+  methods: {
+    getDomainData: {
+      handler(domainId) {
+        return this.broker.call('dbDomainSettings.getDomainSettingsByDomainId', { domainId })
+          .then(({ domainSettings }) => domainSettings);
+      },
+    },
+
+    getDomainAliases: {
+      handler(domainId) {
+        return this.broker.call('dbAliases.getDomainAliases', { domainId })
+          .then(({ aliases }) => aliases);
+      },
+    },
+
+    getDomainSettingsSchema: {
+      handler(domain) {
+        return this.broker.call('schemas.getDomainSettingsSchema', { domain })
+          .then(({ schema }) => schema);
       },
     },
   },

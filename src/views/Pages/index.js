@@ -12,8 +12,8 @@ import {
   Container,
 } from '@material-ui/core';
 import PageHeader from 'src/components/PageHeader';
-import PagesControls from 'src/components/WebPage/PagesControls';
-import PagesList from 'src/components/WebPage/PagesList';
+import PagesControls from 'src/views/Pages/PagesControls';
+import PagesList from 'src/views/Pages/PagesList';
 
 const useStyles = makeStyles((theme) => ({
   root: {

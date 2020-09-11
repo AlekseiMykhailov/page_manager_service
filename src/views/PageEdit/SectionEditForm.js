@@ -35,6 +35,10 @@ const useStyles = makeStyles((theme) => ({
       margin: theme.spacing(1),
     },
   },
+  formControl: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+  },
   fieldset: {
     position: 'relative',
     width: '100%',
@@ -362,15 +366,16 @@ function SectionEditForm({
                       handleDeleteFieldsBlock={handleDeleteFieldsBlock}
                       handleChangeOrderFieldsBlock={handleChangeOrderFieldsBlock}
                       savePageData={savePageData}
+                      className={classes.select}
                     />
                     {fieldsBlock.sort((a, b) => a.order - b.order).map(({
                       name, type, description, value
                     }) => {
                       if (type === 'select') {
                         return (
-                          <FormControl 
-                            variant="outlined" 
-                            className={classes.formControl} 
+                          <FormControl
+                            variant="outlined"
+                            className={classes.formControl}
                             fullWidth
                             key={name}
                           >

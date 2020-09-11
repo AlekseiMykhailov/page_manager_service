@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
@@ -30,6 +30,14 @@ function FormPageEdit({
   const classes = useStyles();
   const API_URL = process.env.REACT_APP_API_URL;
 
+  const ogDefault = fields && fields.find((field) => field.name === 'ogDefault').value;
+  const ogTitleDefault = useMemo(() => (
+    fields && fields.find((field) => field.name === 'title').value
+  ), [fields]);
+  const ogDescriptionDefault = useMemo(() => (
+    fields && fields.find((field) => field.name === 'description').value
+  ), [fields]);
+
   return (
     <form
       id="wep-page-data-form"
@@ -41,6 +49,16 @@ function FormPageEdit({
         .map(({
           name, description, type, value
         }) => {
+          let correctedValue = value;
+
+          if (name === 'ogTitle' && ogDefault) {
+            correctedValue = ogTitleDefault;
+          }
+
+          if (name === 'ogDescription' && ogDefault) {
+            correctedValue = ogDescriptionDefault;
+          }
+
           if (type === 'checkbox') {
             return (
               <FormControlLabel
@@ -65,9 +83,9 @@ function FormPageEdit({
               margin="normal"
               name={name}
               type={type}
-              disabled={name === 'domain'}
               variant="outlined"
-              value={value}
+              value={correctedValue}
+              disabled={name === 'domain' || ((name === 'ogTitle' || name === 'ogDescription') && ogDefault)}
               onChange={handleChange}
               key={name}
             />

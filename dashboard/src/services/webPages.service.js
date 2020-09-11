@@ -13,10 +13,20 @@ module.exports = ({
           [field.name]: field.value,
         }), {});
         const {
-          domain, slug, title, description, disableIndexing
+          domain,
+          slug,
+          title,
+          description,
+          disableIndexing,
+          ogDefault,
+          ogTitle,
+          ogDescription,
+          ogImage,
         } = pageData;
-        const domainId = await this.broker.call('dbDomainSettings.getDomainDataByDomain', { domain: pageData.domain })
-          .then((res) => res.domainData.id);
+        const domainId = await this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', {
+          domain: pageData.domain
+        })
+          .then(({ domainSettings }) => domainSettings.id);
 
         return this.broker.call('dbRedirects.checkSlug', { domainId, slug })
           .then((response) => {
@@ -31,6 +41,10 @@ module.exports = ({
               title,
               description,
               disableIndexing,
+              ogDefault,
+              ogTitle: ogDefault ? title : ogTitle,
+              ogDescription: ogDefault ? description : ogDescription,
+              ogImage,
             });
           })
           .then(({ id }) => ({ ok: true, domainId, webPageId: id }))
@@ -52,10 +66,17 @@ module.exports = ({
           [field.name]: field.value,
         }), {});
         const {
-          slug, title, description, disableIndexing
+          slug,
+          title,
+          description,
+          disableIndexing,
+          ogDefault,
+          ogTitle,
+          ogDescription,
+          ogImage,
         } = pageData;
-        const domainId = await this.broker.call('dbDomainSettings.getDomainDataByDomain', { domain: pageData.domain })
-          .then((res) => res.domainData.id);
+        const domainId = await this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain: pageData.domain })
+          .then(({ domainSettings }) => domainSettings.id);
 
         return this.broker.call('dbRedirects.checkSlug', { domainId, slug })
           .then((response) => {
@@ -69,13 +90,12 @@ module.exports = ({
             const { data } = await this.broker.call('dbWebPages.getWebPageById', { id: +id });
             const oldSlug = data.slug;
             if (slug !== oldSlug) {
-              return this.broker.call('dbRedirects.addWebPageRedirect', {
+              this.broker.call('dbRedirects.addWebPageRedirect', {
                 domainId,
                 webPageId: +id,
                 slug: oldSlug,
               });
             }
-            return null;
           })
           .then(() => this.broker.call('dbWebPages.updateWebPage', {
             id: +id,
@@ -83,6 +103,10 @@ module.exports = ({
             title,
             description,
             disableIndexing,
+            ogDefault,
+            ogTitle,
+            ogDescription,
+            ogImage,
           }))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
@@ -267,7 +291,7 @@ module.exports = ({
 
     listPublishedWebPages: {
       handler() {
-        return this.broker.call('publish.getAllPublishedPages')
+        return this.broker.call('publish.listPublishedPages')
           .then((response) => JSON.stringify(response, null, 2))
           .catch((err) => {
             this.logger.error('ERROR: ', err);
@@ -283,7 +307,7 @@ module.exports = ({
       async handler(ctx) {
         const id = +ctx.params.id;
 
-        const webPage = await this.broker.call('webPages.getWebPageById', { id }).then((res) => res.data);
+        const webPage = await this.broker.call('webPages.getWebPageById', { id }).then(({ data }) => data);
         const [
           domainData,
           webPageRedirects,
@@ -292,23 +316,35 @@ module.exports = ({
           webPageSchema,
           sectionSchemas,
         ] = await Promise.all([
-          this.broker.call('dbDomainSettings.getDomainData', { domainId: webPage.domainId }).then((res) => res.domainData),
-          this.broker.call('dbRedirects.getWebPageRedirects', { webPageId: webPage.id }).then((res) => res.redirects),
-          this.broker.call('sections.getSectionsForWebPage', { webPageId: webPage.id }),
-          this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId: webPage.id }).then((res) => res.data),
-          this.broker.call('schemas.getWebPageSchema').then((res) => res.schema),
-          this.broker.call('schemas.listSectionSchemas').then((res) => res.schemas),
+          this.broker.call('dbDomainSettings.getDomainSettingsByDomainId', { domainId: webPage.domainId }).then(({ domainSettings }) => domainSettings),
+          this.broker.call('dbRedirects.getWebPageRedirects', { webPageId: id }).then(({ redirects }) => redirects),
+          this.broker.call('sections.getSectionsForWebPage', { webPageId: id }),
+          this.broker.call('dbPublishedPage.getPublishedPageByWebPageId', { webPageId: id }).then(({ data }) => data),
+          this.broker.call('schemas.getWebPageSchema').then(({ schema }) => schema),
+          this.broker.call('schemas.listSectionSchemas').then(({ schemas }) => schemas),
         ]);
         const webPageFields = await this.broker.call('dbFields.getFieldsBySectionId', {
           sectionIds: webPageSections.map((section) => section.id)
         }).then((res) => res.fields);
-        const { domain, slug, title } = webPage;
+        const {
+          domain,
+          slug,
+          title,
+          ogDefault,
+          ogTitle,
+          ogDescription,
+          ogImage,
+        } = webPage;
 
         const preparedData = {
           id,
           domain,
           slug,
           title,
+          ogDefault,
+          ogTitle,
+          ogDescription,
+          ogImage,
           isHomePage: domainData.homePageId === webPage.id,
           publishedAt: (webPagePublishData && webPagePublishData.publishedAt) || false,
           webPageFields: [

@@ -2,17 +2,18 @@ const { layout } = require('./layout');
 const { cssStyles } = require('./cssStyles');
 const { jsScripts } = require('./jsScripts');
 const {
-  header, benefits, reviews, instructors
+  applyForm, benefits, header, instructors, reviews
 } = require('./sections');
 
 const template = {
   layout,
   cssStyles,
   jsScripts,
-  header,
+  applyForm,
   benefits,
-  reviews,
+  header,
   instructors,
+  reviews,
 };
 
 module.exports = template;
