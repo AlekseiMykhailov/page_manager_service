@@ -82,5 +82,16 @@ module.exports = {
           });
       }
     },
+
+    listSections: {
+      handler() {
+        return this.settings.model.findAll({ raw: true })
+          .then((sections) => ({ ok: true, sections }))
+          .catch((error) => {
+            this.logger.error('ERROR listSections: ', error);
+            return { ok: false, error };
+          });
+      },
+    },
   },
 };

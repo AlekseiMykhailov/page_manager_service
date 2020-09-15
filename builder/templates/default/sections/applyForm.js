@@ -14,7 +14,7 @@ const applyForm = Handlebars.compile(`
       <label>
         <input type="email" name="email" placeholder="Email" required>
       </label>
-      {{#each additionalFields}}
+      {{#each fieldsets.additionalFields.fields}}
         <label>
           <input 
             type="{{ this.type }}" 
@@ -23,7 +23,7 @@ const applyForm = Handlebars.compile(`
           >
         </label>
       {{/each}}
-      <button type="submit">{{ buttonText }}!!!!!</button>
+      <button type="submit">{{ buttonText }}</button>
     </form>
   </section>
 `);

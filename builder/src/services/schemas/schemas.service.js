@@ -108,287 +108,19 @@ const webPageSchema = [
   },
 ];
 
-const sectionsSchemas = [
+const sectionCreateSchema = [
   {
-    name: 'header',
-    title: 'Header Section',
-    dependencies: ['header.css', 'button.css'],
-    webPageId: 'number',
-    order: 'number',
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-        title: 'Title',
-        description: 'Catchy a course title',
-        value: '',
-        order: 100,
-      },
-      {
-        name: 'description',
-        type: 'text',
-        title: 'Description',
-        description: 'Short description of a course',
-        value: '',
-        order: 110,
-      },
-      {
-        name: 'backgroundImage',
-        type: 'url',
-        title: 'Background',
-        description: 'Background Image',
-        value: '',
-        order: 120,
-      },
-    ],
-    fieldsets: [
-      {
-        title: 'Call To Action',
-        name: 'ctaHeader',
-        maxItemsQty: 1,
-        itemFields: [
-          {
-            name: 'ctaHeader.text',
-            type: 'text',
-            title: 'Text',
-            description: 'CTA on button',
-            value: '',
-            order: 100,
-          },
-          {
-            name: 'ctaHeader.url',
-            type: 'url',
-            title: 'URL',
-            description: 'URL',
-            value: '',
-            order: 110,
-          },
-        ],
-      }
-    ],
+    name: 'type',
+    type: 'hidden',
+    value: 'section',
   },
   {
-    name: 'benefits',
-    title: 'Section With Benefits',
-    dependencies: ['benefits.css'],
-    webPageId: 'number',
-    order: 'number',
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-        title: 'Title',
-        description: 'Title of the benefits section',
-        value: '',
-        order: 100,
-      },
-    ],
-    fieldsets: [
-      {
-        title: 'Benefits',
-        name: 'benefits',
-        maxItemsQty: 6,
-        itemFields: [
-          {
-            name: 'benefits.title',
-            type: 'text',
-            title: 'Title',
-            description: 'Benefit`s title',
-            value: '',
-            order: 100,
-          },
-          {
-            name: 'benefits.description',
-            type: 'text',
-            title: 'Description',
-            description: 'Description of the benefit',
-            value: '',
-            order: 110,
-          },
-        ],
-      }
-    ],
-  },
-  {
-    name: 'reviews',
-    title: 'Text Reviews',
-    dependencies: ['reviews.css'],
-    webPageId: 'number',
-    order: 'number',
-    fields: [],
-    fieldsets: [
-      {
-        title: '',
-        name: 'reviews',
-        maxItemsQty: 10,
-        itemFields: [
-          {
-            name: 'reviews.reviewer',
-            type: 'text',
-            title: 'Reviewer',
-            description: 'Reviewer Name',
-            value: '',
-            order: 100,
-          },
-          {
-            name: 'reviews.authorPhoto',
-            type: 'text',
-            title: 'Photo',
-            description: 'Photo',
-            value: '',
-            order: 200,
-          },
-          {
-            name: 'reviews.companyName',
-            type: 'text',
-            title: 'Company',
-            description: 'The name of the company where the reviewer works',
-            value: '',
-            order: 300,
-          },
-          {
-            name: 'reviews.companyLogo',
-            type: 'text',
-            title: 'Company Logo',
-            description: 'The logo of the company',
-            value: '',
-            order: 400,
-          },
-          {
-            name: 'reviews.text',
-            type: 'textarea',
-            title: 'Review Text',
-            description: 'Review Text',
-            value: '',
-            order: 600,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'instructors',
-    title: 'Instructors Section',
-    dependencies: ['instructors.css'],
-    webPageId: 'number',
-    order: 'number',
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-        title: 'Title',
-        description: 'Title of the instructors section',
-        value: '',
-        order: 100,
-      },
-      {
-        name: 'description',
-        type: 'text',
-        title: 'Description',
-        description: 'Description of the instructors section',
-        value: '',
-        order: 200,
-      },
-    ],
-    fieldsets: [
-      {
-        title: 'Instructors',
-        name: 'instructors',
-        maxItemsQty: 6,
-        itemFields: [
-          {
-            name: 'instructors.person',
-            type: 'select',
-            title: 'Instructor',
-            description: 'Instructor',
-            value: '',
-            order: 100,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'applyForm',
-    title: 'Apply Form',
-    dependencies: ['form.css', 'button.css', 'form.js'],
-    webPageId: 'number',
-    order: 'number',
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-        title: 'Title',
-        description: 'Title of the Apply Form',
-        value: '',
-        order: 100,
-      },
-      {
-        name: 'description',
-        type: 'text',
-        title: 'Description',
-        description: 'Description of the Apply Form',
-        value: '',
-        order: 200,
-      },
-      {
-        name: 'action',
-        type: 'text',
-        title: 'Action URI',
-        description: 'Action URI',
-        value: '',
-        order: 300,
-      },
-      {
-        name: 'buttonText',
-        type: 'text',
-        title: 'Button text',
-        description: 'Button text',
-        value: 'Submit',
-        order: 400,
-      },
-    ],
-    fieldsets: [
-      {
-        title: 'Additional Fields',
-        name: 'additionalFields',
-        maxItemsQty: 6,
-        itemFields: [
-          {
-            name: 'additionalFields.name',
-            type: 'text',
-            title: 'Field Name',
-            description: 'Field Name',
-            value: '',
-            order: 100,
-          },
-          {
-            name: 'additionalFields.type',
-            type: 'text',
-            title: 'Field Type',
-            description: 'Field Type',
-            value: '',
-            order: 100,
-          },
-          {
-            name: 'additionalFields.title',
-            type: 'text',
-            title: 'Field Title',
-            description: 'Field Title',
-            value: '',
-            order: 100,
-          },
-          {
-            name: 'additionalFields.description',
-            type: 'text',
-            title: 'Field Description',
-            description: 'Field Description',
-            value: '',
-            order: 100,
-          },
-        ],
-      },
-    ],
+    name: 'json',
+    type: 'textarea',
+    title: 'JSON',
+    description: 'JSON',
+    value: '', // TODO: create default JSON
+    order: 200,
   },
 ];
 
@@ -486,25 +218,31 @@ module.exports = ({
     },
 
     getSectionSchema: {
-      handler(ctx) {
-        const { name } = ctx.params;
+      async handler(ctx) {
+        const { sectionName } = ctx.params;
+        const schema = await this.broker.call('dbSchemas.listSchemas')
+          .then(({ schemas }) => schemas.find(({ name }) => (name === sectionName)))
+          .then(({ json }) => json);
 
-        return { ok: true, schemas: sectionsSchemas.filter((schema) => schema.name === name) };
+        return {
+          ok: true,
+          schema,
+        };
       }
     },
 
     listSectionSchemas: {
       async handler() {
         const instructorSelectOptions = await this.broker.call('instructors.listOptions');
+        const sectionsSchemas = await this.broker.call('dbSchemas.listSchemas')
+          .then(({ schemas }) => schemas.map((schema) => ({
+            id: schema.id,
+            ...schema.json
+          })));
+
         const schemas = sectionsSchemas.map((schema) => {
           if (schema.name === 'instructors') {
-            return {
-              ...schema,
-              fieldsets: schema.fieldsets.map((fieldset) => ({
-                ...fieldset,
-                options: instructorSelectOptions,
-              }))
-            };
+            return this.addOptions(schema, instructorSelectOptions);
           }
           return schema;
         });
@@ -516,6 +254,85 @@ module.exports = ({
     getInstructorSchema: {
       handler() {
         return { ok: true, schema: instructorSchema };
+      },
+    },
+
+    getSectionCreateSchema: {
+      handler() {
+        return { ok: true, schema: sectionCreateSchema };
+      },
+    },
+
+    getSectionEditSchema: {
+      params: {
+        sectionId: 'string',
+      },
+      async handler(ctx) {
+        const sectionId = +ctx.params.sectionId;
+
+        const schema = await this.broker.call('dbSchemas.listSchemas')
+          .then((res) => res.schemas.map(({ id, type, json }) => ({ id, type, json })))
+          .then((schemas) => schemas.find((sectionSchema) => sectionSchema.id === sectionId))
+          .then((schemaData) => sectionCreateSchema.map((field) => ({
+            ...field,
+            value: schemaData[field.name],
+          })));
+        return { ok: true, schema };
+      },
+    },
+
+    createSectionSchema: {
+      handler(ctx) {
+        const { json, type } = ctx.params;
+        const { name } = json;
+
+        if (!this.validateSectionSchema(json)) {
+          return JSON.stringify({ ok: false }, null, 2);
+        }
+
+        return this.broker.call('dbSchemas.createSchema', { name, json, type })
+          .then((res) => JSON.stringify(res, null, 2));
+      },
+    },
+
+    editSectionSchema: {
+      handler(ctx) {
+        const { id, json, type } = ctx.params;
+        const { name } = json;
+
+        if (!this.validateSectionSchema(json)) {
+          return JSON.stringify({ ok: false }, null, 2);
+        }
+
+        return this.broker.call('dbSchemas.editSchema', {
+          id, name, json, type
+        })
+          .then((res) => JSON.stringify(res, null, 2));
+      },
+    },
+  },
+
+  methods: {
+    addOptions: {
+      handler(schema, options) {
+        return {
+          ...schema,
+          fieldsets: schema.fieldsets.map((fieldset) => ({
+            ...fieldset,
+            options,
+          }))
+        };
+      },
+    },
+
+    validateSectionSchema: {
+      handler(json) {
+        const {
+          name, title, fields, fieldsets
+        } = json;
+        const isValid = name && title && fields && fieldsets;
+
+        return isValid;
       },
     },
   },

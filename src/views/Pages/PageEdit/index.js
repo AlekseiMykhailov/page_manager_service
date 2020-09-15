@@ -13,7 +13,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import Page from 'src/components/Page';
 import * as FETCH from 'src/utils/fetch';
-import FormPageEdit from 'src/views/PageEdit/FormPageEdit';
+import FormPageEdit from 'src/views/Pages/PageEdit/FormPageEdit';
 import PageEditHeader from './PageEditHeader';
 import PageEditButtons from './PageEditButtons';
 import PageRedirectControl from './PageRedirectControl';

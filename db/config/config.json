@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": "250979",
-    "database": "dev2",
+    "database": "jobeasy-lpms",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

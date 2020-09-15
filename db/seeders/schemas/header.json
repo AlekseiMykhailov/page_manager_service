@@ -1,0 +1,59 @@
+{
+  "name":"header",
+  "title":"Header Section",
+  "dependencies":[
+    "header.css",
+    "button.css"
+  ],
+  "fields":[
+    {
+      "name":"title",
+      "type":"text",
+      "title":"Title",
+      "description":"Catchy a course title",
+      "value":"",
+      "order":100
+    },
+    {
+      "name":"description",
+      "type":"text",
+      "title":"Description",
+      "description":"Short description of a course",
+      "value":"",
+      "order":110
+    },
+    {
+      "name":"backgroundImage",
+      "type":"url",
+      "title":"Background",
+      "description":"Background Image",
+      "value":"",
+      "order":120
+    }
+  ],
+  "fieldsets":[
+    {
+      "title":"Call To Action",
+      "name":"ctaHeader",
+      "maxItemsQty":1,
+      "itemFields":[
+        {
+          "name":"ctaHeader.text",
+          "type":"text",
+          "title":"Text",
+          "description":"CTA on button",
+          "value":"",
+          "order":100
+        },
+        {
+          "name":"ctaHeader.url",
+          "type":"url",
+          "title":"URL",
+          "description":"URL",
+          "value":"",
+          "order":110
+        }
+      ]
+    }
+  ]
+}

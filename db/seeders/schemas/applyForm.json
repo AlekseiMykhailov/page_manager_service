@@ -1,0 +1,84 @@
+{
+  "name": "applyForm",
+  "title": "Apply Form",
+  "dependencies": [
+    "form.css",
+    "button.css",
+    "form.js"
+  ],
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "title": "Title",
+      "description": "Title of the Apply Form",
+      "value": "",
+      "order": 100
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "title": "Description",
+      "description": "Description of the Apply Form",
+      "value": "",
+      "order": 200
+    },
+    {
+      "name": "action",
+      "type": "text",
+      "title": "Action URI",
+      "description": "Action URI",
+      "value": "",
+      "order": 300
+    },
+    {
+      "name": "buttonText",
+      "type": "text",
+      "title": "Button text",
+      "description": "Button text",
+      "value": "Submit",
+      "order": 400
+    }
+  ],
+  "fieldsets": [
+    {
+      "title": "Additional Fields",
+      "name": "additionalFields",
+      "maxItemsQty": 6,
+      "itemFields": [
+        {
+          "name": "additionalFields.name",
+          "type": "text",
+          "title": "Field Name",
+          "description": "Field Name",
+          "value": "",
+          "order": 100
+        },
+        {
+          "name": "additionalFields.type",
+          "type": "text",
+          "title": "Field Type",
+          "description": "Field Type",
+          "value": "",
+          "order": 100
+        },
+        {
+          "name": "additionalFields.title",
+          "type": "text",
+          "title": "Field Title",
+          "description": "Field Title",
+          "value": "",
+          "order": 100
+        },
+        {
+          "name": "additionalFields.description",
+          "type": "text",
+          "title": "Field Description",
+          "description": "Field Description",
+          "value": "",
+          "order": 100
+        }
+      ]
+    }
+  ]
+}

@@ -11,7 +11,9 @@ import {
 } from '@material-ui/core';
 
 const useStyles = makeStyles(() => ({
-  root: {},
+  root: {
+    display: 'flex',
+  },
   button: {
     display: 'flex',
     alignItems: 'center',

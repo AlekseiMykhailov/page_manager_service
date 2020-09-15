@@ -8,7 +8,7 @@ const header = Handlebars.compile(`
         <p class="header__description">{{ description }}</p>
       </div>
       <div class="buttons">
-        {{#each buttons}}
+        {{#each fieldsets.ctaHeader.fields}}
           <a href="{{ this.url }}" class="button">
             {{ this.text}}
           </a>

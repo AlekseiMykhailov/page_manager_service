@@ -138,6 +138,10 @@ module.exports = {
         path: '/schemas',
         aliases: {
           'GET /sections': 'schemas.listSectionSchemas',
+          'POST /sections': 'schemas.createSectionSchema',
+          'PUT /sections': 'schemas.editSectionSchema',
+          'GET /sections/create': 'schemas.getSectionCreateSchema',
+          'GET /sections/:sectionId': 'schemas.getSectionEditSchema',
           'GET /page': 'schemas.getWebPageSchema',
           'GET /instructor': 'schemas.getInstructorSchema',
         },

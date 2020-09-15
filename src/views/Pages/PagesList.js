@@ -148,7 +148,7 @@ function PagesList({
                       {!page.disableIndexing && (
                         <TooltipIcon
                           type="icon"
-                          title="Indexing of the Page"
+                          title="Open for indexing"
                           icon={<Language />}
                         />
                       )}

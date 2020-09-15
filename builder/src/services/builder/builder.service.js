@@ -20,8 +20,9 @@ module.exports = ({
       const sectionSchemas = await this.broker.call('schemas.listSectionSchemas')
         .then(({ schemas }) => schemas);
 
-      const prepareFieldset = (fieldsList, fieldName) => fieldsList.filter((field) => field.name
-        .startsWith(`${fieldName}`))
+      const prepareFieldsetFields = (fieldsList, fieldName) => (
+        fieldsList.filter((field) => field.name.startsWith(`${fieldName}`))
+      )
         .reduce((acc, field) => {
           const fieldsBlockIndex = field.name.replace(/\D/g, '');
           const fieldPublishName = field.name.split('.').reverse()[0];
@@ -63,47 +64,16 @@ module.exports = ({
           sectionDependencies.css.forEach((dependency) => { cssDependencies.add(dependency); });
           sectionDependencies.js.forEach((dependency) => { jsDependencies.add(dependency); });
 
-          const sectionTemplate = {
-            header: () => template.header({
-              title: sectionFieldsMap.title,
-              description: sectionFieldsMap.description,
-              backgroundImage: sectionFieldsMap.backgroundImage,
-              buttons: prepareFieldset(sectionFields, 'ctaHeader'),
-            }),
-
-            benefits: () => template.benefits({
-              title: sectionFieldsMap.title,
-              benefits: prepareFieldset(sectionFields, 'benefits'),
-            }),
-
-            reviews: () => template.reviews({
-              reviews: prepareFieldset(sectionFields, 'reviews'),
-            }),
-
-            instructors: () => template.instructors({
-              title: sectionFieldsMap.title,
-              description: sectionFieldsMap.description,
-              instructors: prepareFieldset(sectionFields, 'instructors'),
-            }),
-
-            applyForm: () => template.applyForm({
-              title: sectionFieldsMap.title,
-              description: sectionFieldsMap.description,
-              action: sectionFieldsMap.action,
-              buttonText: sectionFieldsMap.buttonText,
-              additionalFields: prepareFieldset(sectionFields, 'additionalFields'),
-            }),
-
-            default: () => {
-              this.logger.error(`SECTION TEMPLATE "${sectionName}" NOT FOUND`);
-              return '';
-            },
-          };
-
-          return (
-            (sectionTemplate[sectionName] && sectionTemplate[sectionName]())
-              || sectionTemplate.default()
-          );
+          return template[sectionName]({
+            ...sectionFieldsMap,
+            fieldsets: currentSchema.fieldsets.reduce((acc, fieldset) => ({
+              ...acc,
+              [fieldset.name]: {
+                ...fieldset,
+                fields: prepareFieldsetFields(sectionFields, fieldset.name),
+              },
+            }), {}),
+          });
         })
         .join('');
 

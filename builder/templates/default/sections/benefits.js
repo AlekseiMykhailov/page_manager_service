@@ -5,7 +5,7 @@ const benefits = Handlebars.compile(`
   <div class="benefits__wrapper">
     <h2 class="benefits__title">{{ title }}</h2>
     <ul class="benefits__list">
-      {{#each benefits}}
+      {{#each fieldsets.benefits.fields}}
         <li class="benefits__item benefit">
           <h4 class="benefit__header">{{this.title}}</h4>
           <p class="benefit__content">{{this.description}}</p>

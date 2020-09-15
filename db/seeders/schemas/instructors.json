@@ -1,0 +1,42 @@
+{
+  "name": "instructors",
+  "title": "Instructors Section",
+  "dependencies": [
+    "instructors.css"
+  ],
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "title": "Title",
+      "description": "Title of the instructors section",
+      "value": "",
+      "order": 100
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "title": "Description",
+      "description": "Description of the instructors section",
+      "value": "",
+      "order": 200
+    }
+  ],
+  "fieldsets": [
+    {
+      "title": "Instructors",
+      "name": "instructors",
+      "maxItemsQty": 6,
+      "itemFields": [
+        {
+          "name": "instructors.person",
+          "type": "select",
+          "title": "Instructor",
+          "description": "Instructor",
+          "value": "",
+          "order": 100
+        }
+      ]
+    }
+  ]
+}

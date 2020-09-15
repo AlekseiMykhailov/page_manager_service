@@ -5,7 +5,7 @@ const instructors = Handlebars.compile(`
     <h2>{{ title }}</h2>
     <p>{{ description }}</p>
     <ul class="reviews__list">
-      {{#each instructors}}
+      {{#each fieldsets.instructors.fields}}
         <li class="instructors__item">
           {{ this.name }}
           {{ this.photo }}

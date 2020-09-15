@@ -10,6 +10,12 @@ module.exports = {
       schema: {
         type: DataTypes.STRING,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'schema',
+          },
+          key: 'name',
+        },
       },
       webPageId: {
         type: DataTypes.INTEGER,

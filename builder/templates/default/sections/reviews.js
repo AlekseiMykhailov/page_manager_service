@@ -3,7 +3,7 @@ const Handlebars = require('handlebars');
 const reviews = Handlebars.compile(`
   <section class="reviews container">
     <ul class="reviews__list">
-      {{#each reviews}}
+      {{#each fieldsets.reviews.fields}}
         <li class="reviews__item">
           {{ this.reviewer }}
           {{ this.authorPhoto }}

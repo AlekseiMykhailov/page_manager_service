@@ -30,7 +30,7 @@ export default [
       {
         path: '/pages/create',
         exact: true,
-        component: lazy(() => import('src/views/PageCreate'))
+        component: lazy(() => import('src/views/Pages/PageCreate'))
       },
       {
         path: '/pages/:domainId',
@@ -40,7 +40,7 @@ export default [
       {
         path: '/pages/:domainId/:webPageId',
         exact: true,
-        component: lazy(() => import('src/views/PageEdit'))
+        component: lazy(() => import('src/views/Pages/PageEdit'))
       },
       {
         path: '/instructors',
@@ -50,12 +50,27 @@ export default [
       {
         path: '/instructors/create',
         exact: true,
-        component: lazy(() => import('src/views/InstructorCreate'))
+        component: lazy(() => import('src/views/Instructors/InstructorCreate'))
       },
       {
         path: '/instructors/:instructorId',
         exact: true,
-        component: lazy(() => import('src/views/InstructorEdit'))
+        component: lazy(() => import('src/views/Instructors/InstructorEdit'))
+      },
+      {
+        path: '/sections',
+        exact: true,
+        component: lazy(() => import('src/views/Sections'))
+      },
+      {
+        path: '/sections/create',
+        exact: true,
+        component: lazy(() => import('src/views/Sections/SectionCreate'))
+      },
+      {
+        path: '/sections/:sectionSchemaId',
+        exact: true,
+        component: lazy(() => import('src/views/Sections/SectionEdit'))
       },
     ]
   },

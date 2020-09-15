@@ -1,0 +1,42 @@
+{
+  "name": "benefits",
+  "title": "Section With Benefits",
+  "dependencies": [
+    "benefits.css"
+  ],
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "title": "Title",
+      "description": "Title of the benefits section",
+      "value": "",
+      "order": 100
+    }
+  ],
+  "fieldsets": [
+    {
+      "title": "Benefits",
+      "name": "benefits",
+      "maxItemsQty": 6,
+      "itemFields": [
+        {
+          "name": "benefits.title",
+          "type": "text",
+          "title": "Title",
+          "description": "Benefit`s title",
+          "value": "",
+          "order": 100
+        },
+        {
+          "name": "benefits.description",
+          "type": "text",
+          "title": "Description",
+          "description": "Description of the benefit",
+          "value": "",
+          "order": 110
+        }
+      ]
+    }
+  ]
+}

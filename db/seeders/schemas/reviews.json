@@ -1,0 +1,57 @@
+{
+  "name": "reviews",
+  "title": "Text Reviews",
+  "dependencies": [
+    "reviews.css"
+  ],
+  "fields": [],
+  "fieldsets": [
+    {
+      "title": "",
+      "name": "reviews",
+      "maxItemsQty": 10,
+      "itemFields": [
+        {
+          "name": "reviews.reviewer",
+          "type": "text",
+          "title": "Reviewer",
+          "description": "Reviewer Name",
+          "value": "",
+          "order": 100
+        },
+        {
+          "name": "reviews.authorPhoto",
+          "type": "text",
+          "title": "Photo",
+          "description": "Photo",
+          "value": "",
+          "order": 200
+        },
+        {
+          "name": "reviews.companyName",
+          "type": "text",
+          "title": "Company",
+          "description": "The name of the company where the reviewer works",
+          "value": "",
+          "order": 300
+        },
+        {
+          "name": "reviews.companyLogo",
+          "type": "text",
+          "title": "Company Logo",
+          "description": "The logo of the company",
+          "value": "",
+          "order": 400
+        },
+        {
+          "name": "reviews.text",
+          "type": "textarea",
+          "title": "Review Text",
+          "description": "Review Text",
+          "value": "",
+          "order": 600
+        }
+      ]
+    }
+  ]
+}

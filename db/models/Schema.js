@@ -1,33 +1,21 @@
 module.exports = (sequelize, DataTypes) => {
-  const Section = sequelize.define('Section', {
+  const Schema = sequelize.define('Schema', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
-    schema: {
-      type: DataTypes.INTEGER,
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
-      references: {
-        model: {
-          tableName: 'schema',
-        },
-        key: 'name',
-      },
     },
-    webPageId: {
-      type: DataTypes.INTEGER,
+    type: {
+      type: DataTypes.STRING,
       allowNull: false,
-      references: {
-        model: {
-          tableName: 'webPage',
-        },
-        key: 'id',
-      },
     },
-    order: {
-      type: DataTypes.INTEGER,
+    json: {
+      type: DataTypes.JSON,
       allowNull: false,
     },
     createdAt: {
@@ -38,13 +26,24 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
+    deletedAt: {
+      allowNull: true,
+      type: DataTypes.DATE,
+    },
   }, {
     freezeTableName: true,
+    paranoid: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['name'],
+      }
+    ],
   });
 
-  Section.associate = function(models) {
+  Schema.associate = function(models) {
     // associations can be defined here
   };
 
-  return Section;
+  return Schema;
 };

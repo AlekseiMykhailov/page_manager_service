@@ -3,6 +3,7 @@ const Sequelize = require('sequelize');
 const config = require('../config/config.json');
 
 const WebPage = require('./WebPage');
+const Schema = require('./Schema');
 const DomainSettings = require('./DomainSettings');
 const Section = require('./Section');
 const Field = require('./Field');
@@ -25,6 +26,7 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 db.WebPage = WebPage(sequelize, Sequelize);
+db.Schema = Schema(sequelize, Sequelize);
 db.Section = Section(sequelize, Sequelize);
 db.Field = Field(sequelize, Sequelize);
 db.Instructor = Instructor(sequelize, Sequelize);
@@ -38,7 +40,10 @@ db.WebPage.hasMany(db.PublishedPage, { foreignKey: 'webPageId' });
 db.WebPage.hasMany(db.DomainSettings, { foreignKey: 'homePageId' });
 db.WebPage.hasMany(db.Redirect, { foreignKey: 'webPageId' });
 
+db.Schema.hasMany(db.Section, { foreignKey: 'schema' });
+
 db.Section.belongsTo(db.WebPage, { foreignKey: 'webPageId' });
+db.Section.belongsTo(db.Schema, { foreignKey: 'schema' });
 db.Section.hasMany(db.Field, { foreignKey: 'sectionId' });
 
 db.Field.belongsTo(db.Section, { foreignKey: 'sectionId' });

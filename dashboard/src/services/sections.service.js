@@ -92,9 +92,9 @@ module.exports = ({
       },
     },
 
-    getAllSections: {
+    listSections: {
       handler() {
-        return this.broker.call('dbSections.getAllSections')
+        return this.broker.call('sections.listSections')
           .then((res) => JSON.stringify(res, null, 2));
       },
     },
