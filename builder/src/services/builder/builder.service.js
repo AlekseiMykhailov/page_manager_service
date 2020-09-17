@@ -20,6 +20,12 @@ module.exports = ({
       const sectionSchemas = await this.broker.call('schemas.listSectionSchemas')
         .then(({ schemas }) => schemas);
 
+      const { favicon, webclip } = await this.broker.call('dbDomainSettings.getDomainSettingsByDomainName', { domain })
+        .then(({ domainSettings }) => ({
+          favicon: domainSettings.favicon,
+          webclip: domainSettings.webclip,
+        }));
+
       const prepareFieldsetFields = (fieldsList, fieldName) => (
         fieldsList.filter((field) => field.name.startsWith(`${fieldName}`))
       )
@@ -99,6 +105,8 @@ module.exports = ({
         disableIndexing,
         title,
         description,
+        favicon,
+        webclip,
         og,
         sections: sectionsHtml,
       });

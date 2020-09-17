@@ -8,7 +8,8 @@ const layout = Handlebars.compile(`
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="http://{{ domainOfAssets }}/images/favicon.ico" type="image/png">
+    <link rel="shortcut icon" href="{{ favicon }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ webclip }}"/>
 
     <title>{{ title }}</title>
     <meta name="title" content="{{ title }}">
@@ -28,7 +29,6 @@ const layout = Handlebars.compile(`
 
     <link rel="stylesheet" href="http://{{ domainOfAssets }}/css/index.css">
     {{#if cssCode}}{{{ cssCode }}}{{/if}}
-    {{#if jsCode}}{{{ jsCode }}}{{/if}}
     {{#if disableIndexing}}
       <meta name="robots" content="noindex">
     {{/if}}
@@ -42,6 +42,7 @@ const layout = Handlebars.compile(`
       </temp>
     {{/if}}
     {{ sections }}
+    {{#if jsCode}}{{{ jsCode }}}{{/if}}
   </body>
 </html>
 `, {
